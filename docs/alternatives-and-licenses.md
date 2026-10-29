@@ -91,3 +91,63 @@ GitHub 코드·라이선스는 아래 커밋에 고정했다. Wiki와 판매·�
 [C-S]: https://bastardkb.com/product/charybdis-mini-kit/
 [C-F]: https://github.com/qmk/qmk_firmware/blob/a3ecbc53f60e2e262a0df5e34a89ca6eeb17dd48/keyboards/bastardkb/charybdis/charybdis.c
 [CC]: https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode.en
+
+## 5. 추가 34mm 모듈 조사
+
+확인일: 2026-10-29. Keyball 이외에도 34mm 볼과 PMW3360을 결합한 키보드 통합용 모듈이 있다. 공개 파일의 종류와 재사용 조건은 서로 다르다. 아래 후보의 No.1/60 중앙 장착 적합성은 검증하지 않았으며, 기존 Keyball 배치의 검사 결과를 적용하지 않는다.
+
+| 후보 | 통합 용도와 확인된 구성 | 공개 자료와 라이선스 |
+| --- | --- | --- |
+| **YMG Works 트랙볼 유닛 / `YMG-CODE/PMW3360_mod`** | 공식 가이드가 **34mm, PMW3360, 베어링 지지**, JST-SH와 7핀 커넥터를 통한 착탈 구조를 명시한다. TheEndpoint와 TheEpilogue에 사용하는 모듈이며 다른 키보드에 그대로 호환된다는 보장은 없다. [YMG-B] | `ETE` 브랜치에 센서 Gerber ZIP, BOM, `reex_34mm_high.stl`, `reex_34mm_low.stl`와 덮개 STL이 공개되어 있다. **MIT** 고지이며 저작권과 허가문을 유지해야 한다. 해당 리비전에는 편집 가능한 PCB 원본이나 STEP 홀더가 없다. [YMG-R][YMG-L] |
+| **kushima8 PMW3360 / Reex 34mm 홀더** | YMG 모듈의 상류 프로젝트다. PMW3360 센서 보드와 34mm 케이스 조립 가이드를 제공한다. YMG가 이를 다른 키보드에 맞춰 수정한 사례는 확인되지만, 모든 키보드에 적용 가능한 공통 기구 인터페이스가 정의된 것은 아니다. [REEX-R][REEX-B][YMG-B] | **MIT**. EasyEDA로 여는 회로도 및 PCB JSON, Gerber, KiCad footprint, 34mm 홀더와 덮개 STL이 있다. YMG fork보다 PCB 편집 원본을 확보하기 좋다. 각 프로젝트의 최신 홀더와 센서 PCB를 임의로 섞어 광학 간격이 맞는다고 가정하지 않는다. [REEX-R][REEX-L] |
+| **picot5400** | **다른 키보드에 통합하기 위한 목적을 명시**한 PMW3360 + RP2040 모듈이다. 공식 소개에서 34mm 볼을 설명하며, README의 보드 크기는 **38 x 38mm**다. 키 매트릭스 PCB를 24핀 FFC로 연결하고 USB-C 또는 Unified Daughterboard를 사용한다. 이미 MCU가 포함되므로 단순 SPI 센서 보드를 기존 MCU에 추가하는 방식과 설계 구성이 다르다. [PICOT-R][PICOT-I][PICOT-D] | **CC BY-NC-SA 4.0**로, 상업 이용이 자유로운 오픈소스로 분류하지 않는다. 모듈 STEP, 주변 케이스 설계 예제 STEP, 회로도 PDF와 설계 가이드가 공개되어 있다. 이 리비전에서 편집 가능한 센서 PCB 원본과 독립된 볼 홀더 제작용 CAD는 확인하지 못했다. 모듈 STEP를 볼 홀더의 편집 원본으로 간주하지 않는다. [PICOT-D][PICOT-L] |
+| **Kiwano** | **34mm + PMW3360**을 명시한 VIK 모듈이다. PER56 스크롤 링, RGB, 7.5mm 볼 트랜스퍼 유닛(BTU)을 사용하며 VIK 연결을 지원하는 키보드에 통합하도록 설계되었다. VIK는 3.3V 로직과 12핀 0.5mm FPC 연결을 규정한다. [KIW-R][VIK-R] | **CERN-OHL-S-2.0**. KiCad PCB와 제조 자료, `Trackball Mount Full/Low Profile/Semi.step`을 제공한다. 인증 카드의 크기 분류는 Large다. VIK Large의 65 x 65mm 미만 규격을 이 모듈의 실측 외곽으로 사용하지 않으며, 스크롤 링과 체결부까지 중앙 공간에 들어가는지 별도로 확인해야 한다. [KIW-R][KIW-L][VIK-R] |
+| **BastardKB 독립 홀더 + Charybdis 센서 PCB** | 홀더 README는 다른 키보드에 통합할 수 있다고 명시하고, 반경 21mm, 높이 2mm의 장착 링을 안내한다. 센서는 PMW3360이다. 단, 홀더 저장소 이름은 `34-mm-trackball-holder`인데 README는 **35mm**라고 적으므로, Charybdis 제품의 34mm 사양만으로 이 독립 홀더의 볼 호환을 확정하지 않는다. [BH-R][C-P] | 홀더 STEP/STL과 센서 PCB 설계가 공개되어 있다. 둘 다 **CC BY-NC-SA 4.0**이다. 개인 비상업 설계의 참고 후보이며, 상업 이용이 자유로운 오픈소스로 분류하지 않는다. [BH-R][C-P] |
+
+**MIT 조건의 홀더 STL과 PCB 편집 원본이 함께 필요한 경우 kushima8 PMW3360을 먼저 검토할 근거가 있다.** 다른 키보드의 키 매트릭스까지 연결하는 모듈 사용법은 picot5400 설계 가이드가 가장 직접적으로 설명한다. 다만 이는 자료와 인터페이스에 관한 비교다. 홀더 전체 외곽, 센서 하부 돌출, 커넥터와 케이블 경로, 볼 중심 높이, 체결 구조를 대조하기 전에는 어느 후보도 더 작거나 낮거나 No.1/60에 들어간다고 확정하지 않는다. YMG 공식 가이드는 2025년 배포분의 스페이서 변경도 기록하므로, 2024년 저장소 리비전을 현행 판매 조립체와 동일시하지 않는다. [PICOT-D][YMG-B]
+
+센서 보드만 필요하다면 VIK의 `pmw3360`과 소형 `pmw3360-xs`도 다른 키보드에 연결하도록 만들어졌다. 다만 이 보드의 공개만으로 34mm 홀더까지 제공되는 완성 모듈이라고 판단하지 않는다. 검색에 자주 나오는 aki27kbd의 `trackball_module`은 34mm 통합용이지만 **ADNS-5050**을 사용하므로 이번 PMW3360 조건에서는 제외한다. [VIK-P][VIK-XS][AKI-T]
+
+### 물리적인 스크롤 링을 우선하는 후보
+
+추가 조사에서는 **34mm, PMW3360과 볼 주위의 물리적인 회전 링**을 함께 갖춘 구조를 우선한다. 최종 장치 채택이나 기존 배열 변경을 확정한 것은 아니다. Charybdis 기본형의 공식 스크롤 기능은 볼 이동을 스크롤로 변환하는 `drag-scroll`이며, 별도 링 엔코더가 있는 아래 구조와 구분한다. [C-SCROLL]
+
+| 후보 | 링 구성과 재사용 범위 | 우선순위와 한계 |
+| --- | --- | --- |
+| **Kiwano** | 34mm + PMW3360 + PER56. 다른 키보드에 연결하는 VIK 모듈이며 KiCad, 제조 자료와 홀더 및 링 부품 STEP가 함께 있다. CERN-OHL-S-2.0. [KIW-R][KIW-L] | **모듈 전체를 이식하는 첫 검토 대상**이다. 볼 규격, 센서, 링과 통합 인터페이스를 모두 명시한다. 중앙에 들어가는지는 별도 확인해야 한다. |
+| **cocot36plus v2** | 34mm + PMW3360 + **PER601**. 중앙의 볼 커버가 스크롤 링 역할을 한다. 저장소에는 볼 베이스와 커버 STEP, 플레이트 및 케이스 자료와 MIT 고지가 있다. [COCOT-B][COCOT-H][COCOT-L] | **중앙 링 구조의 기구 참고 대상**이다. 센서와 엔코더는 키보드 PCB에 장착되므로 독립 모듈처럼 바로 연결하는 제품은 아니다. 확인한 리비전에는 PCB 편집 원본이 없어 센서와 엔코더 회로는 별도로 설계해야 한다. |
+| **VIK `per56-pmw3360-leds`** | PMW3360 + PER56 + 선택 RGB. KiCad 회로/PCB와 제조 자료가 있고 저장소 기본 라이선스는 CERN-OHL-P-2.0이다. VIK 연결과 Large 장착 규격을 사용한다. [VIK-RING][VIK-L] | **링과 센서 회로의 참고 대상**이다. 해당 디렉터리에서 34mm 볼을 지정한 홀더 CAD는 확인하지 못했으므로 Kiwano와 같은 완성 기구 모듈로 취급하지 않는다. |
+| **OmegaSupreme / Starship Bubu** | RP2040 + PMW3360 + PER56을 묶고, 이 모듈 주변에 키보드 PCB를 설계하는 목적을 명시한다. Bubu 제작 사례는 Kiwano의 홀더와 링 부품을 사용한다. OmegaSupreme은 CC BY-NC-SA 4.0이다. [OMEGA-R][OMEGA-L][BUBU-R] | **후순위 회로 참고 대상**이다. README가 34mm를 직접 지정하지 않으며 적용할 Kiwano 부품을 대조해야 한다. Bubu REV4에는 PER56 footprint가 뒤집혀 고정부를 잘라 장착했다는 기록이 있다. 해당 문제를 해결한 제작 기준 리비전은 이번 조사에서 확정하지 않았다. |
+
+**Kiwano는 현재 중앙 예약 영역에 그대로 넣는 부품으로 볼 수 없다.** 커밋 `1f59c4cd6c829ef414e1f67927971d8f2da21fad`의 `PCB/Kiwano.kicad_pcb`에서 좌우 바깥 `Edge.Cuts` 원호를 읽으면 PCB X 방향 폭은 약 **63mm**다. 이는 KiCad 원본 좌표의 mm 단위에서 계산한 기판 폭이며 실물 측정값, 링 외경 또는 완성 모듈 높이가 아니다. 현재 배열의 중앙 빈 명목 폭 57.15mm보다 넓으므로, 같은 높이의 직사각형 통로 안에 배치할 수 없다. PCB를 다른 높이에 두는 경우에도 인접 스위치, 소켓, 키캡과 링 조작 공간을 별도로 대조해야 한다. 63키 옵션은 뒤쪽 공간을 늘리지만 중앙 폭은 늘리지 않는다. [KIW-PCB][현재 배열 기준](project-context.md)
+
+jfedor2의 `scroll-ring-trackball`도 PMW3360과 실제 회전 링을 사용하지만, 원형 설계는 **57.2mm 볼과 60 x 78 x 10mm 링 베어링**을 사용한다. 34mm 통합 모듈 후보에서는 제외하며, 링 감지 구조를 연구할 때만 참고한다. [JF-RING]
+
+[YMG-B]: https://note.com/underthrow_/n/n65385d90a76e
+[YMG-R]: https://github.com/YMG-CODE/PMW3360_mod/tree/bcd0de4d7a3f03151e1b8e9f415e596cc5963d0d
+[YMG-L]: https://github.com/YMG-CODE/PMW3360_mod/blob/bcd0de4d7a3f03151e1b8e9f415e596cc5963d0d/LICENSE
+[REEX-R]: https://github.com/kushima8/PMW3360/tree/ea1e9835a3d254a377a296c1144b8cd6e2294e81
+[REEX-B]: https://github.com/kushima8/PMW3360/blob/ea1e9835a3d254a377a296c1144b8cd6e2294e81/documents/buildguide.md
+[REEX-L]: https://github.com/kushima8/PMW3360/blob/ea1e9835a3d254a377a296c1144b8cd6e2294e81/LICENSE
+[PICOT-R]: https://github.com/aki27kbd/picot5400/blob/10a0347a38bb7df5ce9286e327de2144d03f0b23/README.md
+[PICOT-I]: https://cocotkeebs.com/blogs/blogs/picot5400-introduction
+[PICOT-D]: https://github.com/aki27kbd/picot5400/blob/10a0347a38bb7df5ce9286e327de2144d03f0b23/doc/designguide.md
+[PICOT-L]: https://github.com/aki27kbd/picot5400/blob/10a0347a38bb7df5ce9286e327de2144d03f0b23/LICENSE
+[KIW-R]: https://github.com/Kaleidogeist/Kiwano/tree/1f59c4cd6c829ef414e1f67927971d8f2da21fad
+[KIW-L]: https://github.com/Kaleidogeist/Kiwano/blob/1f59c4cd6c829ef414e1f67927971d8f2da21fad/LICENSE.txt
+[VIK-R]: https://github.com/sadekbaroudi/vik/tree/cd5d16e4cd9137a229fc673412a89d75f4e64553#specifications
+[VIK-P]: https://github.com/sadekbaroudi/vik/tree/cd5d16e4cd9137a229fc673412a89d75f4e64553/pcb/pmw3360
+[VIK-XS]: https://github.com/sadekbaroudi/vik/tree/cd5d16e4cd9137a229fc673412a89d75f4e64553/pcb/pmw3360-xs
+[BH-R]: https://github.com/Bastardkb/34-mm-trackball-holder/tree/1bb7b1a49d6d5beca8eb48987bdb35460ba3529e
+[AKI-T]: https://github.com/aki27kbd/trackball_module
+[C-SCROLL]: https://docs.bastardkb.com/fw/charybdis-features.html
+[COCOT-B]: https://github.com/aki27kbd/cocot36plus/blob/c19727643ee5929bd8d5af541be6720e9b7c3324/doc/buildguide.md
+[COCOT-H]: https://github.com/aki27kbd/cocot36plus/tree/c19727643ee5929bd8d5af541be6720e9b7c3324/hardware
+[COCOT-L]: https://github.com/aki27kbd/cocot36plus/blob/c19727643ee5929bd8d5af541be6720e9b7c3324/LICENSE
+[VIK-RING]: https://github.com/sadekbaroudi/vik/tree/cd5d16e4cd9137a229fc673412a89d75f4e64553/pcb/per56-pmw3360-leds
+[VIK-L]: https://github.com/sadekbaroudi/vik/blob/cd5d16e4cd9137a229fc673412a89d75f4e64553/LICENSE.md
+[KIW-PCB]: https://github.com/Kaleidogeist/Kiwano/blob/1f59c4cd6c829ef414e1f67927971d8f2da21fad/PCB/Kiwano.kicad_pcb
+[OMEGA-R]: https://github.com/protieusz/OmegaSupreme/blob/9efdc0776e071cc35cef51e3b681792727207b05/README.md
+[OMEGA-L]: https://github.com/protieusz/OmegaSupreme/blob/9efdc0776e071cc35cef51e3b681792727207b05/LICENSE
+[BUBU-R]: https://github.com/protieusz/Starship-Bubu-01-Prototype-Trackball-Unit/blob/e2110b80d6fc248ce3d480d134076afbe049a3ba/README.md
+[JF-RING]: https://github.com/jfedor2/scroll-ring-trackball/blob/bcc73b1298b87e88c36e843fc690b19b71f73898/README.md
