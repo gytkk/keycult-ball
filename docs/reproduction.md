@@ -70,3 +70,8 @@ ezdxf 1.4.3와 Shapely 2.1.2를 사용한다. 로컬 ZIP 및 내부 DXF의 고�
 - Gerber: 고정 Keyball46 센서 `ball_sensor-Edge_Cuts.gbr`는 mm/4.6 좌표 형식이며 x=100…122, y=−100…−75mm이다. 현재 판매 부품 전체 크기를 뜻하지 않는다.
 
 현재 스크립트는 원본 CAD 측정 전체를 자동화하는 범용 CAD 파이프라인은 아니다. 이후 공식 STEP+실물 홀더를 FreeCAD에서 합쳐 높이와 체결부를 검토한다.
+
+
+## KiCad 66키 회로·PCB 초안
+
+[PCB 재현 안내](../design/pcb/README.md#reproduction)를 별도로 따른다. 기존 예비 도면을 다시 생성할 필요는 없다. 설치된 KiCad 10.0.7의 Python 바인딩은 Python 3.14를 사용하며, 회로도·PCB 생성, 저장된 배선 재적용, 실제 ERC/DRC·netlist·좌표·SVG/PDF 검증을 제공한다. `--draft`는 미배선 수를 명시적으로 보고하는 검토 모드이며 제조 검증 통과를 뜻하지 않는다. 현재 초안은 57개 미연결 항목(27개 net)이 남아 있어 strict native DRC는 종료 코드 5를 반환한다.
