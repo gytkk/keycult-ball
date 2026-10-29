@@ -164,7 +164,7 @@ Rev.1의 USB-C daughterboard 존재만으로 JST 규격·핀순서·기판 크�
 - **FreeCAD**: STEP/DXF 등과 BRep·솔리드, 실단위 파라메트릭 설계, 어셈블리 지원 [T2]. 저장소 push 2026-10-29. 공식 STEP와 홀더 모델의 합본 조립·간섭 확인에 적합하다.
 - **KiCad**: PCB 편집기로 DXF/SVG 가져오기와 DRC 및 3D 확인 기능이 있다 [T3]. 저장소 push 2026-10-29. 확정 외곽/부품 keepout을 이관하고 실제 회로·PCB를 설계할 단계에 사용한다.
 
-따라서 권장 흐름은 **공식 STEP + FreeCAD에서 기구 스택 확정 → Ergogen/좌표를 보조 입력으로 사용 → KiCad PCB**다. 이번 소형 Python 파일은 좌표 계산·검증·설명용 SVG/HTML을 반복 생성하는 도구일 뿐, 범용 CAD나 PCB 자동설계기를 새로 만든 것이 아니다. 공식 파일의 로컬 측정에는 기존 ezdxf와 OpenCascade/CadQuery, 별도 공식 윤곽 포함 검사에는 Shapely를 사용했다. 공개 배치 생성은 정확한 공식 윤곽 파일을 요구하지 않는다.
+권장 흐름은 **GH60와 기존 키 좌표를 참고한 KiCad 회로도/PCB 초안 작성, FreeCAD 기구 검토, 실측 반영 후 최종 배선과 제조 준비**다. 회로도와 PCB 초안은 실측을 기다리지 않고 진행하며, 단계별 산출물과 검증 기준은 [PCB 구현 계획](../../docs/pcb-implementation-plan.md)을 따른다. 기존 소형 Python 파일은 좌표 계산·검증·설명용 SVG/HTML을 반복 생성하는 도구이며 범용 CAD나 PCB 자동설계기가 아니다. 공식 파일의 로컬 측정에는 기존 ezdxf와 OpenCascade/CadQuery, 별도 공식 윤곽 포함 검사에는 Shapely를 사용했다. 공개 배치 생성은 정확한 공식 윤곽 파일을 요구하지 않는다.
 
 ## 9. 다음으로 필요한 최소 실측과 종이 검증
 
