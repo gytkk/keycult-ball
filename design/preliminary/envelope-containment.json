@@ -20,6 +20,16 @@
         "outside_rectangular_reference": [],
         "min_clearance_to_rectangular_reference_mm": 7.025
       }
+    },
+    "rear_clearance": {
+      "switch_proxy": {
+        "outside_rectangular_reference": [],
+        "min_clearance_to_rectangular_reference_mm": 2.525
+      },
+      "keycap_assumption": {
+        "outside_rectangular_reference": [],
+        "min_clearance_to_rectangular_reference_mm": 0.525
+      }
     }
   }
 }

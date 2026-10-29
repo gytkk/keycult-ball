@@ -52,6 +52,32 @@
         28.575,
         0.0
       ]
+    },
+    "rear-clearance-15u-3u-63": {
+      "keys": 63,
+      "unique_centers": 63,
+      "keycap_pair_collisions": [],
+      "switch_proxy_pair_collisions": [],
+      "minimum_keycap_pair_gap_mm": 1.05,
+      "ball_to_keycap_min_mm": 12.1,
+      "ball_to_switch_proxy_min_mm": 14.1,
+      "50mm_square_to_keycap_min_signed_mm": 4.1,
+      "50mm_square_to_full_cell_min_signed_mm": 3.575,
+      "50mm_square_to_switch_proxy_min_signed_mm": 6.1,
+      "case_exterior_x_margin_to_grid_mm": 4.275,
+      "case_exterior_y_margin_to_grid_mm": 7.875,
+      "keycap_envelope_mm": [
+        284.7,
+        94.2
+      ],
+      "G_mm": [
+        -38.1,
+        0.0
+      ],
+      "H_mm": [
+        38.1,
+        0.0
+      ]
     }
   }
 }

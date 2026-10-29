@@ -18,7 +18,12 @@ Keycult No.1/60에 트랙볼을 결합하기 위한 PCB와 보강판(플레이�
 | 볼과 G/H 키 중심 | 볼 `(0, 0)`, G `(-38.10, 0)`, H `(+38.10, 0)`, 단위 mm |
 | 볼과 키캡 사이 최소 평면 간격 | 지름 34mm 볼과 18 × 18mm 키캡 가정에서 12.10mm |
 | 임시 조립 예약 영역 | 50 × 50mm, 키캡과 최소 4.10mm 간격 |
+| 뒤쪽 공간 확보 옵션 | 15u 63키. 상단 중앙 Vol-/Mute/Vol+를 제거해 중앙 명목 빈 영역을 57.15 × 76.20mm로 확장 |
 | 보류한 대안 | 14u 너비의 64키 배열. 같은 예약 영역과 키캡이 5.425mm 겹침 |
+
+63키 옵션은 볼 지름 34mm와 중심, G/H 및 하단 M1/M3/M2를 포함한 나머지 키를 유지합니다. 뒤쪽 한 행을 비워 센서와 배선, 지지 브리지와 체결 간격을 검토할 공간을 확보합니다. 키 제거만으로 강성이 좋아지는 것은 아니며, 빈 영역 전체를 절개하면 강성이 낮아질 수 있습니다. 볼을 키우거나 수직 여유를 늘리는 옵션이 아닙니다.
+
+![상단 중앙 세 키를 제거한 63키 뒤쪽 공간 확보 옵션](design/preliminary/rear-clearance.png)
 
 50 × 50mm 영역은 실제 홀더 외곽이나 보강판 및 PCB의 가공 구멍 치수가 아닙니다. 공개 도면의 초록색 경계도 공식 보강판 윤곽을 복제한 것이 아니라, 전체 치수만 참조한 285.75 × 108.25mm 직사각형입니다. 현재 검증은 이 경계 안의 포함 여부와 부품 사이 평면 간격을 확인하며, 실제 케이스 개구부 통과나 수직 공간, 조립 가능 여부를 증명하지 않습니다.
 
@@ -33,6 +38,7 @@ Keycult No.1/60에 트랙볼을 결합하기 위한 PCB와 보강판(플레이�
 | [배치 HTML](design/preliminary/layout.html) · [SVG](design/preliminary/layout.svg) · [JSON](design/preliminary/layout.json) | 브라우저 설명도, 편집 가능한 벡터, 모든 키 중심 좌표 |
 | [단면 SVG](design/preliminary/section.svg) · [PNG](design/preliminary/section.png) | 수직 설치 센서와 미확정 Z 스택 |
 | [1:1 A3 PDF](design/preliminary/print-1to1.pdf) · [SVG](design/preliminary/print-1to1.svg) | 100mm 기준선 포함 종이 검증용 |
+| [63키 옵션 SVG](design/preliminary/rear-clearance.svg) · [PNG](design/preliminary/rear-clearance.png) · [1:1 A3 PDF](design/preliminary/rear-clearance-print.pdf) · [인쇄 SVG](design/preliminary/rear-clearance-print.svg) · [인쇄 HTML](design/preliminary/rear-clearance-print.html) | 뒤쪽 공간 확보 비교. 좌표는 `layout.json`의 `rear_clearance` |
 | [재현·검증 방법](docs/reproduction.md) | 좌표 생성, PNG/PDF 렌더, 원본 취득·해시 검증 |
 | [에이전트 작업 지침](AGENTS.md) | 설계 변경, 검증, 공개 자료 관리, 커밋·푸시 규칙 |
 

@@ -63,7 +63,7 @@ plate_width, plate_height, _ = layout['official_plate_envelope_mm']
 polygon = box(-plate_width/2, -plate_height/2, plate_width/2, plate_height/2)
 assert layout['plate_visualization'].startswith('generic rectangular bounding envelope')
 containment = {}
-for name, key_count, gap in [('preferred', 66, 3), ('alternative', 64, 2)]:
+for name, key_count, gap in [('preferred', 66, 3), ('alternative', 64, 2), ('rear_clearance', 63, 3)]:
     data = layout[name]
     keys = data['keys']
     assert len(keys) == key_count == data['key_count']
@@ -81,7 +81,7 @@ for name, key_count, gap in [('preferred', 66, 3), ('alternative', 64, 2)]:
     close(ball_gap, values['ball_to_keycap_min_mm'], 'ball gap')
     close(keep_gap, values['50mm_square_to_keycap_min_signed_mm'], 'keepout gap')
     assert ball_gap > 0
-    assert (keep_gap > 0) if name == 'preferred' else (keep_gap < 0)
+    assert (keep_gap < 0) if name == 'alternative' else (keep_gap > 0)
     containment[name] = {}
     for proxy, half in [('switch_proxy', 7), ('keycap_assumption', 9)]:
         boxes = [(k['id'], box(k['x_mm']-half, k['y_mm']-half, k['x_mm']+half, k['y_mm']+half)) for k in keys]
@@ -96,7 +96,7 @@ for name, key_count, gap in [('preferred', 66, 3), ('alternative', 64, 2)]:
     'layouts': containment,
 }, indent=2) + '\n')
 # Public drawings must not silently reintroduce the copied plate contour.
-for name in ('layout.svg', 'alternative.svg', 'print-1to1.svg'):
+for name in ('layout.svg', 'alternative.svg', 'print-1to1.svg', 'rear-clearance.svg', 'rear-clearance-print.svg'):
     root = ET.fromstring((DESIGN / name).read_text())
     reference = root.find('.//*[@id="plate-envelope"]')
     assert reference is not None and reference.tag.endswith('rect'), name
@@ -108,23 +108,51 @@ assert layout['case_opening_mm'] is None and layout['plate_to_floor_mm'] is None
 assert layout['trackball']['holder_verified_envelope_mm'] is None
 assert layout['trackball']['ball_center_height_above_plate_mm'] is None
 
-with pymupdf.open(DESIGN / 'print-1to1.pdf') as pdf:
-    assert len(pdf) == 1
-    page = pdf[0]
-    width, height = page.rect.width * 25.4 / 72, page.rect.height * 25.4 / 72
-    assert abs(width - 420) < 1 and abs(height - 297) < 1, (width, height)
-    calibration = []
-    for drawing in page.get_drawings():
-        for item in drawing['items']:
-            if item[0] == 'l':
-                start, end = item[1:3]
-                length = abs(end.x - start.x) * 25.4 / 72
-                if abs(end.y - start.y) < .001 and abs(length - 100) < .05:
-                    calibration.append(length)
-    assert calibration, 'No 100mm calibration segment in PDF'
-    measured = {'page_count': 1, 'page_size_mm': [width, height], 'calibration_horizontal_line_lengths_mm': calibration,
-                'print_driver_scaling': 'user must still print actual size/100%, no fit-to-page'}
-    (DESIGN / 'print-validation.json').write_text(json.dumps(measured, indent=2) + '\n')
+rear = layout['rear_clearance']
+original = {k['id']: k for k in layout['preferred']['keys']}
+remaining = {k['id']: k for k in rear['keys']}
+assert original.keys() - remaining.keys() == {'r0c6', 'r0c7', 'r0c8'}, 'Remove only the three top center keys'
+assert all(original[key_id] == key for key_id, key in remaining.items()), 'Other keys must not move or change'
+assert not {'Vol-', 'Mute', 'Vol+'} & {k['label'] for k in remaining.values()}
+assert layout['trackball']['ball_diameter_mm'] == 34 and layout['trackball']['center_mm'] == [0, 0]
+assert layout['trackball']['assembly_keepout_mm'] == [50, 50], 'The measured holder size is still unknown'
+assert rear['central_empty_cells_mm'] == {'width': 57.15, 'height': 76.2, 'xmin': -28.575, 'ymin': -47.625, 'xmax': 28.575, 'ymax': 28.575}
+empty_grid = box(-28.575, -47.625, 28.575, 28.575)
+assert polygon.covers(empty_grid), 'Empty grid exceeds the rectangular reference'
+assert all(not empty_grid.intersects(box(k['x_mm']-9, k['y_mm']-9, k['x_mm']+9, k['y_mm']+9)) for k in remaining.values()), 'A keycap occupies the reserved grid'
+for name in ('rear-clearance.svg', 'rear-clearance-print.svg'):
+    root = ET.fromstring((DESIGN / name).read_text())
+    for element_id, expected in [('rear-clearance-grid', [-28.575, -47.625, 57.15, 76.2]), ('rear-extension', [-28.575, -47.625, 57.15, 19.05])]:
+        element = root.find(f'.//*[@id="{element_id}"]')
+        assert element is not None, (name, element_id)
+        for attr, value in zip(('x', 'y', 'width', 'height'), expected):
+            close(float(element.attrib[attr]), value, f'{name} {element_id} {attr}')
+    labels = [element.text for element in root.iter('{http://www.w3.org/2000/svg}text')]
+    assert not {'Vol-', 'Mute', 'Vol+'} & set(labels), name
+    assert any('63 keys' in label for label in labels if label), name
 
-print('PASS: Python/JSON/SVG/HTML/link syntax; 66/64 keys, pitch and centers; cap/ball/reservation checks; generic rectangular envelope; A3 PDF scale.')
-print(f'PDF calibration: {calibration[0]:.6f} mm. Case opening and full 3D assembly remain unverified.')
+for pdf_name, result_name, key_count in [('print-1to1.pdf', 'print-validation.json', 66), ('rear-clearance-print.pdf', 'rear-clearance-print-validation.json', 63)]:
+    with pymupdf.open(DESIGN / pdf_name) as pdf:
+        assert len(pdf) == 1, pdf_name
+        page = pdf[0]
+        assert f'{key_count} keys' in page.get_text(), f'{pdf_name}: wrong layout or stale PDF'
+        if key_count == 63:
+            assert not any(label in page.get_text() for label in ('Vol-', 'Mute', 'Vol+')), pdf_name
+        width, height = page.rect.width * 25.4 / 72, page.rect.height * 25.4 / 72
+        assert abs(width - 420) < 1 and abs(height - 297) < 1, (pdf_name, width, height)
+        calibration = []
+        for drawing in page.get_drawings():
+            for item in drawing['items']:
+                if item[0] == 'l':
+                    start, end = item[1:3]
+                    length = abs(end.x - start.x) * 25.4 / 72
+                    if abs(end.y - start.y) < .001 and abs(length - 100) < .05:
+                        calibration.append(length)
+        assert calibration, f'{pdf_name}: no 100mm calibration segment'
+        measured = {'page_count': 1, 'page_size_mm': [width, height], 'calibration_horizontal_line_lengths_mm': calibration,
+                    'print_driver_scaling': 'user must still print actual size/100%, no fit-to-page'}
+        (DESIGN / result_name).write_text(json.dumps(measured, indent=2) + '\n')
+        print(f'{pdf_name} calibration: {calibration[0]:.6f} mm.')
+
+print('PASS: Python/JSON/SVG/HTML/link syntax; 66/64/63 keys; exact three-key removal; unchanged ball; cap/ball/reservation checks; generic rectangular envelope; both A3 PDF scales.')
+print('Case opening, mounting stiffness and full 3D assembly remain unverified.')

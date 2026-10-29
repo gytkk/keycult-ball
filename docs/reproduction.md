@@ -5,12 +5,14 @@
 ## 1. 좌표·벡터·HTML
 
 ```bash
-python3 design/preliminary/build_artifacts.py
+uv run design/preliminary/build_artifacts.py
 ```
 
 Python 표준 라이브러리만 필요하다. 입력은 생성기 안의 배열/상수 및 `sources/keyball-evidence.json`이다. 공식 CAD나 상세 윤곽 좌표 없이 공개 도면을 생성한다. 초록색 사각형은 285.75 × 108.25mm 전체 치수 참고 경계이며 실제 윤곽이나 케이스 개구부가 아니다. 출력은 `layout.json`, `validation.json`, 평면/대안/단면/인쇄 SVG 및 HTML이다. **기존 PNG/PDF나 플레이트 포함 결과는 이 명령만으로 새로 계산되지 않는다.**
 
 설계를 바꿀 때 배열과 치수 상수를 먼저 편집한다. JSON은 모든 키 중심을 다른 CAD 도구로 가져가기 위한 교환 파일이지만 이 생성기의 입력은 아니므로 JSON에만 한 수정은 재생성 시 덮어쓴다. SVG는 벡터 편집기로 열 수 있지만 그 수정도 생성기에는 역반영되지 않는다.
+
+`layout.json`은 66키 기준안, 14u 64키 비교안과 `rear_clearance` 63키 옵션의 좌표를 포함한다. 63키 옵션은 `rear-clearance.svg`와 `rear-clearance-print.svg`/`.html`로 생성하며, 볼 지름 34mm와 나머지 키를 유지하고 상단 중앙 Vol-/Mute/Vol+만 제거한다. 중앙 57.15 × 76.20mm 빈 명목 영역은 가공 구멍이나 확대된 홀더 예약 영역이 아니다.
 
 ## 2. PNG·1:1 PDF
 
@@ -20,7 +22,7 @@ Python 표준 라이브러리만 필요하다. 입력은 생성기 안의 배열
 uv run scripts/render.py
 ```
 
-`chromium` 또는 `chromium-browser`가 PATH에 없으면 `KEYCULT_CHROMIUM=/절대/경로/chromium`을 지정한다. 명령은 평면 PNG, 단면 PNG, A3 PDF를 다시 만든다. SVG/HTML에 외부 폰트·스크립트·이미지 요청은 없다. PNG 렌더는 브라우저/설치 폰트에 따라 작은 차이가 날 수 있다.
+`chromium` 또는 `chromium-browser`가 PATH에 없으면 `KEYCULT_CHROMIUM=/절대/경로/chromium`을 지정한다. 명령은 평면 PNG, 단면 PNG, A3 PDF와 63키 옵션의 `rear-clearance.png`, `rear-clearance-print.pdf`를 다시 만든다. SVG/HTML에 외부 폰트·스크립트·이미지 요청은 없다. PNG 렌더는 브라우저/설치 폰트에 따라 작은 차이가 날 수 있다.
 
 ## 3. 독립 검증
 
@@ -31,13 +33,13 @@ uv run scripts/validate.py
 Shapely 2.1.2와 PyMuPDF 1.26.7을 사용한다. 다음을 검사한다.
 
 - Python AST, JSON, SVG/XML, HTML 파싱과 문서/HTML 로컬 링크.
-- 66/64키 개수, 중복 좌표, 19.05mm 피치, 중앙 정렬, 문자 키, 키캡 쌍 충돌.
+- 66/64/63키 개수, 중복 좌표, 19.05mm 피치, 중앙 정렬, 문자 키, 키캡 쌍 충돌. 63키 옵션은 기준안에서 상단 중앙 세 키만 제거했는지도 확인.
 - 원–사각형 거리로 볼 간섭을 다시 계산하고 저장된 결과와 비교.
 - 임시 50mm 영역의 양수/음수 간격 및 일반적인 사각 치수 경계에 대한 Shapely 포함·최소 거리. 결과는 `envelope-containment.json`에 저장한다. 공개 SVG에 상세 윤곽이 아닌 사각 치수 경계가 있는지도 확인한다.
 - 미확정 케이스 개구부·깊이·홀더 치수가 JSON에서 계속 `null`인지 확인.
-- PDF 한 페이지 A3 가로 및 벡터상의 100mm 기준선 길이. 결과를 `print-validation.json`에 기록.
+- 기준안과 63키 옵션의 PDF가 각각 한 페이지 A3 가로인지, 벡터상의 100mm 기준선 길이가 맞는지 확인. 결과는 `print-validation.json`과 `rear-clearance-print-validation.json`에 기록.
 
-공개 검증은 공식 윤곽을 사용하지 않으며 실제 윤곽 포함을 증명하지 않는다. `plate-containment.json`은 초기 공식 윤곽 조사에서 얻은 스칼라 결과 기록이며 이 명령으로 재계산하지 않는다. 상세 윤곽 재현은 아래 로컬 전용 절차로 수행한다. 이 검증은 PCB DRC, 실제 케이스 개구부, 3D 수납, 소켓·다이오드·배선·하중 검증을 대체하지 않는다.
+공개 검증은 공식 윤곽을 사용하지 않으며 실제 윤곽 포함을 증명하지 않는다. `plate-containment.json`은 초기 66/64키 공식 윤곽 조사에서 얻은 스칼라 결과 기록이며 이 명령으로 재계산하지 않고 63키 옵션도 다루지 않는다. 상세 윤곽 재현은 아래 로컬 전용 절차로 수행한다. 이 검증은 PCB DRC, 실제 케이스 개구부, 3D 수납, 소켓·다이오드·배선·하중 검증을 대체하지 않는다.
 
 종이 출력은 **A3 가로 / 100% 실제 크기 / 페이지 맞춤 끄기**로 하고 100mm 선을 자로 확인한다. PDF 내부 길이가 정확해도 프린터 배율까지 보증하지는 않는다.
 
@@ -46,7 +48,7 @@ Shapely 2.1.2와 PyMuPDF 1.26.7을 사용한다. 다음을 검사한다.
 원본 STEP/DXF/Gerber는 저장소에 포함하지 않는다. 먼저 [라이선스·사용 조건](alternatives-and-licenses.md)을 확인한다. 아래 명령은 고정 출처 세 ZIP을 git-ignored 디렉터리 `design/preliminary/sources/upstream/`에만 저장하고, 조사 당시 SHA-256과 일치해야 성공한다. 자동 압축 해제나 외부 파일 실행은 하지 않는다.
 
 ```bash
-python3 scripts/fetch_sources.py
+uv run scripts/fetch_sources.py
 ```
 
 [원본 해시와 측정 방법](../design/preliminary/sources/README.md)에 개별 파일 체크섬도 있다. 원본이 바뀌면 해시 실패를 무시하지 말고 새 리비전으로 별도 검토한다.
