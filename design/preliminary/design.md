@@ -136,6 +136,18 @@ Ctrl GUI  Alt  Fn  Space Del |  M1   M3   M2  | Bksp Space Fn  Left Down Right
 
 ## 7. 유선 QMK 전장 범위
 
+### PCB 설계 출발점
+
+2026-10-29 결정: **공개 GH60 KiCad 도면을 새 PCB 설계의 출발점으로 사용한다.** WT60-A의 정확한 PCB CAD 확보를 설계 시작의 선행 조건으로 두지 않는다. 기준 자료는 `komar007/gh60`의 커밋 `e7948cf44dbd3d43eb70296023a6fe3f471b44ba`에 있는 [keyboard.kicad_pcb](https://github.com/komar007/gh60/blob/e7948cf44dbd3d43eb70296023a6fe3f471b44ba/keyboard.kicad_pcb)와 [keyboard.sch](https://github.com/komar007/gh60/blob/e7948cf44dbd3d43eb70296023a6fe3f471b44ba/keyboard.sch)다. PCB 외곽과 기본 스위치 배치의 기준을 참고하되, 현재 프로젝트의 직교 배열과 중앙 포인팅 장치에 맞춰 스위치 좌표, 중앙 개구와 회로를 새로 설계한다.
+
+호환 근거는 [Salvun의 WT60-D 제품 설명](https://salvun.com/products/wilba-60-pcb-wt60-d)이다. 이 PCB는 Poker2 규격의 USB 위치와 PCB 장착 홀을 사용하며, FAQ는 Keycult No.1/60에 장착하려면 PCB의 USB-C 커넥터를 제거하고 JST 커넥터를 납땜하면 된다고 명시한다. [Keycult 공식 FAQ](https://resources.keycult.com/faq_keycult_faq.html)도 No.1/60의 대체 PCB로 WT60-G를 명시한다. 이는 범용 60% PCB를 출발점으로 사용할 근거이며, 모든 GH60 파생 PCB나 위 GH60 파일 그대로의 실물 장착을 보증하는 내용은 아니다. WT60-D는 호환 근거이고, 위 GH60 파일은 설계 참고 원본이다.
+
+No.1/60은 보강판이 케이스에 결합하고 PCB는 스위치를 통해 지지되는 구조이므로, 작은 PCB 외곽 치수 차이만으로 호환 불가라고 판단하지 않는다. 보강판의 케이스 결합 형상은 Keycult 자료를 기준으로 유지하고 GH60의 트레이 장착 홀은 그대로 재현할 필요가 없다. 새 메인 PCB에는 USB 커넥터를 두지 않고 기존 도터보드를 연결하는 방향으로 설계한다. 제조 전에는 PCB 가장자리와 하부 부품의 케이스 간섭, 도터보드 커넥터의 위치와 방향, 핀 배열 및 케이블 공간을 실물과 대조한다. 중앙 트랙볼의 높이와 개구, 지지 강성은 별도로 검증한다.
+
+현재 결정은 참고 도면의 선택이며 PCB CAD를 생성하거나 원본을 공개 산출물에 포함한 상태는 아니다. 원본 파일의 취득과 파생 CAD 공개는 [자료 관리 기준](../../docs/alternatives-and-licenses.md)에 따라 해당 파일의 사용 조건을 확인하고 진행한다.
+
+### 회로와 펌웨어
+
 새 PCB는 직교 키 매트릭스+다이오드, QMK 지원 USB MCU, 센서 SPI 및 전원을 포함한다. RP2040 계열 같은 QMK 지원 MCU를 후보로 둘 수 있지만 아직 회로·핀맵·전압을 정하지 않았다. 물리 5×15 배치는 논리 좌표이고 전기 매트릭스 배선은 별개다. 중앙에는 스위치/소켓뿐 아니라 PCB 부품·배선을 넣지 않는 영역과 필요 시 관통 개구부가 필요하다.
 
 원본 Keyball46 센서 회로도 [B3]에는 커넥터 측 5V와 센서 측 1.9V, TPS73601 레귤레이터 및 TXS0102 레벨 변환기가 있고 7핀 신호는 SCLK/NCS/GND/5V/GND/MOSI/MISO이다. 핀 번호 방향은 해당 회로도와 실물 커넥터를 대조해야 한다. **PMW3360 생칩 5V 직결이나 임의 3.3V MCU의 무조건 호환으로 일반화하지 않는다.** 사용할 모듈 리비전과 MCU에 맞춰 로직·전원 인터페이스를 설계한다.
