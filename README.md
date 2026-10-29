@@ -4,7 +4,7 @@ Keycult No.1/60에 트랙볼을 결합하기 위한 PCB와 보강판(플레이�
 
 현재는 예비 기구 배치를 검토하는 단계입니다. 저장소에는 배치도, 키 중심 좌표, 수치 검증 스크립트와 1:1 인쇄 자료가 있습니다. 실제 케이스 내부에 조립할 수 있는지는 미확정이며, 제조용 CAD, 회로 및 PCB 설계, QMK 펌웨어는 아직 없습니다.
 
-보유 케이스는 NovelKeys 최신 판매 버전의 WK이며, 정확한 리비전과 과거 공개 도면의 호환성은 확인이 필요합니다. 34mm Keyball은 현재 예비 배치의 기준입니다. 중앙의 소형 트랙볼·터치패드와 외부 USB 모듈도 검토하고 있으며 최종 장치는 아직 선택하지 않았습니다. [실현 가능성과 대안 조사](docs/feasibility.md)를 참고합니다.
+보유 케이스는 NovelKeys 최신 판매 버전의 WK이며, 정확한 리비전과 과거 공개 도면의 호환성은 확인이 필요합니다. G/H 사이 중앙 통합은 필수 조건이며 외부 별도 장치는 범위에서 제외합니다. 34mm Keyball은 현재 예비 배치의 기준이고, 작은 볼과 터치패드도 중앙 통합 후보로 검토합니다. 최종 장치는 아직 선택하지 않았으며 [실현 가능성과 대안 조사](docs/feasibility.md)를 참고합니다.
 
 ![추천 66키 배치](design/preliminary/layout.png)
 
@@ -27,7 +27,7 @@ Keycult No.1/60에 트랙볼을 결합하기 위한 PCB와 보강판(플레이�
 | 자료 | 내용 |
 |---|---|
 | [프로젝트 맥락](docs/project-context.md) | 요구사항, 결정 이유, 확정/가정/미확정, 실측·다음 단계 |
-| [실현 가능성과 대안 조사](docs/feasibility.md) | 34mm 중앙 통합의 제약, 소형 터치패드·트랙볼, 외부 USB 장치 비교 |
+| [실현 가능성과 대안 조사](docs/feasibility.md) | 34mm 중앙 통합의 제약과 중앙에 통합할 소형 터치패드·트랙볼 비교 |
 | [상세 설계와 출처](design/preliminary/design.md) | 치수 계산, 장착·flex, 센서 방향, QMK·USB 범위 |
 | [Ploopy / Keyball / Charybdis 및 라이선스](docs/alternatives-and-licenses.md) | 제품별 차이, 원본 공개 범위와 재사용 조건 |
 | [배치 HTML](design/preliminary/layout.html) · [SVG](design/preliminary/layout.svg) · [JSON](design/preliminary/layout.json) | 브라우저 설명도, 편집 가능한 벡터, 모든 키 중심 좌표 |
