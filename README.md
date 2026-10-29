@@ -1,20 +1,24 @@
 # keycult-ball
 
-**Keycult No.1/60 케이스를 유지하고, PCB·플레이트를 교체해 유선 QMK 직교 배열과 G/H 사이 중앙 34mm Keyball을 결합하는 개인 프로젝트입니다.**
+Keycult No.1/60에 트랙볼을 결합하기 위한 PCB와 보강판(플레이트)을 제작하는 개인 프로젝트입니다. 기존 케이스를 절삭하거나 새 구멍을 뚫지 않고, PCB와 보강판을 교체해 G/H 사이에 34mm Keyball을 배치하는 것이 목표입니다. 키 배열은 직교 배열을 사용하고, 유선 USB와 QMK 기반 키보드 및 포인팅 장치를 구현할 계획입니다.
 
-현재 단계: **예비 기구 배치 / 실제 수납 미확정 / 제조용 CAD·PCB·펌웨어 없음**.
+현재는 예비 기구 배치를 검토하는 단계입니다. 저장소에는 배치도, 키 중심 좌표, 수치 검증 스크립트와 1:1 인쇄 자료가 있습니다. 실제 케이스 내부에 조립할 수 있는지는 미확정이며, 제조용 CAD, 회로 및 PCB 설계, QMK 펌웨어는 아직 없습니다.
 
 ![추천 66키 배치](design/preliminary/layout.png)
 
-## 현재 추천안
+## 현재 검토 중인 배치
 
-- **15u × 5행, 66키**: 19.05mm 피치, 명목 키필드 **285.75 × 95.25mm**.
-- 중앙 3열 × 3행을 비우고 볼 중심 `(0,0)`, G `(-38.10,0)`, H `(+38.10,0)`.
-- Ø34 볼과 가정한 18mm 키캡 사이 최소 **12.10mm**.
-- 주황색 **50 × 50mm는 임시 조립 예약 영역**이며 실제 홀더 외곽·가공 구멍이 아님. 키캡과 최소 **4.10mm**.
-- 14u·중앙 2u·64키 대안은 같은 예약 영역과 키캡이 **5.425mm 겹쳐 보류**.
-- 공개 도면은 **285.75 × 108.25mm 일반 직사각형 치수 경계**만 표시하며, 공식 플레이트 윤곽을 복제하지 않습니다. 공개 검증도 이 경계와 부품 간 평면 간격에 한정됩니다.
-- 과거 공식 윤곽 포함 검사 결과는 별도 기록으로 남깁니다. 직사각형 경계 통과가 정확한 윤곽 포함을 증명하지 않으며, **케이스 내부 개구부·수직 깊이·실제 홀더 외곽 확인이 필요**합니다.
+추천안은 15u 너비의 5행 66키 배열이며, 중앙 3열의 가운데 3행을 비워 트랙볼 공간을 확보합니다. 아래 값은 현재 예비 설계의 계산값입니다.
+
+| 항목 | 값 또는 조건 |
+| --- | --- |
+| 키 피치와 명목 키필드 | 19.05mm, 285.75 × 95.25mm |
+| 볼과 G/H 키 중심 | 볼 `(0, 0)`, G `(-38.10, 0)`, H `(+38.10, 0)`, 단위 mm |
+| 볼과 키캡 사이 최소 평면 간격 | 지름 34mm 볼과 18 × 18mm 키캡 가정에서 12.10mm |
+| 임시 조립 예약 영역 | 50 × 50mm, 키캡과 최소 4.10mm 간격 |
+| 보류한 대안 | 14u 너비의 64키 배열. 같은 예약 영역과 키캡이 5.425mm 겹침 |
+
+50 × 50mm 영역은 실제 홀더 외곽이나 보강판 및 PCB의 가공 구멍 치수가 아닙니다. 공개 도면의 초록색 경계도 공식 보강판 윤곽을 복제한 것이 아니라, 전체 치수만 참조한 285.75 × 108.25mm 직사각형입니다. 현재 검증은 이 경계 안의 포함 여부와 부품 사이 평면 간격을 확인하며, 실제 케이스 개구부 통과나 수직 공간, 조립 가능 여부를 증명하지 않습니다.
 
 ## 자료 안내
 
@@ -27,23 +31,44 @@
 | [단면 SVG](design/preliminary/section.svg) · [PNG](design/preliminary/section.png) | 수직 설치 센서와 미확정 Z 스택 |
 | [1:1 A3 PDF](design/preliminary/print-1to1.pdf) · [SVG](design/preliminary/print-1to1.svg) | 100mm 기준선 포함 종이 검증용 |
 | [재현·검증 방법](docs/reproduction.md) | 좌표 생성, PNG/PDF 렌더, 원본 취득·해시 검증 |
+| [에이전트 작업 지침](AGENTS.md) | 설계 변경, 검증, 공개 자료 관리, 커밋·푸시 규칙 |
 
-HTML은 내려받아 브라우저에서 엽니다. GitHub에서는 위 PNG로 미리 볼 수 있습니다.
+HTML은 저장소를 내려받은 뒤 브라우저에서 엽니다. GitHub에서는 위 PNG로 미리 볼 수 있습니다. 종이 배치는 A3 가로, 배율 100%, 페이지 맞춤을 끈 상태로 출력하고 100mm 기준선을 자로 확인합니다.
 
-## 빠른 재생성
+## 생성과 검증
+
+Python 3.11 이상과 `uv`를 사용하며, 명령은 저장소 루트에서 실행합니다. 검증 및 렌더 스크립트의 의존성은 각 파일의 메타데이터에 고정되어 있고 `uv run`이 준비합니다.
+
+기존 산출물과 문서의 로컬 링크를 검증하려면 다음 명령을 실행합니다.
 
 ```bash
-python3 design/preliminary/build_artifacts.py
 uv run scripts/validate.py
-# PNG/PDF도 다시 만들 때 (Chromium 필요)
+```
+
+배열이나 치수를 변경한 경우에는 산출물을 순서대로 다시 생성하고 검증합니다.
+
+```bash
+uv run design/preliminary/build_artifacts.py
 uv run scripts/render.py
 uv run scripts/validate.py
 ```
 
-`build_artifacts.py`의 배열·치수 상수가 편집 원본이며 JSON/SVG/HTML은 파생 산출물입니다. JSON만 수정한 뒤 생성기를 실행하면 덮어쓰므로 설계 변경은 생성기에 반영합니다.
+`design/preliminary/build_artifacts.py`의 배열과 치수 상수가 편집 원본이며, 키 중심 JSON과 SVG/HTML은 생성 결과입니다. 설계 변경은 생성기에 반영합니다. 생성기만 실행하면 기존 PNG/PDF는 갱신되지 않으므로 `scripts/render.py`도 실행해야 합니다. 렌더에는 시스템 Chromium이 필요하며, PATH에서 찾을 수 없으면 `KEYCULT_CHROMIUM`에 실행 파일의 절대 경로를 지정합니다.
 
-공식 윤곽 검사는 위 공개 검증과 별개입니다. 원본 조건을 확인하고 공식 DXF를 로컬에 취득한 뒤 `uv run scripts/verify_official_contour.py`로 재현합니다. 추출 좌표와 재검사 출력은 Git에서 제외하는 `design/preliminary/sources/local/`에만 저장합니다. [과거 검사 기록](design/preliminary/plate-containment.json)은 현재 공개 도형의 검증 결과가 아닙니다. 세부 절차는 [재현 문서](docs/reproduction.md)를 따릅니다.
+검증 스크립트는 파일 형식과 로컬 링크, 키 개수와 좌표, 평면 간격, 직사각형 경계 안의 포함 여부, PDF의 A3 크기와 100mm 기준선을 검사합니다. 검증 결과 일부는 `envelope-containment.json`과 `print-validation.json`에 기록됩니다.
+
+공식 윤곽 검사는 별도 절차입니다. 원본 사용 조건을 확인한 뒤 `uv run scripts/fetch_sources.py`로 원본을 취득하고 `uv run scripts/verify_official_contour.py`로 재현합니다. [과거 검사 기록](design/preliminary/plate-containment.json)은 현재 공개 검증으로 갱신되지 않습니다. 추출 좌표와 재검사 출력의 저장 위치, 해시 확인 방법은 [재현 문서](docs/reproduction.md)를 따릅니다.
+
+## 다음 설계 단계
+
+1. 케이스와 Keyball 홀더의 리비전, 내부 개구부, 보강판에서 바닥까지의 거리, 홀더와 센서의 외곽을 실측합니다.
+2. 1:1 종이 배치로 손가락 접근을 확인하고, FreeCAD에서 실제 홀더와 케이스의 간섭 및 장착 구조를 검토합니다. 볼과 센서는 같은 강체에 고정해 상대 광학 위치를 유지합니다.
+3. 장착 구조와 USB 도터보드, 전압 및 배선을 확정한 뒤 KiCad 회로·PCB 설계, 가공용 보강판 설계, QMK 포팅을 진행합니다.
+
+측정할 항목과 결정 이유는 [프로젝트 맥락](docs/project-context.md)에 기록합니다. 예비 SVG를 제조용 도면으로 사용하지 않습니다.
 
 ## 범위와 출처 관리
 
-정식 산출물은 이 저장소에서 관리합니다. 원본 대화·개인 메모·인증 정보는 포함하지 않습니다. 제3자 STEP/DXF/Gerber 원본과 공식 플레이트 윤곽 복제본은 재배포하지 않고, 공식 URL·해시·형상을 복제하지 않는 요약 측정값 및 로컬 취득·검사 절차를 제공합니다. 공개 SVG/HTML/PNG/PDF는 독립 키 배열과 일반 직사각형 치수 경계만 사용합니다. 정확한 윤곽 좌표는 Git에서 제외하는 `design/preliminary/sources/local/measured-official-dxf.json`에 두며, 요약 치수만 담은 `measured-official-step.json`은 공개 자료에 남깁니다. 원본의 개인·비상업 사용 조건과 공개 재배포 허가는 별개이며, 저장소 공개 자체가 제3자 자료의 포괄적 재사용 허가를 뜻하지 않습니다. [자료별 라이선스](docs/alternatives-and-licenses.md)를 확인합니다.
+공개 자료는 독립 키 배열, 형상을 복제하지 않는 요약 측정값, 검증 결과, 출처 URL과 해시입니다. 제3자 STEP/DXF/Gerber 원본, 공식 보강판 윤곽 좌표와 이를 복제한 도면은 공개하지 않습니다. 원본 다운로드는 `design/preliminary/sources/upstream/`에, 상세 윤곽과 로컬 검사 결과는 `design/preliminary/sources/local/`에 저장하며 두 디렉토리는 Git에서 제외합니다. 원본 대화, 개인 메모, 인증 정보도 포함하지 않습니다.
+
+저장소 공개 자체가 제3자 자료의 재사용이나 재배포 허가를 뜻하지 않습니다. 자료를 취득하거나 재사용하기 전에 [자료별 라이선스와 배포 범위](docs/alternatives-and-licenses.md), [출처와 측정 기록](design/preliminary/sources/README.md)을 확인합니다.
