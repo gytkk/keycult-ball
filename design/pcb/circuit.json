@@ -137,9 +137,36 @@
       "uuid": "b974de5d-7d8a-5531-8067-0c7165c92816"
     },
     {
+      "ref": "J1",
+      "lib": "Connector_Generic_MountingPin:Conn_01x04_MountingPin",
+      "value": "USB / UDB JST-SH",
+      "fp": "Connector_JST:JST_SH_SM04B-SRSS-TB_1x04-1MP_P1.00mm_Horizontal",
+      "nets": {
+        "1": "VBUS_USB",
+        "2": "USB_DM",
+        "3": "USB_DP",
+        "4": "GND",
+        "MP": "GND"
+      },
+      "sch": [
+        375.92,
+        91.44
+      ],
+      "pos": [
+        40.599999999999994,
+        112
+      ],
+      "angle": 90,
+      "side": "B",
+      "mpn": "JST SM04B-SRSS-TB(LF)(SN)",
+      "status": "UDB electrical pinout; stock cable fit unverified",
+      "note": "1 VBUS, 2 D-, 3 D+, 4 GND; 1:1 JST-SH cable. Left-edge placement is provisional, not measured WT60-A registration; confirm owned daughterboard revision and CC/ESD protection",
+      "uuid": "261878df-3fb4-51f7-b055-2d4af5f9dec9"
+    },
+    {
       "ref": "TP1",
       "lib": "Connector:TestPoint",
-      "value": "VBUS_USB / USB LOGICAL",
+      "value": "VBUS_USB / USB TEST",
       "fp": "TestPoint:TestPoint_Pad_D1.5mm",
       "nets": {
         "1": "VBUS_USB"
@@ -155,14 +182,14 @@
       "angle": 0,
       "side": "B",
       "mpn": "PCB pad",
-      "status": "logical only; daughterboard connector unresolved",
-      "note": "Not connector pin numbering; verify existing daughterboard, CC, ESD, shield and cable",
+      "status": "test access; J1 is the cable connector",
+      "note": "Test-pad numbering differs from J1 contact numbering",
       "uuid": "f82919ce-d152-5296-91c9-b353452702ac"
     },
     {
       "ref": "TP2",
       "lib": "Connector:TestPoint",
-      "value": "GND / USB LOGICAL",
+      "value": "GND / USB TEST",
       "fp": "TestPoint:TestPoint_Pad_D1.5mm",
       "nets": {
         "1": "GND"
@@ -178,14 +205,14 @@
       "angle": 0,
       "side": "B",
       "mpn": "PCB pad",
-      "status": "logical only; daughterboard connector unresolved",
-      "note": "Not connector pin numbering; verify existing daughterboard, CC, ESD, shield and cable",
+      "status": "test access; J1 is the cable connector",
+      "note": "Test-pad numbering differs from J1 contact numbering",
       "uuid": "5c4d11e9-7de3-5bc3-9e91-09dfb8ced935"
     },
     {
       "ref": "TP3",
       "lib": "Connector:TestPoint",
-      "value": "USB_DM / USB LOGICAL",
+      "value": "USB_DM / USB TEST",
       "fp": "TestPoint:TestPoint_Pad_D1.5mm",
       "nets": {
         "1": "USB_DM"
@@ -201,14 +228,14 @@
       "angle": 0,
       "side": "B",
       "mpn": "PCB pad",
-      "status": "logical only; daughterboard connector unresolved",
-      "note": "Not connector pin numbering; verify existing daughterboard, CC, ESD, shield and cable",
+      "status": "test access; J1 is the cable connector",
+      "note": "Test-pad numbering differs from J1 contact numbering",
       "uuid": "3640ca28-b2e7-512b-97a7-1efddabf01a9"
     },
     {
       "ref": "TP4",
       "lib": "Connector:TestPoint",
-      "value": "USB_DP / USB LOGICAL",
+      "value": "USB_DP / USB TEST",
       "fp": "TestPoint:TestPoint_Pad_D1.5mm",
       "nets": {
         "1": "USB_DP"
@@ -224,8 +251,8 @@
       "angle": 0,
       "side": "B",
       "mpn": "PCB pad",
-      "status": "logical only; daughterboard connector unresolved",
-      "note": "Not connector pin numbering; verify existing daughterboard, CC, ESD, shield and cable",
+      "status": "test access; J1 is the cable connector",
+      "note": "Test-pad numbering differs from J1 contact numbering",
       "uuid": "f85d8dc1-6f94-5e5e-b943-f076a6632067"
     },
     {

@@ -30,6 +30,18 @@ Original GH60 downloads are only in ignored `../preliminary/sources/upstream/gh6
 - [QMK RP2040](https://docs.qmk.fm/platformdev_rp2040), [pointing-device driver](https://docs.qmk.fm/features/pointing_device#pmw-3360-and-pmw-3389-sensor): pin-map reference, not a copied firmware or claimed build result.
 - Keyball published interface evidence and restrictions remain in the existing [design document](../preliminary/design.md) and [license comparison](../../docs/alternatives-and-licenses.md). The old Keyball46 connector is **not asserted as the actual sensor's pin order**.
 
+## USB daughterboard evidence
+
+Checked 2026-10-29. These sources establish an electrical design target, not the identity or measured fit of the user's installed daughterboard.
+
+- [Wilba WT60-D at Salvun](https://salvun.com/products/wilba-60-pcb-wt60-d): describes its JST footprint as Unified Daughterboard-compatible and explicitly lists Keycult No.1/60 support after removing USB-C and soldering JST. This is the primary bridge between No.1/60 and the UDB electrical interface.
+- [Keycult WT60-A](https://keycult.com/products/wt60-a-pcb-60) and its official product photograph: a left-edge, outward-facing main-board connector is visible. No exact connector coordinates or cable length are provided. The new `(40.6,112.0)mm` position is independently selected for the ortholinear PCB, not measured from this photograph.
+- [NovelKeys No.1/60 replacement PCB](https://novelkeys.com/products/keycult-no-1-60-pcb): its pictured board differs from the older red WT60-A. No owned-revision identification or pinout guarantee is inferred from the replacement product name.
+- [UDB PCB-side specification](https://github.com/Unified-Daughterboard/UDB-C-Legacy/wiki/PCB-side-design-resources): JST `SM04B-SRSS-TB(LF)(SN)`, 1:1 contact-number cable and identical main-board/daughterboard pinout. This archived specification is used for legacy Wilba/Keycult compatibility, not to propose replacing the installed daughterboard with a newly manufactured C3.
+- [UDB C3 schematic](https://github.com/Unified-Daughterboard/UDB-C-Legacy/blob/2ecdd7e0482ecbd3ffe9af04966ab3555f7fc33c/KiCad/C3/Unified-Daughterboard.sch), commit `2ecdd7e0482ecbd3ffe9af04966ab3555f7fc33c`: J2 maps 1=VCC, 2=DN, 3=DP, 4=GND. Original Git blob `86f8bea12f75fce34009c3bc10643d38e6eaba47`; downloaded bytes SHA-256 `7d150e1e955eca3ec802049248848f61f5315a891d0e1c15e4abd5037f3fe6fb`. Local original is ignored under `../preliminary/sources/upstream/udb-c3/`. The repository is [MIT, copyright 2019 ai03](https://github.com/Unified-Daughterboard/UDB-C-Legacy/blob/2ecdd7e0482ecbd3ffe9af04966ab3555f7fc33c/LICENSE). No source CAD, artwork or layout is redistributed; the new connector uses stock KiCad symbols/footprints and independently authored copper.
+- [JST SH series datasheet](https://www.jst-mfg.com/product/pdf/eng/eSH.pdf), pages 1-3: 1.00mm pitch, side-entry header and mounting-surface pin numbering; `SHR-04V-S` mating housing and nominal 2.9mm header body height. Installed height and cable clearance still require a case model or measurements.
+- C3's CC/ESD/overvoltage/fuse/shield implementation is evidence about **C3 only**. It is not evidence that the unidentified Keycult daughterboard carries those components. The main-board fuse remains, and protection coordination is an open assembly requirement.
+
 ## Maintained tools and stock libraries
 
 - **KiCad 10.0.7** GUI/CLI and its installed Python `pcbnew` binding, Python 3.14.7.

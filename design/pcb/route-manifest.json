@@ -7,9 +7,9 @@
   "stop_passes": 12,
   "note": "v2.0.1 -mp alone does not bound BatchAutorouter; router.stop_pass_no is explicitly supplied. No cloud routing; usage analytics disabled.",
   "input_sha256": {
-    "design/pcb/circuit.json": "d15a07b3b1e5be75c8841378ffb1dc9d3296a014ad2c9b75f0200c8962765d46",
+    "design/pcb/circuit.json": "774f68097271396e3d6f7c53e52c42e91ce3f4294d648f3c3962278fd5afe3b3",
     "design/preliminary/layout.json": "6bd264684ddc415e40bfe91836bab6dd586f9bf93a91918599737024b11e6fcd",
-    "scripts/build_pcb.py": "d868454ac6352be42c5d953172664a745e5bfae435a08379bf567b2e5a466107"
+    "scripts/build_pcb.py": "15a8be7d3936559634b4f2f4179879ee3d7c7eb946862ab8a420ee17e848550e"
   },
-  "ses_sha256": "7aa6007643d3dc829bef74b1c047e819e28436bb8e219e30afa0eae60f439a3f"
+  "ses_sha256": "52dd478463e6c56757271b885f099b57198f6d3d106fd455b2a5bf4db31d764b"
 }

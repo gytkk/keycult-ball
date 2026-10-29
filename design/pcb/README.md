@@ -1,13 +1,13 @@
 # Keycult66 and Keycult63 KiCad designs
 
-**DRAFT B, not for fabrication or assembly.** Both variants use the same RP2040 circuit and stable key references. Open the corresponding project in **KiCad 10.0.7**. The schematic and PCB are native editable CAD.
+**DRAFT C, not for fabrication or assembly.** Both variants use the same RP2040 circuit and stable key references. Open the corresponding project in **KiCad 10.0.7**. The schematic and PCB are native editable CAD.
 
 | Variant | Project | Schematic | PCB | Validation |
 | --- | --- | --- | --- | --- |
 | 66 keys | [keycult66.kicad_pro](keycult66.kicad_pro) | [Schematic](keycult66.kicad_sch) | [PCB](keycult66.kicad_pcb) | [Report](reports/validation.json) |
 | 63 keys | [keycult63.kicad_pro](63/keycult63.kicad_pro) | [Schematic](63/keycult63.kicad_sch) | [PCB](63/keycult63.kicad_pcb) | [Report](63/reports/validation.json) |
 
-Both variants pass strict validation with zero ERC violations, DRC violations, unconnected items and schematic/PCB net mismatches. The reports contain the actual counts and CAD hashes. Static electrical checks do not establish powered operation or case fit. Sensor and daughterboard models remain unknown; their interfaces are deliberately logical pads, pending the user's hardware identification.
+Both variants pass strict validation with zero ERC violations, DRC violations, unconnected items and schematic/PCB net mismatches. The reports contain the actual counts and CAD hashes. Static electrical checks do not establish powered operation or case fit. J1 implements the documented Unified Daughterboard (UDB) electrical interface; the owned Keycult daughterboard revision and stock-cable fit remain unverified. The sensor interface remains logical pads pending hardware identification.
 
 ## Review entry points
 
@@ -56,20 +56,36 @@ unused. Dedicated QSPI, USB and SWD pins do not consume these 30 GPIOs.
 `qmk-config.h.example` is a mapping aid, **not a compiled QMK port**. It does not
 select a sensor revision, flash boot stage, descriptor power or a final keymap.
 
-## Unresolved interfaces are deliberately not invented
+## USB daughterboard interface and compatibility limits
 
-**TP1–TP4 are individually named USB logical testpads, not a four-position JST
-connector or pin-order claim.** No USB-C receptacle/CC network is placed on this
-main board because the existing daughterboard is intended. Its connector,
-polarity, VBUS/GND/shield arrangement, ESD/CC protection, cable and location need
-issue #3 verification. No assumption of completed ESD protection is made.
+**J1 is a JST SM04B-SRSS-TB(LF)(SN), a 4-contact, 1.00mm-pitch side-entry header on B.Cu.** The [Wilba WT60-D product documentation](https://salvun.com/products/wilba-60-pcb-wt60-d) explicitly identifies its JST connection as UDB-compatible and lists Keycult No.1/60 compatibility after removing the on-board USB connector and fitting JST. The [UDB designer specification](https://github.com/Unified-Daughterboard/UDB-C-Legacy/wiki/PCB-side-design-resources) and [pinned C3 schematic](https://github.com/Unified-Daughterboard/UDB-C-Legacy/blob/2ecdd7e0482ecbd3ffe9af04966ab3555f7fc33c/KiCad/C3/Unified-Daughterboard.sch) establish the connector and pinout. This supports the UDB electrical design target; it does not identify the user's uninspected daughterboard as a particular UDB revision.
+
+| J1 contact | Signal | Existing test pad |
+| --- | --- | --- |
+| 1 | VBUS_USB, USB supply before main-board F1 | TP1 |
+| 2 | USB_DM, D- | TP3 |
+| 3 | USB_DP, D+ | TP4 |
+| 4 | GND | TP2 |
+| MP | Mechanical solder anchors, tied to GND locally | Not a cable contact |
+
+Use a **1:1 contact-number cable**, 1-to-1 through 4-to-4. Wire color and apparent left-to-right order are not pin-number evidence. TP1-TP4 retain their earlier numbering and are test access, not the connector's contact order. The validator independently checks J1 against the UDB map, including rejection of reversed power and swapped data contacts.
+
+J1's footprint origin is PCB **(40.6,112.0)mm**, B.Cu, rotation 90 degrees, with its mouth facing keyboard-left. Looking down from the switch side, pad centres are x=42.6mm and y=113.5,112.5,111.5,110.5mm for contacts 1-4. The [official WT60-A photo](https://keycult.com/products/wt60-a-pcb-60) supports a left-edge connector facing outward, but supplies no exact coordinates. Our position is an independent placement between the ortholinear switch/diode footprints, **not a measured WT60-A connector registration**. Stock cable reach, case-channel alignment, mating clearance and the connector's full installed height below the PCB need physical checking. JST specifies a nominal 2.9mm body height; do not infer assembled clearance from the footprint courtyard alone.
+
+J1's data pair runs together on In2.Cu along the left and top margins, referenced to the In1.Cu ground pour, then joins the existing local USB route. VBUS uses a separate 0.4mm feed to the retained main-board fuse. Trace width/gap and cable length still require stackup and signal-integrity review; the route is not impedance-qualified.
+
+No USB-C receptacle or CC resistors are placed on the main board: CC must be handled at the daughterboard's USB-C connector. A UDB C3 schematic has CC and protection components, but **the actual Keycult board's ESD, overvoltage, fuse and shield circuitry has not been established**. Main-board F1 remains fitted; confirm total resistance/drop and protection coordination if the daughterboard also has a fuse. The [current NovelKeys replacement PCB](https://novelkeys.com/products/keycult-no-1-60-pcb) has a different board design from the old WT60-A, so its name alone does not establish the owned interface revision.
+
+Before connection, identify the board/revision, verify all four cable paths with USB power disconnected, and check the actual connector position, cable reach and protection arrangement in issue #3. The electrical interface is implemented; installed compatibility remains conditional on those checks.
+
+## Sensor interface remains unresolved
 
 **TP10–TP17 are MCU-side 3.3V logical/test pads only.** They are not the Keyball
 7-pin connector. There is no 5V sensor feed, no sensor connector and no approved
 5V module-to-RP2040 path. Exact module revision, supply, signal levels and the
 appropriate translator/interface remain open in issue #2. Do not wire these
 pads straight to an unverified sensor. Reset/motion are reserved, not mandatory
-PMW3360 connections. Sensor and USB physical connector routing is not finalized.
+PMW3360 connections. The sensor connector is not finalized; J1's electrical routing is complete but its case and cable fit is provisional.
 
 ## Geometry and construction assumptions
 
@@ -146,7 +162,7 @@ without `--draft` returns nonzero for *any* DRC finding or unconnected item.
 ## Release gates still open
 
 Issues #1–#6 remain the mechanical/interface/bring-up gate. No Gerber fabrication
-release, production BOM, final connector, module-level translator, firmware
+release, production BOM, final sensor connector, module-level translator, firmware
 build, USB/keyboard/sensor bench test or assembly-fit approval is supplied.
 Read the exact outstanding electrical/route counts in each variant's `reports/validation.json`;
 a zero ERC or a matching netlist is not a manufacturing-ready assertion.

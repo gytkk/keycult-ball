@@ -265,6 +265,12 @@
     )
     (network_out
       (net GND
+        (wire (path B.Cu 2500 426000 -1105000 426000 -1085000) (type protect))
+        (via "Via[0-3]_600:300_um" 426000 -1085000 (type protect))
+        (wire (path B.Cu 2500 387250 -1092000 381000 -1092000) (type protect))
+        (via "Via[0-3]_600:300_um" 381000 -1092000 (type protect))
+        (wire (path B.Cu 2500 387250 -1148000 381000 -1148000) (type protect))
+        (via "Via[0-3]_600:300_um" 381000 -1148000 (type protect))
         (wire
           (path B.Cu 1500
             1003620 -708000
@@ -6621,6 +6627,10 @@
         )
       )
       (net USB_DP
+        (wire (path B.Cu 2000 426000 -1115000 438000 -1115000 440000 -1113000 440000 -1106000) (type protect))
+        (wire (path In2.Cu 2000 440000 -1106000 390000 -1106000 390000 -536000 1171000 -536000 1171000 -545000) (type protect))
+        (via "Via[0-3]_600:300_um" 440000 -1106000 (type protect))
+        (via "Via[0-3]_600:300_um" 1171000 -545000 (type protect))
         (via "Via[0-3]_600:300_um" 1164000 -555000
           (type protect)
         )
@@ -6654,6 +6664,11 @@
         )
       )
       (net VBUS_USB
+        (wire (path B.Cu 4000 426000 -1135000 445000 -1135000) (type protect))
+        (wire (path F.Cu 4000 445000 -1135000 402000 -1135000 402000 -550000 688000 -550000) (type protect))
+        (wire (path B.Cu 4000 688000 -550000 688000 -538000) (type protect))
+        (via "Via[0-3]_600:300_um" 445000 -1135000 (type protect))
+        (via "Via[0-3]_600:300_um" 688000 -550000 (type protect))
         (wire
           (path B.Cu 1500
             708625 -680000
@@ -6697,6 +6712,10 @@
         )
       )
       (net USB_DM
+        (wire (path B.Cu 2000 426000 -1125000 450000 -1125000 450000 -1098000 448000 -1096000) (type protect))
+        (wire (path In2.Cu 2000 448000 -1096000 394000 -1096000 394000 -540000 1139000 -540000 1139000 -545000) (type protect))
+        (via "Via[0-3]_600:300_um" 448000 -1096000 (type protect))
+        (via "Via[0-3]_600:300_um" 1139000 -545000 (type protect))
         (via "Via[0-3]_600:300_um" 1148000 -545000
           (type protect)
         )

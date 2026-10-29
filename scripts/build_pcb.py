@@ -89,9 +89,10 @@ for p in pins('MCU_RaspberryPi:RP2040'):
 part('U1','MCU_RaspberryPi:RP2040','RP2040','Package_DFN_QFN:QFN-56-1EP_7x7mm_P0.4mm_EP3.2x3.2mm',u1,(100.33,106.68),(180,68.5),mpn='RP2040',note='Direct mounted QFN; exposed pad to GND; unused GP25/27/28/29 NC')
 part('U2','Memory_Flash:W25Q16JVSS','W25Q16JVSSIQ','Package_SO:SOIC-8_5.3x5.3mm_P1.27mm',{1:'QSPI_SS',2:'QSPI_SD1',3:'QSPI_SD2',4:'GND',5:'QSPI_SD0',6:'QSPI_SCLK_FLASH',7:'QSPI_SD3',8:'+3V3'},(215.9,83.82),(194.5,68.5),mpn='W25Q16JVSSIQ',note='208 mil SOIC, NOT 150mil package; QMK RP2040 flash boot stage must match')
 part('U3','Regulator_Linear:AP2112K-3.3','AP2112K-3.3TRG1','Package_TO_SOT_SMD:SOT-23-5',{1:'VBUS_FUSED',2:'GND',3:'VBUS_FUSED',4:None,5:'+3V3'},(330.2,73.66),(158,68.5),mpn='AP2112K-3.3TRG1',note='600mA part rating is NOT USB budget; 5V->3V3 thermal/load budget unresolved')
-# Physical USB connection is four individually labelled pads, never a fabricated JST pin order.
+# UDB pin numbers are connector contacts, independent of the legacy test-pad numbering.
+part('J1','Connector_Generic_MountingPin:Conn_01x04_MountingPin','USB / UDB JST-SH','Connector_JST:JST_SH_SM04B-SRSS-TB_1x04-1MP_P1.00mm_Horizontal',{1:'VBUS_USB',2:'USB_DM',3:'USB_DP',4:'GND','MP':'GND'},(375.92,91.44),(116.8,112),angle=90,mpn='JST SM04B-SRSS-TB(LF)(SN)',status='UDB electrical pinout; stock cable fit unverified',note='1 VBUS, 2 D-, 3 D+, 4 GND; 1:1 JST-SH cable. Left-edge placement is provisional, not measured WT60-A registration; confirm owned daughterboard revision and CC/ESD protection')
 for i,(net,x) in enumerate([('VBUS_USB',145),('GND',148),('USB_DM',151),('USB_DP',154)],1):
-    part(f'TP{i}','Connector:TestPoint',net+' / USB LOGICAL','TestPoint:TestPoint_Pad_D1.5mm',{1:net},(300.99+17.78*i,111.76),(x,56),mpn='PCB pad',status='logical only; daughterboard connector unresolved',note='Not connector pin numbering; verify existing daughterboard, CC, ESD, shield and cable')
+    part(f'TP{i}','Connector:TestPoint',net+' / USB TEST','TestPoint:TestPoint_Pad_D1.5mm',{1:net},(300.99+17.78*i,111.76),(x,56),mpn='PCB pad',status='test access; J1 is the cable connector',note='Test-pad numbering differs from J1 contact numbering')
 part('F1','Device:Polyfuse','500mA hold / provisional','Fuse:Fuse_0805_2012Metric',{1:'VBUS_USB',2:'VBUS_FUSED'},(300.99,139.7),(148,68),mpn='Bourns MF-PSMF050X-2',note='USB total load/inrush and daughterboard protection need verification')
 cap('C1','1uF','VBUS_FUSED',(325.12,139.7),(153,68.5),fp='Capacitor_SMD:C_0603_1608Metric')
 cap('C2','1uF','+3V3',(350.52,139.7),(162,68.5),fp='Capacitor_SMD:C_0603_1608Metric')
@@ -172,7 +173,7 @@ for p in parts:
 
 # Embed the stock symbols so the native schematic is self-contained.
 rootuuid=uid('schematic')
-sch=[S('kicad_sch'),node('version',20250114),node('generator','eeschema'),node('uuid',rootuuid),node('paper','A1'),node('title_block',node('title',f'Keycult{args.keys} / electrical review draft'),node('date','2026-10-29'),node('rev','DRAFT-B'),node('comment',1,'NOT FOR FABRICATION - sensor and daughterboard interfaces provisional')),node('lib_symbols',*SYMS.values())]
+sch=[S('kicad_sch'),node('version',20250114),node('generator','eeschema'),node('uuid',rootuuid),node('paper','A1'),node('title_block',node('title',f'Keycult{args.keys} / electrical review draft'),node('date','2026-10-29'),node('rev','DRAFT-C'),node('comment',1,'NOT FOR FABRICATION - sensor and physical cable fit provisional')),node('lib_symbols',*SYMS.values())]
 def effect(size=1.27,just=None,hide=False):
     a=node('effects',node('font',node('size',size,size)))
     if just:a.append(node('justify',S(just)))
@@ -212,13 +213,13 @@ for i,k in indexed_keys:
   sch.append(node('wire',node('pts',node('xy',round(a[0],4),round(a[1],4)),node('xy',round(b[0],4),round(b[1],4))),node('stroke',node('width',0),node('type',S('default'))),node('uuid',uid('series'+str(i)+'_'+str(j)))))
  sch.append(node('global_label','K_'+k['id'],node('shape',S('input')),node('at',round(x+12.7,4),round(y,4),0),effect(.9,'left'),node('uuid',uid('series-label'+str(i)))))
 for text,x,y,size in [
- ('1 / RP2040 + FLASH + BOOT + RESET',25.4,25.4,3),('2 / USB LOGICAL INPUT + 3V3 POWER',292.1,25.4,3),
+ ('1 / RP2040 + FLASH + BOOT + RESET',25.4,25.4,3),('2 / USB DAUGHTERBOARD + 3V3 POWER',292.1,25.4,3),
  ('3 / CLOCK + SENSOR MCU-SIDE ONLY',492.76,25.4,3),
  ('No module connector or 5V sensor connection. Verify revision and level translation before connection.',551.18,190.5,1.5),
  ('DECOUPLING: individual IOVDD / USB / ADC / DVDD pins; VREG 1uF input + output',25.4,195.58,1.5),
  ('4 / 5 ROW x 15 COLUMN MATRIX: COL -> switch -> diode ANODE -> CATHODE -> ROW (COL2ROW)',25.4,284.48,2.2),
  (f'{args.keys} keys; stable references from preferred.keys. Central reservation is NOT A HOLE.',25.4,294.64,1.5),
- ('DRAFT: USB pads are individual logical nets, not JST pin order. CC/ESD/shield on existing daughterboard unverified.',292.1,45.72,1.3)]:
+ ('J1: UDB 1=VBUS 2=D- 3=D+ 4=GND; 1:1 cable. Owned daughterboard revision, CC/ESD and cable fit unverified.',292.1,45.72,1.3)]:
  sch.append(node('text',text,node('at',x,y,0),effect(size,'left'),node('uuid',uid('text'+text))))
 (OUT/(NAME+'.kicad_sch')).write_text(txt(sch)+'\n')
 
@@ -331,7 +332,7 @@ for x,y in [(38,53.2),(322,53.2),(322,146.8),(38,146.8)]:g.Outline().Append(mm(x
 board.Add(g)
 # Local ground and support routing are performed by the detailed router.
 # Board notes are on fabrication/documentation layers, not over copper/silkscreen.
-for text0,xy0,size in [(f'DRAFT B / {args.keys} KEYS - NOT FOR FABRICATION',(180,150),1.5),('RESERVED / NO CUTOUT',(180,100),1),('USB LOGICAL PADS - PINOUT TBD',(74,50),1),('SENSOR 3V3 LOGIC ONLY / NO MODULE CONNECTOR',(98,98),.9)]:
+for text0,xy0,size in [(f'DRAFT C / {args.keys} KEYS - NOT FOR FABRICATION',(180,150),1.5),('RESERVED / NO CUTOUT',(180,100),1),('J1 UDB: 1 VBUS / 2 D- / 3 D+ / 4 GND; CABLE FIT TBD',(85,50),.8),('SENSOR 3V3 LOGIC ONLY / NO MODULE CONNECTOR',(98,98),.9)]:
  t=pcb.PCB_TEXT(board);t.SetText(text0);t.SetPosition(pt(*xy0));t.SetTextSize(pt(size,size));t.SetTextThickness(mm(.15));t.SetLayer(pcb.Dwgs_User);board.Add(t)
 for i,k in indexed_keys:
  t=pcb.PCB_TEXT(board);t.SetText(k['id']);t.SetPosition(pt(180+k['x_mm'],100+k['y_mm']+8.2));t.SetTextSize(pt(.8,.8));t.SetTextThickness(mm(.12));t.SetLayer(pcb.F_SilkS);board.Add(t)

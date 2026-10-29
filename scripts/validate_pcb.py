@@ -26,6 +26,8 @@ def circuit_net_matches(expected,actual,ref,pin,net_pad_count):
  return actual==expected.replace('/','{slash}')
 def reservation_matches(shape,reservation):
  return shape.is_valid and shape.hausdorff_distance(reservation)<=1e-5 and shape.symmetric_difference(reservation).area<1e-3
+def usb_connector_matches(pad_nets):
+ return pad_nets=={'1':'VBUS_USB','2':'USB_DM','3':'USB_DP','4':'GND','MP':'GND'}
 ROOT=Path(__file__).resolve().parents[1]
 parser=argparse.ArgumentParser();parser.add_argument('--draft',action='store_true');parser.add_argument('--keys',type=int,choices=VARIANTS,default=66);args=parser.parse_args()
 D=ROOT/'design/pcb' if args.keys==66 else ROOT/'design/pcb/63'; R=D/'reports'; E=D/'exports'; NAME=f'keycult{args.keys}'
@@ -46,6 +48,12 @@ def xy(p):return (pcb.ToMM(p.x),pcb.ToMM(p.y))
 layout=json.loads((ROOT/'design/preliminary/layout.json').read_text());variant,expected_keepout=VARIANTS[args.keys];keys=indexed_keys(layout,variant)
 circuit=json.loads((D/'circuit.json').read_text());expectedparts={p['ref']:p for p in circuit['parts'] if p['fp']}
 check(set(fps)==set(expectedparts),'Schematic/PCB footprint reference set differs')
+check('J1' in fps,'Missing UDB cable connector')
+if 'J1' in fps:
+ j=fps['J1']
+ check(usb_connector_matches({p.GetNumber():p.GetNetname() for p in j.Pads()}),'J1 differs from the UDB contact pinout')
+ check(j.GetFPID().GetLibItemName()=='JST_SH_SM04B-SRSS-TB_1x04-1MP_P1.00mm_Horizontal','Wrong J1 connector footprint')
+ check(j.GetLayer()==pcb.B_Cu and abs(j.GetOrientationDegrees()-90)<.00001,'J1 must face the left edge from the bottom side')
 check(circuit['key_count']==args.keys and circuit['layout_variant']==variant,'Circuit layout variant differs from selected key count')
 check(len(keys)==args.keys and len(layout[variant]['keys'])==args.keys,'Unexpected layout key count')
 check([k for _,k in keys]==layout[variant]['keys'],'Variant must preserve baseline key coordinates and order')

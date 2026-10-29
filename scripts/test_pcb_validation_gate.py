@@ -12,7 +12,7 @@ from shapely.geometry import box
 
 SOURCE = Path(__file__).with_name("validate_pcb.py")
 GATE = compile(ast.Module(body=[ast.parse(SOURCE.read_text()).body[-1]], type_ignores=[]), str(SOURCE), "exec")
-VARIANT_CODE = compile(ast.Module(body=[node for node in ast.parse(SOURCE.read_text()).body if (isinstance(node, ast.FunctionDef) and node.name in {'indexed_keys', 'circuit_net_matches', 'reservation_matches'}) or (isinstance(node, ast.Assign) and any(isinstance(target, ast.Name) and target.id == 'VARIANTS' for target in node.targets))], type_ignores=[]), str(SOURCE), "exec")
+VARIANT_CODE = compile(ast.Module(body=[node for node in ast.parse(SOURCE.read_text()).body if (isinstance(node, ast.FunctionDef) and node.name in {'indexed_keys', 'circuit_net_matches', 'reservation_matches', 'usb_connector_matches'}) or (isinstance(node, ast.Assign) and any(isinstance(target, ast.Name) and target.id == 'VARIANTS' for target in node.targets))], type_ignores=[]), str(SOURCE), "exec")
 
 class DraftGateTests(unittest.TestCase):
     def result(self, draft=True, errs=None, viol=None, unconn=None):
@@ -75,6 +75,13 @@ class VariantTests(unittest.TestCase):
             self.assertFalse(matches(None, net, 'U1', '37', 1))
         self.assertTrue(matches('QSPI_SD0', 'QSPI_SD0', 'U1', '53', 2))
         self.assertFalse(matches('QSPI_SD0', 'GND', 'U1', '53', 2))
+
+    def test_usb_connector_rejects_reversed_cable_and_testpad_numbering(self):
+        matches = self.namespace['usb_connector_matches']
+        self.assertTrue(matches({'1':'VBUS_USB','2':'USB_DM','3':'USB_DP','4':'GND','MP':'GND'}))
+        self.assertFalse(matches({'1':'GND','2':'USB_DP','3':'USB_DM','4':'VBUS_USB','MP':'GND'}))
+        self.assertFalse(matches({'1':'VBUS_USB','2':'GND','3':'USB_DM','4':'USB_DP','MP':'GND'}))
+        self.assertFalse(matches({'1':'VBUS_USB','2':'USB_DP','3':'USB_DM','4':'GND','MP':'GND'}))
 
     def test_reservation_accepts_native_rounding_but_rejects_geometry_changes(self):
         matches = self.namespace['reservation_matches']

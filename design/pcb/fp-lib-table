@@ -2,6 +2,7 @@
   (lib (name "Button_Switch_Keyboard")(type "KiCad")(uri "${KICAD10_FOOTPRINT_DIR}/Button_Switch_Keyboard.pretty")(options "")(descr "KiCad stock"))
   (lib (name "Button_Switch_SMD")(type "KiCad")(uri "${KICAD10_FOOTPRINT_DIR}/Button_Switch_SMD.pretty")(options "")(descr "KiCad stock"))
   (lib (name "Capacitor_SMD")(type "KiCad")(uri "${KICAD10_FOOTPRINT_DIR}/Capacitor_SMD.pretty")(options "")(descr "KiCad stock"))
+  (lib (name "Connector_JST")(type "KiCad")(uri "${KICAD10_FOOTPRINT_DIR}/Connector_JST.pretty")(options "")(descr "KiCad stock"))
   (lib (name "Crystal")(type "KiCad")(uri "${KICAD10_FOOTPRINT_DIR}/Crystal.pretty")(options "")(descr "KiCad stock"))
   (lib (name "Diode_SMD")(type "KiCad")(uri "${KICAD10_FOOTPRINT_DIR}/Diode_SMD.pretty")(options "")(descr "KiCad stock"))
   (lib (name "Fuse")(type "KiCad")(uri "${KICAD10_FOOTPRINT_DIR}/Fuse.pretty")(options "")(descr "KiCad stock"))

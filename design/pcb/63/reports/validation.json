@@ -26,28 +26,28 @@
   ],
   "switch_count": 63,
   "diode_count": 63,
-  "footprint_count": 175,
+  "footprint_count": 176,
   "net_count": 117,
-  "track_segment_count": 1495,
-  "via_count": 195,
+  "track_segment_count": 1517,
+  "via_count": 204,
   "signal_tracks_on_ground_layer": 3,
   "keepout_intersections": [],
   "structural_errors": [],
   "native_export_readback": {
     "exports/back.svg": {
-      "bytes": 313715,
+      "bytes": 320335,
       "viewBox": "0.0000 0.0000 284.9880 94.5896"
     },
     "exports/front.svg": {
-      "bytes": 273551,
+      "bytes": 277563,
       "viewBox": "0.0000 0.0000 284.9880 94.5896"
     },
     "exports/ground.svg": {
-      "bytes": 532426,
+      "bytes": 539415,
       "viewBox": "0.0000 0.0000 284.9880 94.5896"
     },
     "exports/schematic/keycult63.svg": {
-      "bytes": 2873226,
+      "bytes": 2851649,
       "viewBox": "0.0000 0.0000 840.9940 594.0044"
     },
     "exports/schematic.pdf": {
@@ -204,8 +204,8 @@
   ],
   "artifact_sha256": {
     "keycult63.kicad_pro": "c64d43d8b73b37dfb5345a0bfcf29b1eca4dbb680a411a42d424b766912ba33a",
-    "keycult63.kicad_sch": "b7c6174499e32042b18928fbac0fe9133cbbc8b9c966474a2e90bd3ff718a37f",
-    "keycult63.kicad_pcb": "c6f2cf2b930aa431e30216161e33f6ae8b17565fb3edbd95a1f3b11d1fedd1b2"
+    "keycult63.kicad_sch": "3f44e2f7ac2a77893b41a766297a59c412440e09c8c91e6580ee1cc0c60dca59",
+    "keycult63.kicad_pcb": "68f5143cdafb6b96e6978d5c171766b9037fe32001fe21b8bd8596947846cddb"
   },
   "ground_layer_tracks_by_net": {
     "COL12": 3,
