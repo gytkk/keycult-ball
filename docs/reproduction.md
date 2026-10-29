@@ -72,6 +72,21 @@ ezdxf 1.4.3와 Shapely 2.1.2를 사용한다. 로컬 ZIP 및 내부 DXF의 고�
 현재 스크립트는 원본 CAD 측정 전체를 자동화하는 범용 CAD 파이프라인은 아니다. 이후 공식 STEP+실물 홀더를 FreeCAD에서 합쳐 높이와 체결부를 검토한다.
 
 
-## KiCad 66키 회로·PCB 초안
+## KiCad 66키·63키 회로·PCB 초안
 
-[PCB 재현 안내](../design/pcb/README.md#reproduction)를 별도로 따른다. 기존 예비 도면을 다시 생성할 필요는 없다. 설치된 KiCad 10.0.7의 Python 바인딩은 Python 3.14를 사용하며, 회로도·PCB 생성, 저장된 배선 재적용, 실제 ERC/DRC·netlist·좌표·SVG/PDF 검증을 제공한다. `--draft`는 미배선 수를 명시적으로 보고하는 검토 모드이며 제조 검증 통과를 뜻하지 않는다. 현재 초안은 57개 미연결 항목(27개 net)이 남아 있어 strict native DRC는 종료 코드 5를 반환한다.
+[PCB 재현 안내](../design/pcb/README.md#reproduction)를 별도로 따른다. 기존 예비 키 좌표는 변경하지 않았으므로 예비 도면 생성기나 PNG/PDF 렌더를 다시 실행할 필요는 없다. 설치된 KiCad 10.0.7의 Python 바인딩은 Python 3.14를 사용한다. 66키 원본은 `design/pcb/keycult66.*`, 63키 원본은 `design/pcb/63/keycult63.*`이며, 각 디렉터리에 BOM·핀맵·배선과 `reports/`, `exports/`를 둔다.
+
+아래 명령은 저장된 배선을 재적용한 뒤 실제 ERC/DRC, netlist, 키 좌표와 예약 영역을 검사하고 SVG/PDF를 내보낸다. 생성기는 현재 CAD를 덮어쓰므로 수동 편집을 보존한 뒤 실행한다. `--keys`를 생략하면 66키를 선택한다.
+
+```bash
+uv run --python "$(command -v python3)" scripts/build_pcb.py --keys 66
+uv run --python "$(command -v python3)" scripts/route_pcb.py --keys 66 --import-saved
+uv run --python "$(command -v python3)" scripts/validate_pcb.py --keys 66
+uv run --python "$(command -v python3)" scripts/build_pcb.py --keys 63
+uv run --python "$(command -v python3)" scripts/route_pcb.py --keys 63 --import-saved
+uv run --python "$(command -v python3)" scripts/validate_pcb.py --keys 63
+```
+
+회로나 배열을 변경하면 저장된 배선의 입력 해시가 일치하지 않으므로 `--import-saved` 대신 `--route`로 다시 배선한다.
+
+검증은 기본적으로 미배선이나 DRC 위반이 있으면 실패한다. `--draft`는 미배선만 허용하고 실제 수를 보고하는 검토 모드이며, 기하 DRC 위반은 그대로 실패한다. 검사 상태는 [66키 보고서](../design/pcb/reports/validation.json)와 [63키 보고서](../design/pcb/63/reports/validation.json)를 기준으로 하며 제조 승인으로 해석하지 않는다. KiCad 없이 실행하는 검사 회귀 테스트는 `uv run scripts/test_pcb_validation_gate.py`다.

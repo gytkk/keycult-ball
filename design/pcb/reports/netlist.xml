@@ -2,14 +2,14 @@
 <export version="E">
   <design>
     <source>/home/gytkk/development/keycult-ball/design/pcb/keycult66.kicad_sch</source>
-    <date>2026-10-29T20:33:54</date>
+    <date>2026-10-29T22:18:00</date>
     <tool>Eeschema 10.0.7</tool>
     <textvar name="STATUS">DRAFT_NOT_FOR_FABRICATION</textvar>
     <sheet number="1" name="/" tstamps="/">
       <title_block>
         <title>Keycult66 / electrical review draft</title>
         <company/>
-        <rev>DRAFT-A</rev>
+        <rev>DRAFT-B</rev>
         <date>2026-10-29</date>
         <source>keycult66.kicad_sch</source>
         <comment number="1" value="NOT FOR FABRICATION - sensor and daughterboard interfaces provisional"/>
@@ -2019,9 +2019,9 @@
     </comp>
     <comp ref="F1">
       <value>500mA hold / provisional</value>
-      <footprint>Fuse:Fuse_1206_3216Metric</footprint>
+      <footprint>Fuse:Fuse_0805_2012Metric</footprint>
       <fields>
-        <field name="Footprint">Fuse:Fuse_1206_3216Metric</field>
+        <field name="Footprint">Fuse:Fuse_0805_2012Metric</field>
         <field name="Datasheet"/>
         <field name="Description"/>
       </fields>

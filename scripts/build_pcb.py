@@ -8,7 +8,7 @@ This deliberately small project generator is not a general CAD/routing engine.
 Native CAD is editable; regeneration overwrites the seed. See design/pcb/README.md.
 """
 from pathlib import Path
-import copy, csv, json, math, os, sys, uuid, subprocess
+import argparse, copy, csv, json, math, os, sys, uuid, subprocess
 import xml.etree.ElementTree as ET
 import sexpdata as sx
 from kicad_runtime import configure
@@ -16,11 +16,14 @@ configure()
 import pcbnew as pcb
 
 ROOT = Path(__file__).resolve().parents[1]
-OUT = ROOT / 'design/pcb'
+parser=argparse.ArgumentParser()
+parser.add_argument('--keys',type=int,choices=(66,63),default=66)
+args=parser.parse_args()
+OUT = ROOT / 'design/pcb' / ('63' if args.keys==63 else '')
 OUT.mkdir(parents=True,exist_ok=True)
 (OUT/'reports').mkdir(exist_ok=True)
 (ROOT/'.cache/pcb-tools').mkdir(parents=True,exist_ok=True)
-NAME = 'keycult66'
+NAME = f'keycult{args.keys}'
 S = sx.Symbol
 NAMESPACE = uuid.UUID('407a7896-387e-451d-87c9-48af58dcf00c')
 def uid(s): return str(uuid.uuid5(NAMESPACE, s))
@@ -63,7 +66,12 @@ def part(ref,lib,value,fp,nets,sch,pos=None,angle=0,side='B',mpn='',status='prov
 RFP='Resistor_SMD:R_0402_1005Metric'; CFP='Capacitor_SMD:C_0402_1005Metric'
 def res(ref,value,nets,sch,pos,angle=0): return part(ref,'Device:R',value,RFP,dict(enumerate(nets,1)),sch,pos,angle,mpn='TBD 0402 1% 50V',note='value fixed; manufacturer not selected')
 def cap(ref,value,net,sch,pos,angle=0,fp=CFP): return part(ref,'Device:C',value,fp,{1:net,2:'GND'},sch,pos,angle,mpn='TBD X7R 10V' if 'p' not in value else 'TBD C0G 50V',note='voltage rating >=10V; capacitance under DC bias to verify')
-keys=json.loads((ROOT/'design/preliminary/layout.json').read_text())['preferred']['keys']
+layout=json.loads((ROOT/'design/preliminary/layout.json').read_text())
+variant='preferred' if args.keys==66 else 'rear_clearance'
+keys=layout[variant]['keys']
+refs={k['id']:i for i,k in enumerate(layout['preferred']['keys'],1)}
+indexed_keys=[(refs[k['id']],k) for k in keys]
+keepout=[155,75,205,125] if args.keys==66 else [151.425,52.7,208.575,128.575]
 ROW_GPIO=[4,5,6,7,8]; COL_GPIO=[9,10,11,12,13,14,15,16,17,18,19,20,21,22,26]
 # Reserve hardware SPI0 GP0/1/2/3 before assigning the twenty matrix pins.
 gpio={0:'SENSOR_MISO_3V3',1:'SENSOR_CS_3V3',2:'SENSOR_SCLK_3V3',3:'SENSOR_MOSI_3V3'}
@@ -84,7 +92,7 @@ part('U3','Regulator_Linear:AP2112K-3.3','AP2112K-3.3TRG1','Package_TO_SOT_SMD:S
 # Physical USB connection is four individually labelled pads, never a fabricated JST pin order.
 for i,(net,x) in enumerate([('VBUS_USB',145),('GND',148),('USB_DM',151),('USB_DP',154)],1):
     part(f'TP{i}','Connector:TestPoint',net+' / USB LOGICAL','TestPoint:TestPoint_Pad_D1.5mm',{1:net},(300.99+17.78*i,111.76),(x,56),mpn='PCB pad',status='logical only; daughterboard connector unresolved',note='Not connector pin numbering; verify existing daughterboard, CC, ESD, shield and cable')
-part('F1','Device:Polyfuse','500mA hold / provisional','Fuse:Fuse_1206_3216Metric',{1:'VBUS_USB',2:'VBUS_FUSED'},(300.99,139.7),(148,68),mpn='Bourns MF-PSMF050X-2',note='USB total load/inrush and daughterboard protection need verification')
+part('F1','Device:Polyfuse','500mA hold / provisional','Fuse:Fuse_0805_2012Metric',{1:'VBUS_USB',2:'VBUS_FUSED'},(300.99,139.7),(148,68),mpn='Bourns MF-PSMF050X-2',note='USB total load/inrush and daughterboard protection need verification')
 cap('C1','1uF','VBUS_FUSED',(325.12,139.7),(153,68.5),fp='Capacitor_SMD:C_0603_1608Metric')
 cap('C2','1uF','+3V3',(350.52,139.7),(162,68.5),fp='Capacitor_SMD:C_0603_1608Metric')
 # One 100nF for each IOVDD group, ADC_AVDD, USB_VDD and each DVDD pin.
@@ -118,7 +126,7 @@ for i,net in enumerate(['SENSOR_MISO_3V3','SENSOR_CS_3V3','SENSOR_SCLK_3V3','SEN
 res('R8','10k',('+3V3','SENSOR_CS_3V3'),(609.6,116.84),(215,68.5))
 for n,net in enumerate(['VBUS_FUSED','GND'],1):
     part(f'#FLG0{n}','power:PWR_FLAG','PWR_FLAG','',{1:net},(365.76+25.4*n,139.7),status='external USB supply assertion; not a fitted component')
-for i,k in enumerate(keys,1):
+for i,k in indexed_keys:
     x,y=180+k['x_mm'],100+k['y_mm']; r,c=k['row'],k['column']; nodekey='K_'+k['id']
     sx0,sy0=27.94+50.8*c,309.88+45.72*r
     part(f'SW{i}','Switch:SW_Push',k['id']+' '+k['label'],'Button_Switch_Keyboard:SW_Cherry_MX_1.00u_PCB',{1:f'COL{c}',2:nodekey},(sx0,sy0),(x+2.54,y-5.08),side='F',mpn='Cherry MX PCB-mount solder; exact variant TBD',note='Stock footprint origin is pin1, NOT stem; stem offset (-2.54,+5.08)mm')
@@ -137,8 +145,9 @@ placements={
  'C16':(168.9,72),'C17':(171,72),'SW67':(208.5,68.5),
  'SW68':(128,68.5),'C2':(161.5,72.5),'U3':(157,68),
  'R8':(221,71.5),'TP5':(132,73),'TP6':(135,73),'TP7':(138,73),'TP8':(141,73),'TP9':(144,73),
- 'D7':(153,73),'D8':(172,58),'D9':(211,73),
+ 'D3':(153-76.2,73),'D4':(172-76.2,58),'D5':(211-76.2,73),'D6':(216-76.2,73.4),
 }
+placements.pop('D10')
 for p in parts:
  if p['ref'] in placements:p['pos']=placements[p['ref']]
  if p['ref']=='U1':p['angle']=90
@@ -146,10 +155,24 @@ for p in parts:
  if p['ref'] in ('C5','C7','C8','C9','C10','C11','C12'):p['angle']=0
  if p['ref'].startswith('TP') and int(p['ref'][2:])>=10:
   p['pos']=(209,78+2.5*(int(p['ref'][2:])-10))
+ # A four-pitch translation preserves switch-hole registration and frees the 63-key rear band.
+ if p['fp'] and not (p['ref'].startswith('D') or (p['ref'].startswith('SW') and int(p['ref'][2:])<=66)):
+  p['pos']=(p['pos'][0]-76.2,p['pos'][1])
+
+# Place decouplers beside the actual rotated power pads, not the schematic pin order.
+local_caps={'C3':(108.6,73.5),'C4':(102.8,74.6),'C5':(98.1,67.7),
+ 'C6':(102.8,64.8),'C7':(106.4,64.8),'C8':(111.5,69.8),
+ 'C9':(108.7,65.6),'C10':(109.4,69.8),'C11':(98.1,69.0),'C12':(109.4,71.0),
+ 'C13':(109.4,67.4),'C14':(110.0,68.6)}
+for p in parts:
+ if p['ref'] in local_caps:
+  p['pos']=local_caps[p['ref']];p['angle']=0
+ if p['ref'] in ('R1','R2'):p['pos']=(114,67.5 if p['ref']=='R1' else 68.7)
+ if p['ref'] in ('TP3','TP4'):p['pos']=(113.9 if p['ref']=='TP3' else 117.1,54.5)
 
 # Embed the stock symbols so the native schematic is self-contained.
 rootuuid=uid('schematic')
-sch=[S('kicad_sch'),node('version',20250114),node('generator','eeschema'),node('uuid',rootuuid),node('paper','A1'),node('title_block',node('title','Keycult66 / electrical review draft'),node('date','2026-10-29'),node('rev','DRAFT-A'),node('comment',1,'NOT FOR FABRICATION - sensor and daughterboard interfaces provisional')),node('lib_symbols',*SYMS.values())]
+sch=[S('kicad_sch'),node('version',20250114),node('generator','eeschema'),node('uuid',rootuuid),node('paper','A1'),node('title_block',node('title',f'Keycult{args.keys} / electrical review draft'),node('date','2026-10-29'),node('rev','DRAFT-B'),node('comment',1,'NOT FOR FABRICATION - sensor and daughterboard interfaces provisional')),node('lib_symbols',*SYMS.values())]
 def effect(size=1.27,just=None,hide=False):
     a=node('effects',node('font',node('size',size,size)))
     if just:a.append(node('justify',S(just)))
@@ -182,7 +205,7 @@ for p in parts:
         la=90 if dx==0 else 0
         sch.append(node('global_label',net,node('shape',S('input')),node('at',qx,qy,la),effect(0.9,'right' if (dx<0 or dy>0) else 'left'),node('uuid',uid(p['ref']+'label'+num))))
 # Visible switch-to-diode wires make each key's series current path reviewable.
-for i,k in enumerate(keys,1):
+for i,k in indexed_keys:
  x,y=27.94+50.8*k['column'],309.88+45.72*k['row']
  ps=[(x+5.08,y),(x+12.7,y),(x+12.7,y+15.24),(x+3.81,y+15.24)]
  for j,(a,b) in enumerate(zip(ps,ps[1:])):
@@ -194,7 +217,7 @@ for text,x,y,size in [
  ('No module connector or 5V sensor connection. Verify revision and level translation before connection.',551.18,190.5,1.5),
  ('DECOUPLING: individual IOVDD / USB / ADC / DVDD pins; VREG 1uF input + output',25.4,195.58,1.5),
  ('4 / 5 ROW x 15 COLUMN MATRIX: COL -> switch -> diode ANODE -> CATHODE -> ROW (COL2ROW)',25.4,284.48,2.2),
- ('66 keys; IDs from preferred.keys; missing r1..3 c6..8 are intentional. Central 50x50mm is RESERVED, NOT A HOLE.',25.4,294.64,1.5),
+ (f'{args.keys} keys; stable references from preferred.keys. Central reservation is NOT A HOLE.',25.4,294.64,1.5),
  ('DRAFT: USB pads are individual logical nets, not JST pin order. CC/ESD/shield on existing daughterboard unverified.',292.1,45.72,1.3)]:
  sch.append(node('text',text,node('at',x,y,0),effect(size,'left'),node('uuid',uid('text'+text))))
 (OUT/(NAME+'.kicad_sch')).write_text(txt(sch)+'\n')
@@ -233,7 +256,8 @@ for a,b in [((180-W/2,100-H/2),(180+W/2,100-H/2)),((180+W/2,100-H/2),(180+W/2,10
  s=pcb.PCB_SHAPE();s.SetShape(pcb.SHAPE_T_SEGMENT);s.SetStart(pt(*a));s.SetEnd(pt(*b));s.SetLayer(pcb.Edge_Cuts);s.SetWidth(mm(.05));board.Add(s)
 zone=pcb.ZONE(board);zone.SetIsRuleArea(True);zone.SetLayerSet(pcb.LSET.AllCuMask());zone.SetDoNotAllowTracks(True);zone.SetDoNotAllowVias(True);zone.SetDoNotAllowPads(True);zone.SetDoNotAllowZoneFills(True);zone.SetDoNotAllowFootprints(True)
 zone.Outline().NewOutline()
-for x,y in [(155,75),(205,75),(205,125),(155,125)]:zone.Outline().Append(mm(x),mm(y))
+left,top,right,bottom=keepout
+for x,y in [(left,top),(right,top),(right,bottom),(left,bottom)]:zone.Outline().Append(mm(x),mm(y))
 board.Add(zone)
 
 def xy(p):return (pcb.ToMM(p.x),pcb.ToMM(p.y))
@@ -244,11 +268,46 @@ def track(net,points,layer=pcb.F_Cu,width=.25):
   t=pcb.PCB_TRACK(board);t.SetStart(pt(*a));t.SetEnd(pt(*b));t.SetWidth(mm(width));t.SetLayer(layer);t.SetNet(nets[net]);board.Add(t)
 def via(net,xy0):
  v=pcb.PCB_VIA(board);v.SetPosition(pt(*xy0));v.SetWidth(mm(.6));v.SetDrill(mm(.3));v.SetViaType(pcb.VIATYPE_THROUGH);v.SetLayerPair(pcb.F_Cu,pcb.B_Cu);v.SetNet(nets[net]);board.Add(v)
+# Explicit ground fan-out connects bottom SMT pads to the inner reference plane.
+ground_offsets={'C10':(.42,.5),'C12':(.82,.1),'C11':(.42,.6),'C16':(0,.8),'U1':(-.9625,0),
+ 'U2':(-.9,0),'U3':(-.8,0),'TP2':(1.1,0),'Y1':(0,.9)}
+for ref,f in fps.items():
+ for p in f.Pads():
+  if p.GetNetname()!='GND':continue
+  a=xy(p.GetPosition())
+  if ref=='U1' and p.GetNumber()=='57':via('GND',a);continue
+  dx,dy=ground_offsets.get(ref,(.72,0))
+  if ref=='C15':dx,dy=0,-.72
+  if ref=='Y1':dx,dy=(.85 if p.GetNumber()=='2' else -1),0
+  if ref.startswith('SW'):dx,dy=0,-1.1
+  b=(a[0]+dx,a[1]+dy);track('GND',[a,b],pcb.B_Cu,.15 if ref=='U1' else .25);via('GND',b)
+# Keep USB paired on F.Cu above the uninterrupted In1.Cu reference; impedance needs a final stackup.
+for net,ref,pts in [
+ ('USB_DM','R1',[(114.51,67.5),(115.4,67.5)]),
+ ('USB_DP','R2',[(114.51,68.7),(116.4,68.7)]),
+ ('USB_DM','TP3',[(113.9,54.5),(114.8,54.5)]),
+ ('USB_DP','TP4',[(117.1,54.5),(116.4,55.5)])]:
+ track(net,pts,pcb.B_Cu,.2);via(net,pts[-1])
+track('USB_DM',[(114.8,54.5),(114.8,56.1),(115.4,56.7),(115.4,67.5)],pcb.F_Cu,.2)
+track('USB_DP',[(116.4,55.5),(116.4,56.1),(115.8,56.7),(115.8,66.3),(116.4,66.9),(116.4,68.7)],pcb.F_Cu,.2)
+track('USB_DM_MCU',[xy(pad('U1',46).GetPosition()),(107.8,68.4),(108.2,68),(111.8,68),(112.3,67.5),xy(pad('R1',1).GetPosition())],pcb.B_Cu,.15)
+track('USB_DP_MCU',[xy(pad('U1',47).GetPosition()),(107.8,68.8),(108.2,69.2),(112.99,69.2),xy(pad('R2',1).GetPosition())],pcb.B_Cu,.15)
+track('SWCLK',[xy(pad('U1',24).GetPosition()),(99.65,68.8),(99.4,68.55)],pcb.B_Cu,.15)
+via('SWCLK',(99.4,68.55))
+# Inner-side escape avoids the crowded USB/decoupler corridor outside these QFN pads.
+track('SWDIO',[xy(pad('U1',25).GetPosition()),(101.4,68.4)],pcb.B_Cu,.15)
+via('SWDIO',(101.4,68.4))
+track('+1V1',[xy(pad('U1',45).GetPosition()),(106.2,68)],pcb.B_Cu,.15)
+via('+1V1',(106.2,68))
+track('+1V1',[xy(pad('C14',1).GetPosition()),(108.8,68.6)],pcb.B_Cu,.15)
+via('+1V1',(108.8,68.6))
+track('+1V1',[(106.2,68),(108.2,68),(108.8,68.6)],pcb.F_Cu,.25)
+track('+3V3',[xy(pad('U1',44).GetPosition()),(107.95,67.6),(108.15,67.4),xy(pad('C13',1).GetPosition())],pcb.B_Cu,.15)
 # All switch-diode series links, row buses and per-column trunks are real copper.
 rowends={}; colends={}
-for i,k in enumerate(keys,1):
+for i,k in indexed_keys:
  x,y=180+k['x_mm'],100+k['y_mm'];r,c=k['row'],k['column'];kn='K_'+k['id']
- if r==0 and c in range(5,10):continue
+ if r==0 and c in range(1,6):continue
  a=xy(pad(f'SW{i}',2).GetPosition());b=xy(pad(f'D{i}',2).GetPosition()); cath=xy(pad(f'D{i}',1).GetPosition())
  track(kn,[a,(a[0],y+3.5),(b[0],y+3.5),b],pcb.B_Cu)
  via(f'ROW{r}',(cath[0],y+7.8));track(f'ROW{r}',[cath,(cath[0],y+7.8)],pcb.B_Cu)
@@ -258,12 +317,12 @@ for i,k in enumerate(keys,1):
 for r,pts in rowends.items():
  pts.sort()
  for a,b in zip(pts,pts[1:]):
-  if r in (1,2,3) and a[0]<155 and b[0]>205:
+  if (r==0 and a[0]<145) or (top<a[1]<bottom and a[0]<left and b[0]>right):
    pass # Detailed router bridges the protected centre on available layers.
   else:track(f'ROW{r}',[a,b])
 for c,pts in colends.items():
  pts.sort(key=lambda a:a[1])
- if c in (6,7):
+ if c in (6,7,8):
   pass # Central columns need detours around the keepout; detailed router owns them.
  else:track(f'COL{c}',pts,pcb.B_Cu)
 # Signal ground reference: continuous inner plane outside the centre reservation.
@@ -272,24 +331,23 @@ for x,y in [(38,53.2),(322,53.2),(322,146.8),(38,146.8)]:g.Outline().Append(mm(x
 board.Add(g)
 # Local ground and support routing are performed by the detailed router.
 # Board notes are on fabrication/documentation layers, not over copper/silkscreen.
-for text0,xy0,size in [('DRAFT A - NOT FOR FABRICATION',(180,150),1.5),('50 x 50 RESERVED / NO CUTOUT',(180,100),1),('USB LOGICAL PADS - PINOUT TBD',(150,50),1),('SENSOR 3V3 LOGIC ONLY / NO MODULE CONNECTOR',(241,72),.9)]:
+for text0,xy0,size in [(f'DRAFT B / {args.keys} KEYS - NOT FOR FABRICATION',(180,150),1.5),('RESERVED / NO CUTOUT',(180,100),1),('USB LOGICAL PADS - PINOUT TBD',(74,50),1),('SENSOR 3V3 LOGIC ONLY / NO MODULE CONNECTOR',(98,98),.9)]:
  t=pcb.PCB_TEXT(board);t.SetText(text0);t.SetPosition(pt(*xy0));t.SetTextSize(pt(size,size));t.SetTextThickness(mm(.15));t.SetLayer(pcb.Dwgs_User);board.Add(t)
-for i,k in enumerate(keys,1):
+for i,k in indexed_keys:
  t=pcb.PCB_TEXT(board);t.SetText(k['id']);t.SetPosition(pt(180+k['x_mm'],100+k['y_mm']+8.2));t.SetTextSize(pt(.8,.8));t.SetTextThickness(mm(.12));t.SetLayer(pcb.F_SilkS);board.Add(t)
 board.SetFileName(str(OUT/(NAME+'.kicad_pcb')))
 pcb.SaveBoard(str(OUT/(NAME+'.kicad_pcb')),board)
-pcb.ExportSpecctraDSN(board,str(ROOT/'.cache/pcb-tools/seed.dsn'))
 # Explicit review rules: not a claim about a selected fabricator's process or stackup.
 pro={'meta':{'filename':NAME+'.kicad_pro','version':1},'board':{'design_settings':{'rules':{'min_clearance':.15,'min_track_width':.15,'min_via_diameter':.55,'min_through_hole_diameter':.3,'min_hole_clearance':.25,'min_copper_edge_clearance':.25},'rule_severities':{}}},'net_settings':{'classes':[{'name':'Default','clearance':.15,'track_width':.25,'via_diameter':.6,'via_drill':.3,'diff_pair_width':.2,'diff_pair_gap':.15,'diff_pair_via_gap':.25}], 'meta':{'version':4}},'erc':{'erc_exclusions':[],'rule_severities':{}},'schematic':{'drawing':{}},'text_variables':{'STATUS':'DRAFT_NOT_FOR_FABRICATION'}}
 (OUT/(NAME+'.kicad_pro')).write_text(json.dumps(pro,indent=2)+'\n')
 (OUT/'sym-lib-table').write_text('(sym_lib_table\n'+''.join(f'  (lib (name "{lib}")(type "KiCad")(uri "${{KICAD10_SYMBOL_DIR}}/{lib}.kicad_sym")(options "")(descr "KiCad stock"))\n' for lib in sorted({p['lib'].split(':')[0] for p in parts}))+')\n')
 (OUT/'fp-lib-table').write_text('(fp_lib_table\n'+''.join(f'  (lib (name "{lib}")(type "KiCad")(uri "${{KICAD10_FOOTPRINT_DIR}}/{lib}.pretty")(options "")(descr "KiCad stock"))\n' for lib in sorted({p['fp'].split(':')[0] for p in parts if p['fp']}))+')\n')
-(OUT/'circuit.json').write_text(json.dumps({'parts':parts,'rows':ROW_GPIO,'columns':COL_GPIO,'gpio':gpio,'origin_mm':[180,100],'envelope_mm':[W,H],'keepout_mm':[155,75,205,125]},ensure_ascii=False,indent=2)+'\n')
+(OUT/'circuit.json').write_text(json.dumps({'parts':parts,'rows':ROW_GPIO,'columns':COL_GPIO,'gpio':gpio,'origin_mm':[180,100],'envelope_mm':[W,H],'keepout_mm':keepout,'key_count':args.keys,'layout_variant':variant},ensure_ascii=False,indent=2)+'\n')
 with (OUT/'bom.csv').open('w') as f:
- w=csv.writer(f);w.writerow(['Reference','Value','Manufacturer part / candidate','Footprint','Assembly','Status','Notes'])
+ w=csv.writer(f,lineterminator='\n');w.writerow(['Reference','Value','Manufacturer part / candidate','Footprint','Assembly','Status','Notes'])
  for p in parts:
   if p['fp']:w.writerow([p['ref'],p['value'],p['mpn'],p['fp'],'THT solder' if p['side']=='F' else 'Bottom SMT',p['status'],p['note']])
 with (OUT/'gpio-map.csv').open('w') as f:
- w=csv.writer(f);w.writerow(['key_id','label','switch','diode','matrix_row','matrix_col','row_gpio','column_gpio','x_mm','y_mm','diode_direction'])
- for i,k in enumerate(keys,1):w.writerow([k['id'],k['label'],f'SW{i}',f'D{i}',k['row'],k['column'],f'GP{ROW_GPIO[k["row"]]}',f'GP{COL_GPIO[k["column"]]}',k['x_mm'],k['y_mm'],'COL2ROW'])
+ w=csv.writer(f,lineterminator='\n');w.writerow(['key_id','label','switch','diode','matrix_row','matrix_col','row_gpio','column_gpio','x_mm','y_mm','diode_direction'])
+ for i,k in indexed_keys:w.writerow([k['id'],k['label'],f'SW{i}',f'D{i}',k['row'],k['column'],f'GP{ROW_GPIO[k["row"]]}',f'GP{COL_GPIO[k["column"]]}',k['x_mm'],k['y_mm'],'COL2ROW'])
 print(f'Generated {len(parts)} schematic symbols, {len(fps)} footprints, {len(nets)} nets, {len(list(board.GetTracks()))} tracks/vias with KiCad {pcb.GetBuildVersion()}')

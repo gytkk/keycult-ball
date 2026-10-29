@@ -1,41 +1,21 @@
 {
   "status": "reviewable draft; NOT manufacturing approval",
+  "key_count": 66,
+  "layout_variant": "preferred",
+  "keepout_mm": [
+    155,
+    75,
+    205,
+    125
+  ],
   "kicad_version": "10.0.7",
   "erc_count": 0,
   "erc_by_type": {},
   "drc_count": 0,
   "drc_by_type": {},
   "drc_by_severity": {},
-  "unconnected_item_count": 57,
-  "unconnected_nets": [
-    "+1V1",
-    "+3V3",
-    "COL0",
-    "COL1",
-    "COL10",
-    "COL11",
-    "COL12",
-    "COL13",
-    "COL14",
-    "COL4",
-    "COL5",
-    "COL6",
-    "COL9",
-    "GND",
-    "QSPI_SD2",
-    "QSPI_SD3",
-    "ROW1",
-    "ROW2",
-    "ROW3",
-    "ROW4",
-    "SENSOR_CS_3V3",
-    "SENSOR_MISO_3V3",
-    "SENSOR_MOSI_3V3",
-    "SENSOR_SCLK_3V3",
-    "SWCLK",
-    "SWDIO",
-    "XIN"
-  ],
+  "unconnected_item_count": 0,
+  "unconnected_nets": [],
   "schematic_parity_count": 0,
   "independent_netlist_mismatch_count": 0,
   "envelope_bounds_mm": [
@@ -48,26 +28,26 @@
   "diode_count": 66,
   "footprint_count": 181,
   "net_count": 120,
-  "track_segment_count": 824,
-  "via_count": 102,
-  "signal_tracks_on_ground_layer": 0,
+  "track_segment_count": 1360,
+  "via_count": 175,
+  "signal_tracks_on_ground_layer": 3,
   "keepout_intersections": [],
   "structural_errors": [],
   "native_export_readback": {
     "exports/back.svg": {
-      "bytes": 278812,
+      "bytes": 315158,
       "viewBox": "0.0000 0.0000 284.9880 94.5896"
     },
     "exports/front.svg": {
-      "bytes": 271315,
+      "bytes": 281817,
       "viewBox": "0.0000 0.0000 284.9880 94.5896"
     },
     "exports/ground.svg": {
-      "bytes": 504625,
+      "bytes": 536696,
       "viewBox": "0.0000 0.0000 284.9880 94.5896"
     },
     "exports/schematic/keycult66.svg": {
-      "bytes": 2957423,
+      "bytes": 2945058,
       "viewBox": "0.0000 0.0000 840.9940 594.0044"
     },
     "exports/schematic.pdf": {
@@ -223,8 +203,12 @@
     ]
   ],
   "artifact_sha256": {
-    "keycult66.kicad_pro": "e95a4eaf57c1e7d4cb9778cd5b775b4a353739b0b8f5544a6c2fe390f7ce2dbc",
-    "keycult66.kicad_sch": "2d26c0d5f17a4daf1d9a0dfdec16c5205d5a4eee430ae532230e9bcc5e6614d2",
-    "keycult66.kicad_pcb": "c9f63247d3088fbdfb64f60ba32dc9797efd57a80082c60da9b9ce0ce9d8917e"
+    "keycult66.kicad_pro": "4eefed8e33c8618eb3ab3103b09edbda1cd1bfe9d5551950ee791ebb9687abb7",
+    "keycult66.kicad_sch": "c8b073f67fd59fd65cdb65fad937ff555f0c227fb717ccba7773508075fbafe4",
+    "keycult66.kicad_pcb": "490e604f0a850976da04262c5861d50518eda4fdfdf4ea9de66f430a22e192b6"
+  },
+  "ground_layer_tracks_by_net": {
+    "COL12": 3,
+    "+3V3": 3
   }
 }

@@ -1,0 +1,214 @@
+{
+  "status": "reviewable draft; NOT manufacturing approval",
+  "key_count": 63,
+  "layout_variant": "rear_clearance",
+  "keepout_mm": [
+    151.425,
+    52.7,
+    208.575,
+    128.575
+  ],
+  "kicad_version": "10.0.7",
+  "erc_count": 0,
+  "erc_by_type": {},
+  "drc_count": 0,
+  "drc_by_type": {},
+  "drc_by_severity": {},
+  "unconnected_item_count": 0,
+  "unconnected_nets": [],
+  "schematic_parity_count": 0,
+  "independent_netlist_mismatch_count": 0,
+  "envelope_bounds_mm": [
+    37.5,
+    52.7,
+    322.5,
+    147.3
+  ],
+  "switch_count": 63,
+  "diode_count": 63,
+  "footprint_count": 175,
+  "net_count": 117,
+  "track_segment_count": 1495,
+  "via_count": 195,
+  "signal_tracks_on_ground_layer": 3,
+  "keepout_intersections": [],
+  "structural_errors": [],
+  "native_export_readback": {
+    "exports/back.svg": {
+      "bytes": 313715,
+      "viewBox": "0.0000 0.0000 284.9880 94.5896"
+    },
+    "exports/front.svg": {
+      "bytes": 273551,
+      "viewBox": "0.0000 0.0000 284.9880 94.5896"
+    },
+    "exports/ground.svg": {
+      "bytes": 532426,
+      "viewBox": "0.0000 0.0000 284.9880 94.5896"
+    },
+    "exports/schematic/keycult63.svg": {
+      "bytes": 2873226,
+      "viewBox": "0.0000 0.0000 840.9940 594.0044"
+    },
+    "exports/schematic.pdf": {
+      "pages": 1,
+      "page_sizes_pt": [
+        [
+          2383.919921875,
+          1683.7900390625
+        ]
+      ]
+    },
+    "exports/board-layers.pdf": {
+      "pages": 6,
+      "page_sizes_pt": [
+        [
+          841.89599609375,
+          595.2960205078125
+        ],
+        [
+          841.89599609375,
+          595.2960205078125
+        ],
+        [
+          841.89599609375,
+          595.2960205078125
+        ],
+        [
+          841.89599609375,
+          595.2960205078125
+        ],
+        [
+          841.89599609375,
+          595.2960205078125
+        ],
+        [
+          841.89599609375,
+          595.2960205078125
+        ]
+      ]
+    }
+  },
+  "commands": [
+    [
+      "kicad-cli",
+      "sch",
+      "erc",
+      "--format",
+      "json",
+      "--severity-all",
+      "-o",
+      "/home/gytkk/development/keycult-ball/design/pcb/63/reports/erc.json",
+      "/home/gytkk/development/keycult-ball/design/pcb/63/keycult63.kicad_sch"
+    ],
+    [
+      "kicad-cli",
+      "sch",
+      "export",
+      "netlist",
+      "--format",
+      "kicadxml",
+      "-o",
+      "/home/gytkk/development/keycult-ball/design/pcb/63/reports/netlist.xml",
+      "/home/gytkk/development/keycult-ball/design/pcb/63/keycult63.kicad_sch"
+    ],
+    [
+      "kicad-cli",
+      "pcb",
+      "drc",
+      "--schematic-parity",
+      "--refill-zones",
+      "--save-board",
+      "--format",
+      "json",
+      "--severity-all",
+      "-o",
+      "/home/gytkk/development/keycult-ball/design/pcb/63/reports/drc.json",
+      "/home/gytkk/development/keycult-ball/design/pcb/63/keycult63.kicad_pcb"
+    ],
+    [
+      "kicad-cli",
+      "sch",
+      "export",
+      "pdf",
+      "--exclude-pdf-property-popups",
+      "-o",
+      "/home/gytkk/development/keycult-ball/design/pcb/63/exports/schematic.pdf",
+      "/home/gytkk/development/keycult-ball/design/pcb/63/keycult63.kicad_sch"
+    ],
+    [
+      "kicad-cli",
+      "sch",
+      "export",
+      "svg",
+      "-o",
+      "/home/gytkk/development/keycult-ball/design/pcb/63/exports/schematic/",
+      "/home/gytkk/development/keycult-ball/design/pcb/63/keycult63.kicad_sch"
+    ],
+    [
+      "kicad-cli",
+      "pcb",
+      "export",
+      "svg",
+      "--layers",
+      "F.Cu,F.SilkS,Edge.Cuts,Dwgs.User",
+      "--mode-single",
+      "--fit-page-to-board",
+      "--exclude-drawing-sheet",
+      "-o",
+      "/home/gytkk/development/keycult-ball/design/pcb/63/exports/front.svg",
+      "/home/gytkk/development/keycult-ball/design/pcb/63/keycult63.kicad_pcb"
+    ],
+    [
+      "kicad-cli",
+      "pcb",
+      "export",
+      "svg",
+      "--layers",
+      "B.Cu,B.SilkS,Edge.Cuts,Dwgs.User",
+      "--mode-single",
+      "--fit-page-to-board",
+      "--exclude-drawing-sheet",
+      "-o",
+      "/home/gytkk/development/keycult-ball/design/pcb/63/exports/back.svg",
+      "/home/gytkk/development/keycult-ball/design/pcb/63/keycult63.kicad_pcb"
+    ],
+    [
+      "kicad-cli",
+      "pcb",
+      "export",
+      "svg",
+      "--layers",
+      "In1.Cu,Edge.Cuts,Dwgs.User",
+      "--mode-single",
+      "--fit-page-to-board",
+      "--exclude-drawing-sheet",
+      "-o",
+      "/home/gytkk/development/keycult-ball/design/pcb/63/exports/ground.svg",
+      "/home/gytkk/development/keycult-ball/design/pcb/63/keycult63.kicad_pcb"
+    ],
+    [
+      "kicad-cli",
+      "pcb",
+      "export",
+      "pdf",
+      "--layers",
+      "F.Cu,B.Cu,In1.Cu,In2.Cu,Edge.Cuts,Dwgs.User",
+      "--mode-multipage",
+      "--scale",
+      "0",
+      "-o",
+      "/home/gytkk/development/keycult-ball/design/pcb/63/exports/board-layers.pdf",
+      "/home/gytkk/development/keycult-ball/design/pcb/63/keycult63.kicad_pcb"
+    ]
+  ],
+  "artifact_sha256": {
+    "keycult63.kicad_pro": "c64d43d8b73b37dfb5345a0bfcf29b1eca4dbb680a411a42d424b766912ba33a",
+    "keycult63.kicad_sch": "b7c6174499e32042b18928fbac0fe9133cbbc8b9c966474a2e90bd3ff718a37f",
+    "keycult63.kicad_pcb": "c6f2cf2b930aa431e30216161e33f6ae8b17565fb3edbd95a1f3b11d1fedd1b2"
+  },
+  "ground_layer_tracks_by_net": {
+    "COL12": 3,
+    "+3V3": 3
+  }
+}

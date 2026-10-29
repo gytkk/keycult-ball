@@ -1,11 +1,18 @@
+# /// script
+# requires-python = ">=3.11"
+# dependencies = ["shapely==2.1.2"]
+# ///
 """Regression-test the real final validator gate without running KiCad."""
 import ast
+import json
 from pathlib import Path
 from types import SimpleNamespace
 import unittest
+from shapely.geometry import box
 
 SOURCE = Path(__file__).with_name("validate_pcb.py")
 GATE = compile(ast.Module(body=[ast.parse(SOURCE.read_text()).body[-1]], type_ignores=[]), str(SOURCE), "exec")
+VARIANT_CODE = compile(ast.Module(body=[node for node in ast.parse(SOURCE.read_text()).body if (isinstance(node, ast.FunctionDef) and node.name in {'indexed_keys', 'circuit_net_matches', 'reservation_matches'}) or (isinstance(node, ast.Assign) and any(isinstance(target, ast.Name) and target.id == 'VARIANTS' for target in node.targets))], type_ignores=[]), str(SOURCE), "exec")
 
 class DraftGateTests(unittest.TestCase):
     def result(self, draft=True, errs=None, viol=None, unconn=None):
@@ -32,6 +39,50 @@ class DraftGateTests(unittest.TestCase):
     def test_structural_error_always_fails(self):
         for draft in (True, False):
             self.assertEqual(self.result(draft=draft, errs=["net mismatch"]), 1)
+
+class VariantTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.namespace = {}
+        exec(VARIANT_CODE, cls.namespace)
+        cls.layout = json.loads((SOURCE.parents[1] / 'design/preliminary/layout.json').read_text())
+
+    def test_variant_preserves_original_references_and_coordinates(self):
+        for count, (variant, _) in self.namespace['VARIANTS'].items():
+            with self.subTest(keys=count):
+                keys = self.namespace['indexed_keys'](self.layout, variant)
+                self.assertEqual(len(keys), count)
+                self.assertEqual([key for _, key in keys], self.layout[variant]['keys'])
+                self.assertEqual({index for index, _ in keys}, set(range(1, 67)) - ({7, 8, 9} if count == 63 else set()))
+
+    def test_rear_clearance_reservation_is_clipped_to_board(self):
+        self.assertEqual(self.namespace['VARIANTS'][66][1], [155, 75, 205, 125])
+        self.assertEqual(self.namespace['VARIANTS'][63][1], [151.425, 52.7, 208.575, 128.575])
+        x1, y1, x2, y2 = self.namespace['VARIANTS'][63][1]
+        self.assertAlmostEqual(x2 - x1, 57.15)
+        self.assertEqual(y1, 52.7)
+        self.assertAlmostEqual(y2, 100 + 28.575)
+
+    def test_no_connect_requires_own_single_pad_net(self):
+        matches = self.namespace['circuit_net_matches']
+        for ref, pin, net in [('U1', '37', 'unconnected-(U1-GPIO25-Pad37)'), ('U1', '39', 'unconnected-(U1-GPIO27{slash}ADC1-Pad39)'), ('U3', '4', 'unconnected-(U3-NC-Pad4)')]:
+            with self.subTest(ref=ref, pin=pin):
+                self.assertTrue(matches(None, net, ref, pin, 1))
+                self.assertFalse(matches(None, net, ref, pin, 2))
+                self.assertFalse(matches(None, net, 'U99', pin, 1))
+                self.assertFalse(matches(None, net, ref, '99', 1))
+        for net in ('', 'GND', '+3V3'):
+            self.assertFalse(matches(None, net, 'U1', '37', 1))
+        self.assertTrue(matches('QSPI_SD0', 'QSPI_SD0', 'U1', '53', 2))
+        self.assertFalse(matches('QSPI_SD0', 'GND', 'U1', '53', 2))
+
+    def test_reservation_accepts_native_rounding_but_rejects_geometry_changes(self):
+        matches = self.namespace['reservation_matches']
+        reservation = box(151.425, 52.7, 208.575, 128.575)
+        self.assertTrue(matches(box(151.425, 52.7, 208.575, 128.574999), reservation))
+        self.assertFalse(matches(box(151.425, 52.7, 208.575, 128.5749), reservation))
+        self.assertFalse(matches(box(155, 75, 205, 125), reservation))
+        self.assertFalse(matches(reservation.difference(box(170, 90, 190, 110)), reservation))
 
 if __name__ == "__main__":
     unittest.main()

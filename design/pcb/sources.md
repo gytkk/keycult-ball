@@ -26,6 +26,7 @@ Original GH60 downloads are only in ignored `../preliminary/sources/upstream/gh6
 - [RP2040 datasheet](https://datasheets.raspberrypi.com/rp2040/rp2040-datasheet.pdf): pin functions, SPI0 GP0/1/2/3, TESTEN, USB and GPIO electrical limits.
 - [W25Q16JV Rev D](https://www.winbond.com/resource-files/w25q16jv%20spi%20revd%2008122016.pdf): 2.7–3.6V, 16Mbit/2MiB, SPI/QSPI pinout; **SS = 208mil SOIC**, different from SI = 150mil. QE/boot-stage/part-ordering suffix must be checked before firmware/assembly.
 - [AP2112 datasheet](https://www.diodes.com/assets/Datasheets/AP2112.pdf): 3.3V variant, enable tied to input, 1µF ceramic input/output support. Thermal dissipation and USB load remain unresolved system-level checks.
+- [Bourns MF-PSMF datasheet](https://bourns.com/docs/product-datasheets/mf-psmf.pdf): MF-PSMF050X-2 is an 0805 resettable fuse. Both variants use `Fuse_0805_2012Metric`; USB budget and thermal behavior remain to be qualified.
 - [QMK RP2040](https://docs.qmk.fm/platformdev_rp2040), [pointing-device driver](https://docs.qmk.fm/features/pointing_device#pmw-3360-and-pmw-3389-sensor): pin-map reference, not a copied firmware or claimed build result.
 - Keyball published interface evidence and restrictions remain in the existing [design document](../preliminary/design.md) and [license comparison](../../docs/alternatives-and-licenses.md). The old Keyball46 connector is **not asserted as the actual sensor's pin order**.
 
@@ -52,3 +53,5 @@ The exact router artifact checksum and route-snapshot checksums are recorded in
 [route-manifest.json](route-manifest.json). Saved SES files contain only this
 independent design's editable copper connectivity. Hash mismatches must be
 investigated; do not silently replace pinned inputs.
+
+The 63-key route has its own [manifest](63/route-manifest.json). The router wrapper rejects empty/invalid SES output before replacing a saved route and retries up to three times for the v2.0.1 CLI export race: its CLI observes `COMPLETED` before the scheduler has necessarily populated the output bytes. The upstream [CLI](https://github.com/freerouting/freerouting/blob/v2.0.1/src/main/java/app/freerouting/Freerouting.java) and [scheduler](https://github.com/freerouting/freerouting/blob/v2.0.1/src/main/java/app/freerouting/management/RoutingJobScheduler.java) establish this ordering. The tool JAR is unchanged.

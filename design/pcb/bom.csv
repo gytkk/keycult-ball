@@ -6,7 +6,7 @@ TP1,VBUS_USB / USB LOGICAL,PCB pad,TestPoint:TestPoint_Pad_D1.5mm,Bottom SMT,log
 TP2,GND / USB LOGICAL,PCB pad,TestPoint:TestPoint_Pad_D1.5mm,Bottom SMT,logical only; daughterboard connector unresolved,"Not connector pin numbering; verify existing daughterboard, CC, ESD, shield and cable"
 TP3,USB_DM / USB LOGICAL,PCB pad,TestPoint:TestPoint_Pad_D1.5mm,Bottom SMT,logical only; daughterboard connector unresolved,"Not connector pin numbering; verify existing daughterboard, CC, ESD, shield and cable"
 TP4,USB_DP / USB LOGICAL,PCB pad,TestPoint:TestPoint_Pad_D1.5mm,Bottom SMT,logical only; daughterboard connector unresolved,"Not connector pin numbering; verify existing daughterboard, CC, ESD, shield and cable"
-F1,500mA hold / provisional,Bourns MF-PSMF050X-2,Fuse:Fuse_1206_3216Metric,Bottom SMT,provisional sourcing,USB total load/inrush and daughterboard protection need verification
+F1,500mA hold / provisional,Bourns MF-PSMF050X-2,Fuse:Fuse_0805_2012Metric,Bottom SMT,provisional sourcing,USB total load/inrush and daughterboard protection need verification
 C1,1uF,TBD X7R 10V,Capacitor_SMD:C_0603_1608Metric,Bottom SMT,provisional sourcing,voltage rating >=10V; capacitance under DC bias to verify
 C2,1uF,TBD X7R 10V,Capacitor_SMD:C_0603_1608Metric,Bottom SMT,provisional sourcing,voltage rating >=10V; capacitance under DC bias to verify
 C3,100nF,TBD X7R 10V,Capacitor_SMD:C_0402_1005Metric,Bottom SMT,provisional sourcing,voltage rating >=10V; capacitance under DC bias to verify; IOVDD1

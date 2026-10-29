@@ -1,5 +1,6 @@
 {
-  "status": "partial; component height and assembly fit unverified",
+  "status": "historical DRAFT A checks only; revised 66/63 component heights and assembly fit unverified",
+  "current_variants": "DRAFT B uses kicad-small without component 3D libraries; no component/case-fit check has been performed for either revised variant",
   "kicad_version": "10.0.7",
   "attempts": [
     {

@@ -16,8 +16,19 @@ configure()
 import pcbnew as pcb
 from shapely.geometry import box, LineString, Point, Polygon
 import pymupdf
-ROOT=Path(__file__).resolve().parents[1]; D=ROOT/'design/pcb'; R=D/'reports'; E=D/'exports'; NAME='keycult66'
-parser=argparse.ArgumentParser();parser.add_argument('--draft',action='store_true');args=parser.parse_args()
+VARIANTS={66:('preferred',[155,75,205,125]),63:('rear_clearance',[151.425,52.7,208.575,128.575])}
+def indexed_keys(layout,variant):
+ selected={k['id'] for k in layout[variant]['keys']}
+ return [(i,k) for i,k in enumerate(layout['preferred']['keys'],1) if k['id'] in selected]
+def circuit_net_matches(expected,actual,ref,pin,net_pad_count):
+ if expected is None:
+  return actual.startswith(f'unconnected-({ref}-') and actual.endswith(f'-Pad{pin})') and net_pad_count==1
+ return actual==expected.replace('/','{slash}')
+def reservation_matches(shape,reservation):
+ return shape.is_valid and shape.hausdorff_distance(reservation)<=1e-5 and shape.symmetric_difference(reservation).area<1e-3
+ROOT=Path(__file__).resolve().parents[1]
+parser=argparse.ArgumentParser();parser.add_argument('--draft',action='store_true');parser.add_argument('--keys',type=int,choices=VARIANTS,default=66);args=parser.parse_args()
+D=ROOT/'design/pcb' if args.keys==66 else ROOT/'design/pcb/63'; R=D/'reports'; E=D/'exports'; NAME=f'keycult{args.keys}'
 R.mkdir(parents=True,exist_ok=True); E.mkdir(parents=True,exist_ok=True)
 def run(*args):
  command=['kicad-cli',*map(str,args)];r=subprocess.run(command,check=False,capture_output=True,text=True)
@@ -32,29 +43,47 @@ b=pcb.LoadBoard(str(D/(NAME+'.kicad_pcb')));fps={f.GetReference():f for f in b.G
 def check(ok,message):
  if not ok:errs.append(message)
 def xy(p):return (pcb.ToMM(p.x),pcb.ToMM(p.y))
-keys=json.loads((ROOT/'design/preliminary/layout.json').read_text())['preferred']['keys']
+layout=json.loads((ROOT/'design/preliminary/layout.json').read_text());variant,expected_keepout=VARIANTS[args.keys];keys=indexed_keys(layout,variant)
 circuit=json.loads((D/'circuit.json').read_text());expectedparts={p['ref']:p for p in circuit['parts'] if p['fp']}
 check(set(fps)==set(expectedparts),'Schematic/PCB footprint reference set differs')
-check(len(keys)==66,'Expected 66 preferred.keys')
+check(circuit['key_count']==args.keys and circuit['layout_variant']==variant,'Circuit layout variant differs from selected key count')
+check(len(keys)==args.keys and len(layout[variant]['keys'])==args.keys,'Unexpected layout key count')
+check([k for _,k in keys]==layout[variant]['keys'],'Variant must preserve baseline key coordinates and order')
+switch_refs={f'SW{i}' for i,_ in keys};diode_refs={f'D{i}' for i,_ in keys}
+check({ref for ref in fps if ref.startswith('SW') and ref not in {'SW67','SW68'}}==switch_refs,'Wrong matrix switch references')
+check({ref for ref in fps if ref.startswith('D')}==diode_refs,'Wrong matrix diode references')
 coord=[]
-for i,k in enumerate(keys,1):
+for i,k in keys:
+ if f'SW{i}' not in fps or f'D{i}' not in fps:continue
  f=fps[f'SW{i}'];expected=(180+k['x_mm'],100+k['y_mm'])
  # Inspect actual 4mm stem NPTH, not the footprint anchor.
- stem=next(p for p in f.Pads() if not p.GetNumber() and pcb.ToMM(p.GetDrillSize().x)>3.9)
+ stems=[p for p in f.Pads() if not p.GetNumber() and pcb.ToMM(p.GetDrillSize().x)>3.9]
+ check(len(stems)==1,'Expected one stem NPTH '+k['id'])
+ if len(stems)!=1:continue
+ stem=stems[0]
  actual=xy(stem.GetPosition());delta=max(abs(actual[j]-expected[j]) for j in [0,1]);check(delta<.00001,'Stem position '+k['id'])
  check(f.GetValue().startswith(k['id']+' '),'Wrong key ID '+k['id'])
  check(fps[f'D{i}'].GetLayer()==pcb.B_Cu,'Diode not bottom-mounted '+k['id'])
+ for ref,nets in [(f'SW{i}',{'1':f'COL{k["column"]}','2':'K_'+k['id']}),(f'D{i}',{'1':f'ROW{k["row"]}','2':'K_'+k['id']})]:
+  check({p.GetNumber():p.GetNetname() for p in fps[ref].Pads() if p.GetNumber()}==nets,'Wrong matrix pad nets '+ref)
  coord.append({'id':k['id'],'switch':f'SW{i}','expected_stem_mm':expected,'actual_stem_mm':actual,'error_mm':delta})
 netroot=ET.parse(R/'netlist.xml').getroot()
 schnet={(n.attrib['ref'],n.attrib['pin']):net.attrib['name'].replace('/','{slash}') for net in netroot.find('nets') for n in net.findall('node')}
 netdiff=[]
+net_pad_counts=Counter(p.GetNetname() for f in fps.values() for p in f.Pads() if p.GetNumber())
 for ref,f in fps.items():
+ if ref in expectedparts:
+  check({p.GetNumber() for p in f.Pads() if p.GetNumber()}==set(expectedparts[ref]['nets']),'PCB pad set differs from circuit: '+ref)
  for p in f.Pads():
   if not p.GetNumber():continue
   key=(ref,p.GetNumber());a=schnet.get(key,'');actual=p.GetNetname()
   if a!=actual:netdiff.append({'ref':ref,'pin':p.GetNumber(),'schematic':a,'pcb':actual})
+  if ref in expectedparts:
+   check(circuit_net_matches(expectedparts[ref]['nets'].get(p.GetNumber()),actual,ref,p.GetNumber(),net_pad_counts[actual]),'PCB pad net differs from circuit: '+ref+':'+p.GetNumber())
 check(not netdiff,'Actual KiCad netlist and PCB pad net mismatch')
-keepout=box(155,75,205,125); bad=[]
+check(circuit['keepout_mm']==expected_keepout,'Circuit central reservation bounds differ from selected variant')
+keepout=box(*circuit['keepout_mm']); fill_keepout=keepout; bad=[]
+def chain(c):return [xy(c.CPoint(i)) for i in range(c.PointCount())]
 for f in fps.values():
  # Courtyard covers body, not potentially offboard reference fields.
  for shape in f.GraphicalItems():
@@ -73,6 +102,13 @@ zones=list(b.Zones());rules=[z for z in zones if z.GetIsRuleArea()]
 check(len(rules)==1,'Expected one central rule area')
 if rules:
  z=rules[0];check(all([z.GetDoNotAllowTracks(),z.GetDoNotAllowVias(),z.GetDoNotAllowPads(),z.GetDoNotAllowZoneFills(),z.GetDoNotAllowFootprints()]),'Central rule area restriction missing')
+ outline=z.Outline()
+ check(outline.OutlineCount()==1 and outline.HoleCount(0)==0,'Central rule area must have one outline and no holes')
+ if outline.OutlineCount()==1:
+  rule_shape=Polygon(chain(outline.COutline(0)),[chain(outline.CHole(0,h)) for h in range(outline.HoleCount(0))])
+  check(reservation_matches(rule_shape,keepout),'Central rule area polygon differs from circuit reservation')
+  # Filled copper follows the native boundary, whose mm conversion can round by 1 nm.
+  if reservation_matches(rule_shape,keepout):fill_keepout=rule_shape
  for layer in [pcb.F_Cu,pcb.In1_Cu,pcb.In2_Cu,pcb.B_Cu]:check(z.GetLayerSet().Contains(layer),'Keepout missing copper layer')
 # Inspect filled polygons too; outline-with-hole geometry must not occupy the reserve.
 for z in zones:
@@ -80,10 +116,9 @@ for z in zones:
  for layer in [pcb.F_Cu,pcb.In1_Cu,pcb.In2_Cu,pcb.B_Cu]:
   if not z.GetLayerSet().Contains(layer):continue
   filled=z.GetFilledPolysList(layer)
-  def chain(c):return [xy(c.CPoint(i)) for i in range(c.PointCount())]
   for j in range(filled.OutlineCount()):
    g=Polygon(chain(filled.COutline(j)),[chain(filled.CHole(j,h)) for h in range(filled.HoleCount(j))])
-   if g.intersection(keepout).area>1e-8:bad.append('filled-copper:'+z.GetNetname())
+   if g.intersection(fill_keepout).area>1e-8:bad.append('filled-copper:'+z.GetNetname())
 check(not bad,'Component/copper intersects central reservation: '+str(sorted(set(bad))))
 # A rectangular envelope only: no inner Edge.Cuts and no inherited tray mounting holes.
 edges=[x for x in b.GetDrawings() if x.GetLayer()==pcb.Edge_Cuts]
@@ -110,7 +145,8 @@ for p in [E/'schematic.pdf',E/'board-layers.pdf']:
 erc=json.loads((R/'erc.json').read_text());drc=json.loads((R/'drc.json').read_text())
 eitems=[v for s in erc.get('sheets',[]) for v in s.get('violations',[])];viol=drc['violations'];unconn=drc['unconnected_items'];parity=drc['schematic_parity']
 check(not eitems,'ERC violations');check(not parity,'KiCad native schematic parity violations')
-summary={'status':('validation failed' if errs or viol else 'reviewable draft; NOT manufacturing approval'),'kicad_version':pcb.GetBuildVersion(),'erc_count':len(eitems),'erc_by_type':dict(Counter(v['type'] for v in eitems)),'drc_count':len(viol),'drc_by_type':dict(Counter(v['type'] for v in viol)),'drc_by_severity':dict(Counter(v['severity'] for v in viol)),'unconnected_item_count':len(unconn),'unconnected_nets':sorted({i['description'].split('[')[1].split(']')[0] for v in unconn for i in v['items'] if '[' in i['description']}),'schematic_parity_count':len(parity),'independent_netlist_mismatch_count':len(netdiff),'envelope_bounds_mm':bounds,'switch_count':66,'diode_count':66,'footprint_count':len(fps),'net_count':len(list(b.GetNetInfo().NetsByNetcode()))-1,'track_segment_count':sum(not isinstance(t,pcb.PCB_VIA) for t in b.GetTracks()),'via_count':sum(isinstance(t,pcb.PCB_VIA) for t in b.GetTracks()),'signal_tracks_on_ground_layer':sum(t.GetLayer()==pcb.In1_Cu and t.GetNetname()!='GND' for t in b.GetTracks() if not isinstance(t,pcb.PCB_VIA)),'keepout_intersections':sorted(set(bad)),'structural_errors':errs,'native_export_readback':readback,'commands':commands,'artifact_sha256':{p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in [D/(NAME+ext) for ext in ['.kicad_pro','.kicad_sch','.kicad_pcb']]}}
+summary={'status':('validation failed' if errs or viol or (not args.draft and unconn) else 'reviewable draft; NOT manufacturing approval'),'key_count':args.keys,'layout_variant':variant,'keepout_mm':circuit['keepout_mm'],'kicad_version':pcb.GetBuildVersion(),'erc_count':len(eitems),'erc_by_type':dict(Counter(v['type'] for v in eitems)),'drc_count':len(viol),'drc_by_type':dict(Counter(v['type'] for v in viol)),'drc_by_severity':dict(Counter(v['severity'] for v in viol)),'unconnected_item_count':len(unconn),'unconnected_nets':sorted({i['description'].split('[')[1].split(']')[0] for v in unconn for i in v['items'] if '[' in i['description']}),'schematic_parity_count':len(parity),'independent_netlist_mismatch_count':len(netdiff),'envelope_bounds_mm':bounds,'switch_count':len(set(fps)&switch_refs),'diode_count':len(set(fps)&diode_refs),'footprint_count':len(fps),'net_count':len(list(b.GetNetInfo().NetsByNetcode()))-1,'track_segment_count':sum(not isinstance(t,pcb.PCB_VIA) for t in b.GetTracks()),'via_count':sum(isinstance(t,pcb.PCB_VIA) for t in b.GetTracks()),'signal_tracks_on_ground_layer':sum(t.GetLayer()==pcb.In1_Cu and t.GetNetname() not in ('GND','+3V3','+1V1') for t in b.GetTracks() if not isinstance(t,pcb.PCB_VIA)),'keepout_intersections':sorted(set(bad)),'structural_errors':errs,'native_export_readback':readback,'commands':commands,'artifact_sha256':{p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in [D/(NAME+ext) for ext in ['.kicad_pro','.kicad_sch','.kicad_pcb']]}}
+summary['ground_layer_tracks_by_net']=dict(Counter(t.GetNetname() for t in b.GetTracks() if not isinstance(t,pcb.PCB_VIA) and t.GetLayer()==pcb.In1_Cu))
 (R/'validation.json').write_text(json.dumps(summary,indent=2,ensure_ascii=False)+'\n');(R/'switch-coordinates.json').write_text(json.dumps(coord,indent=2)+'\n')
 print(json.dumps({k:v for k,v in summary.items() if k not in ['commands','native_export_readback','artifact_sha256']},indent=2))
 if errs or viol or (not args.draft and unconn):raise SystemExit(1)
