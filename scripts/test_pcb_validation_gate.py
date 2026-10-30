@@ -53,9 +53,13 @@ class VariantTests(unittest.TestCase):
         for count, (variant, _) in self.namespace['VARIANTS'].items():
             with self.subTest(keys=count):
                 keys = self.namespace['indexed_keys'](self.layout, variant)
-                self.assertEqual(len(keys), count)
+                self.assertEqual(len(keys), count - 1)
                 self.assertEqual([key for _, key in keys], self.layout[variant]['keys'])
-                self.assertEqual({index for index, _ in keys}, set(range(1, 67)) - ({7, 8, 9} if count == 63 else set()))
+                self.assertEqual({index for index, _ in keys}, set(range(1, 67)) - {59} - ({7, 8, 9} if count == 63 else set()))
+                bottom = {index: key for index, key in keys if key['row'] == 4 and key['group'] == 'center'}
+                self.assertEqual(set(bottom), {58, 60})
+                for index, label, x in [(58, 'M1', -14.2875), (60, 'M2', 14.2875)]:
+                    self.assertEqual((bottom[index]['label'], bottom[index]['x_mm'], bottom[index]['y_mm'], bottom[index]['width_u']), (label, x, 38.1, 1.5))
 
     def test_rear_clearance_reservation_is_clipped_to_board(self):
         self.assertEqual(self.namespace['VARIANTS'][66][1], [155, 75, 205, 125])
@@ -105,6 +109,7 @@ class VariantTests(unittest.TestCase):
                 self.assertEqual(parts['DB1']['nets'], expected)
                 self.assertEqual(parts['DB1']['value'], 'UDB C5-JSH / EXTERNAL')
                 self.assertEqual(parts['DB1']['fp'], '')
+                self.assertEqual(parts['U1']['nets']['27'], None if count == 63 else 'COL7')
                 self.assertEqual(parts['F1']['nets'], {'1': 'VBUS_USB', '2': 'VBUS_FUSED'})
                 self.assertEqual(parts['F1']['mpn'], 'Bourns MF-PSMF050X-2')
                 for ref in ('R1', 'R2'):

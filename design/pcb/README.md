@@ -2,18 +2,20 @@
 
 **DRAFT E, not for fabrication or assembly.** Both variants use the same RP2040 circuit and stable key references. Open the corresponding project in **KiCad 10.0.7**. The schematic and PCB are native editable CAD.
 
+Keycult66 and Keycult63 are legacy filenames and `--keys 66`/`--keys 63` selectors; their current physical key counts are 65 and 62.
+
 | Variant | Project | Schematic | PCB | Validation |
 | --- | --- | --- | --- | --- |
-| 66 keys | [keycult66.kicad_pro](keycult66.kicad_pro) | [Schematic](keycult66.kicad_sch) | [PCB](keycult66.kicad_pcb) | [Report](reports/validation.json) |
-| 63 keys | [keycult63.kicad_pro](63/keycult63.kicad_pro) | [Schematic](63/keycult63.kicad_sch) | [PCB](63/keycult63.kicad_pcb) | [Report](63/reports/validation.json) |
+| 65 keys | [keycult66.kicad_pro](keycult66.kicad_pro) | [Schematic](keycult66.kicad_sch) | [PCB](keycult66.kicad_pcb) | [Report](reports/validation.json) |
+| 62 keys | [keycult63.kicad_pro](63/keycult63.kicad_pro) | [Schematic](63/keycult63.kicad_sch) | [PCB](63/keycult63.kicad_pcb) | [Report](63/reports/validation.json) |
 
-Both variants pass strict validation with zero ERC violations, DRC violations, unconnected items and schematic/PCB net mismatches. The reports contain the actual counts and CAD hashes. Static electrical checks do not establish powered operation or case fit. The user-approved design assumption is an unmodified external UDB C5-JSH, represented by DB1 in the schematic and assembly BOM, with no footprint on the main PCB. J1 implements its 1:1 cable interface. The sensor interface remains logical pads pending hardware identification.
+Both variants pass strict validation after regeneration and saved-route replay: zero ERC violations, DRC violations, unconnected items and schematic/PCB mismatches. The reports contain the counts and CAD hashes. Static electrical checks do not establish powered operation or case fit. The user-approved design assumption is an unmodified external UDB C5-JSH, represented by DB1 in the schematic and assembly BOM, with no footprint on the main PCB. J1 implements its 1:1 cable interface. The sensor interface remains logical pads pending hardware identification.
 
 ## Review entry points
 
 - [Native schematic](keycult66.kicad_sch), [native PCB](keycult66.kicad_pcb), [project](keycult66.kicad_pro).
 - [Schematic PDF](exports/schematic.pdf), [front copper SVG](exports/front.svg), [back copper SVG](exports/back.svg), [ground plane SVG](exports/ground.svg), [layer PDF](exports/board-layers.pdf).
-- 63-key exports: [schematic PDF](63/exports/schematic.pdf), [front](63/exports/front.svg), [back](63/exports/back.svg), [ground plane](63/exports/ground.svg), [layer PDF](63/exports/board-layers.pdf), [BOM](63/bom.csv), [key/GPIO map](63/gpio-map.csv).
+- 62-key exports: [schematic PDF](63/exports/schematic.pdf), [front](63/exports/front.svg), [back](63/exports/back.svg), [ground plane](63/exports/ground.svg), [layer PDF](63/exports/board-layers.pdf), [BOM](63/bom.csv), [key/GPIO map](63/gpio-map.csv).
 - [Real validation summary](reports/validation.json), [KiCad ERC](reports/erc.json), [KiCad DRC including native schematic parity](reports/drc.json), [actual exported netlist](reports/netlist.xml).
 The layer PDF is auto-fitted for review, **not a 1:1 print or manufacturing template**.
 
@@ -21,11 +23,11 @@ The layer PDF is auto-fitted for review, **not a 1:1 print or manufacturing temp
 
 ## Implemented electrical content
 
-66 or 63 MX PCB-mount solder switches and individual 1N4148W diodes. Cathode/pad 1 is
+65 or 62 MX PCB-mount solder switches and individual 1N4148W diodes. Cathode/pad 1 is
 the ROW net; current path is COL → switch → diode anode → cathode → ROW. QMK
-`COL2ROW`, five rows × fifteen columns; nine central intersections are absent in the 66-key variant and twelve in the 63-key variant. IDs, not labels, identify keys because labels repeat.
+`COL2ROW`, five rows × fifteen columns; ten intersections are absent in the 65-key variant and thirteen in the 62-key variant. IDs, not labels, identify keys because labels repeat.
 
-The 63-key variant omits SW7-SW9 and D7-D9 without renumbering the other parts. COL6-COL8 remain connected to bottom-row SW58-SW60. Removing only the three switches from a functioning 66-key board leaves open matrix cells; map those positions to `KC_NO` in the eventual firmware. Cutting the PCB is a separate mechanical and copper change, never implied by switch removal.
+Both variants omit bottom-row SW59/D59 and retain SW58/D58 and SW60/D60 as the 1.5u M1/M2 keys, preserving IDs r4c6/r4c8 and removing r4c7. Their layout centres are (-14.2875,38.1)mm and (14.2875,38.1)mm, occupying a combined nominal 3u. The M3 physical key has no replacement mapping yet. The 62-key variant also omits SW7-SW9 and D7-D9 without renumbering other parts. COL6 and COL8 remain connected to the bottom keys; COL7 has no key in the 62-key variant, so GP16 is marked NC in its schematic. The shared 15-column GPIO ordering is retained; all COL7 matrix cells must be KC_NO in eventual firmware. Removing only the three switches from a functioning 65-key board leaves open matrix cells; map those positions to `KC_NO` in the eventual firmware. Cutting the PCB is a separate mechanical and copper change, never implied by switch removal.
 
 RP2040 is directly mounted in its 7×7mm QFN, not represented by a development
 board. The design includes AP2112K-3.3, input PTC, input/output bulk capacitors,
@@ -47,12 +49,12 @@ qualification. No power LED was added. PTC hold rating does not authorize a
 |---|---|
 | SPI0 MISO / CS / SCLK / MOSI | GP0 / GP1 / GP2 / GP3 |
 | Rows 0–4 | GP4, GP5, GP6, GP7, GP8 |
-| Columns 0–14 | GP9–GP22, GP26 |
+| Columns 0–14 | GP9–GP22, GP26; GP16/COL7 is NC in the 62-key variant |
 | Optional sensor motion / reset | GP23 / GP24 |
-| Explicit unused/NC | GP25 / GP27 / GP28 / GP29 |
+| Explicit unused/NC | GP25 / GP27 / GP28 / GP29; also GP16 in the 62-key variant |
 
-26 of 30 GPIOs are allocated, including two optional sensor controls; four remain
-unused. Dedicated QSPI, USB and SWD pins do not consume these 30 GPIOs.
+The 65-key variant allocates 26 of 30 GPIOs, including two optional sensor controls; four remain
+unused. The 62-key variant allocates 25, leaving five NC. Dedicated QSPI, USB and SWD pins do not consume these 30 GPIOs.
 `qmk-config.h.example` is a mapping aid, **not a compiled QMK port**. It does not
 select a sensor revision, flash boot stage, descriptor power or a final keymap.
 
@@ -88,7 +90,7 @@ The J1-side segment-sum difference is 5.9693mm. These are measured routing prope
 
 Strict validation refills zones and checks the full-width projection of every F.Cu USB segment against the saved In1.Cu GND polygons. Both variants have zero uncovered area outside explicit 0.51mm-radius disks around USB transition vias. Those disks exclude signal-via antipads, not unrelated voids elsewhere on the route. The measured minimum F.Cu pair edge gap is 0.2mm. The layer PDF supports inspection of the J1 escape, margin pair, test pads, resistor transitions and ground fill. These geometric checks do not qualify finite plane edges, transitions or cable discontinuities.
 
-DRAFT E was regenerated and checked with official KiCad 10.0.7 in a local Docker container. The saved SES retains the existing base route; `scripts/usb_routing.py` replaces only connector-side USB tracks/vias and applies the ground changes after import. The route manifest includes this script's hash. Native schematic parity, external DB1 netlist, coordinates and central reservations are checked again. Both variants have fresh native PDF/SVG exports and validation reports.
+DRAFT E uses a regenerated base route for the current 1.5u M1/M2 coordinates. After SES import, `scripts/usb_routing.py` applies the connector-side USB recipe and ground changes. Validation uses official KiCad 10.0.7 in a local Docker container. The route manifest includes this script's hash. Native schematic parity, external DB1 netlist, coordinates and central reservations are checked again. Both variants have fresh native PDF/SVG exports and validation reports.
 
 DB1 is the unmodified [C5-JSH at revision `2b6c52aa2de6f9f60ca99c6250e4bdf01e8f4eea`](https://github.com/Unified-Daughterboard/UDB-C-JSH/blob/2b6c52aa2de6f9f60ca99c6250e4bdf01e8f4eea/UDB.kicad_sch), adopted as a design assumption on 2026-10-30. Its USB-C connector, two 5.1k CC pull-downs, TPD4E05U06DQAR data-line ESD array, ASMD1206-150 PTC and SMF6.0A TVS stay on the external daughterboard. Its shield joins signal ground on that board; no extra shield wire, CC resistors or duplicate ESD/TVS array is added to the main PCB. This assumption is not a measurement of the factory Keycult board.
 
@@ -151,15 +153,15 @@ PMW3360 connections. The sensor connector is not finalized; J1's electrical rout
 
 ## Geometry and construction assumptions
 
-- Layout `(0,0)` maps to PCB **(180,100)mm**, +X right, +Y toward the bottom row. Coordinates come from `../preliminary/layout.json`, using `preferred.keys` for 66 keys and `rear_clearance.keys` for 63 keys.
-- Stock `SW_Cherry_MX_1.00u_PCB` has its anchor at **electrical pin 1**, not the
+- Layout `(0,0)` maps to PCB **(180,100)mm**, +X right, +Y toward the bottom row. Coordinates come from `../preliminary/layout.json`, using `preferred.keys` for 65 keys and `rear_clearance.keys` for 62 keys.
+- Stock `SW_Cherry_MX_1.00u_PCB` and `SW_Cherry_MX_1.50u_PCB` have their anchor at **electrical pin 1**, not the
   stem. The stem NPTH is local `(-2.54,+5.08)mm`; generation compensates and
-  validation reads the actual stem holes. Pitch remains exactly 19.05mm.
-- Both variants move the common MCU, flash, clock, power and interface-pad group 76.2mm left from the original draft, with decoupler positions adjusted separately. The original SW7-SW9 area contained essential electronics; the original board must not be cut to obtain the 63-key variant.
+  validation reads the actual stem holes. The base pitch is 19.05mm; the two bottom 1.5u key centres are 28.575mm apart.
+- Both variants move the common MCU, flash, clock, power and interface-pad group 76.2mm left from the original draft, with decoupler positions adjusted separately. The original SW7-SW9 area contained essential electronics; the original board must not be cut to obtain the 62-key variant.
 - The **285.0 × 94.6mm** working rectangle uses only scalar dimensions measured
   from the pinned GH60 PCB. It does **not** copy GH60's rounded corners/holes,
   any Keycult contour, or the 285.75×108.25mm plate reference rectangle.
-- The 66-key all-copper-layer rule area is the centred **50 x 50mm** reservation. The 63-key rule area extends across the nominal empty key band, clipped at the board edge: PCB x=151.425..208.575mm, y=52.7..128.575mm, **57.15 x 75.875mm**. Both prohibit footprints, pads, tracks, vias and copper fill. Neither is an Edge.Cuts opening or a measured holder outline. This larger electrical reservation preserves future placement flexibility; mounting and any eventual cutout still require measurements.
+- The 65-key all-copper-layer rule area is the centred **50 x 50mm** reservation. The 62-key rule area extends across the nominal empty key band, clipped at the board edge: PCB x=151.425..208.575mm, y=52.7..128.575mm, **57.15 x 75.875mm**. Both prohibit footprints, pads, tracks, vias and copper fill. Neither is an Edge.Cuts opening or a measured holder outline. This larger electrical reservation preserves future placement flexibility; mounting and any eventual cutout still require measurements.
 - Four copper layers: F.Cu and B.Cu plus In2.Cu carry most signals. In1.Cu carries the GND reference pour outside the reserved centre, with short local +3V3 and COL12 routes beside the MCU. These routes stay away from the USB pair and the filled ground remains connected. Pad/via antipads and the central reservation still require return-path review; this is not an
   impedance-qualified stackup. Bottom SMT electronics coexist
   with top MX switch bodies, with actual drill/courtyard checks. Board thickness
@@ -182,7 +184,7 @@ PMW3360 connections. The sensor connector is not finalized; J1's electrical rout
 The initial seed uses KiCad's maintained `pcbnew` API and installed stock
 libraries. `sexpdata` serializes the native schematic with stock symbols and applies the deterministic USB overlay to native PCB data. No custom autorouter was written.
 Freerouting performs local detailed routing via KiCad's Specctra DSN/SES API.
-A small cleanup script removes only KiCad-reported dead-ended copper after zone refill; it never suppresses checks or unconnected nets. Native CAD retains the complete editable route. Each variant's saved SES retains the base route, including manual QFN escapes and local corrections. `scripts/usb_routing.py` applies the DRAFT E USB and ground changes after seed generation and SES import. Replaying the SES through `route_pcb.py` reproduces the combined route; rerunning the autorouter from a new seed does not replace layout review or guarantee completion.
+A small cleanup script removes only KiCad-reported dead-ended copper after zone refill; it never suppresses checks or unconnected nets. Native CAD retains the complete editable route. Each variant's saved SES records the base route for its current key coordinates. `scripts/usb_routing.py` applies the DRAFT E USB and ground changes after seed generation and SES import. Replaying the SES through `route_pcb.py` reproduces the combined route; rerunning the autorouter from a new seed does not replace layout review or guarantee completion.
 See [sources](sources.md) for versions, licenses and hashes.
 
 From the repository root, with the Python version matching KiCad's installed binding (the original Nix runtime uses Python 3.14; the official 10.0.7 Docker image uses Python 3.13). Scripts require Python 3.11 or newer, but `pcbnew` must match the chosen interpreter. Use the [Docker procedure](../../docs/reproduction.md#docker에서-kicad-검증) when KiCad is not installed on the host.

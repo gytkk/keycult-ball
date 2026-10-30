@@ -705,24 +705,11 @@
     "id": "r4c6",
     "switch": "SW58",
     "expected_stem_mm": [
-      160.95,
+      165.7125,
       138.1
     ],
     "actual_stem_mm": [
-      160.95,
-      138.1
-    ],
-    "error_mm": 0.0
-  },
-  {
-    "id": "r4c7",
-    "switch": "SW59",
-    "expected_stem_mm": [
-      180.0,
-      138.1
-    ],
-    "actual_stem_mm": [
-      180.0,
+      165.7125,
       138.1
     ],
     "error_mm": 0.0
@@ -731,11 +718,11 @@
     "id": "r4c8",
     "switch": "SW60",
     "expected_stem_mm": [
-      199.05,
+      194.2875,
       138.1
     ],
     "actual_stem_mm": [
-      199.05,
+      194.2875,
       138.1
     ],
     "error_mm": 0.0

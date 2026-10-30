@@ -49,11 +49,15 @@ for value, expected in zip(polygon.bounds, [-142.875, -54.125, 142.875, 54.125])
     assert math.isclose(value, expected, abs_tol=1e-6), polygon.bounds
 layout = json.loads((DESIGN / 'layout.json').read_text())
 containment = {}
-for name in ('preferred', 'alternative'):
+for name in ('preferred', 'alternative', 'rear_clearance'):
     containment[name] = {}
     for proxy, half in [('switch_proxy', 7), ('keycap_assumption', 9)]:
-        rectangles = [(k['id'], box(k['x_mm']-half, k['y_mm']-half, k['x_mm']+half, k['y_mm']+half)) for k in layout[name]['keys']]
+        rectangles = []
+        for k in layout[name]['keys']:
+            half_width = half + (k['width_u'] - 1) * layout['pitch_mm'] / 2 if proxy == 'keycap_assumption' else half
+            rectangles.append((k['id'], box(k['x_mm']-half_width, k['y_mm']-half, k['x_mm']+half_width, k['y_mm']+half)))
         outside = [key for key, rectangle in rectangles if not polygon.covers(rectangle)]
+        assert not outside, (name, proxy, outside)
         containment[name][proxy] = {
             'outside_original_plate_contour': outside,
             'min_clearance_to_original_plate_outer_edge_mm': round(min(rectangle.distance(polygon.boundary) for _, rectangle in rectangles), 6),
@@ -77,7 +81,7 @@ assert replacements == 1, 'Expected one generic plate reference to replace'
 svg = svg.replace('Green: 285.75 × 108.25 bounding reference ONLY — not the official contour.', 'Green: original DXF perimeter — LOCAL inspection only; opening unverified.')
 (LOCAL / 'layout-overlay.svg').write_text(svg)
 historical = json.loads((DESIGN / 'plate-containment.json').read_text())
-assert containment == historical, 'Current local result differs from historical summary; inspect sources/local/plate-containment.json before updating the historical report.'
+assert {name: containment[name] for name in historical} == historical, 'Current local result differs from historical summary; inspect sources/local/plate-containment.json before updating the historical report.'
 print('PASS: pinned official DXF checksum, units, outline envelope, all proxies inside perimeter, historical scalar results reproduced.')
 print('Detailed contour and overlay written under ignored design/preliminary/sources/local/.')
 print('This verifies only the original plate perimeter, NOT the case opening, revision registration or 3D assembly.')

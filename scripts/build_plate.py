@@ -108,11 +108,15 @@ def wire_path(wire):
     return 'M' + ' L'.join(f'{p.x:.4f},{p.y:.4f}' for p in points) + ' Z'
 
 
+def cap_width(key):
+    return 18 + (key['width_u'] - 1) * 19.05
+
+
 def svg(face, carrier_face, keys, count, path):
     s = STUDY
     paths = ' '.join(wire_path(w) for w in face.Wires)
     frame = ' '.join(wire_path(w) for w in carrier_face.Wires)
-    caps = ''.join(f'<rect x="{k["x_mm"]-9}" y="{k["y_mm"]-9}" width="18" height="18" fill="none" stroke="#64748b" stroke-width=".15" stroke-dasharray="1 1"/>' for k in keys)
+    caps = ''.join(f'<rect x="{k["x_mm"]-cap_width(k)/2}" y="{k["y_mm"]-9}" width="{cap_width(k)}" height="18" fill="none" stroke="#64748b" stroke-width=".15" stroke-dasharray="1 1"/>' for k in keys)
     path.write_text(f'''<svg xmlns="http://www.w3.org/2000/svg" width="330mm" height="170mm" viewBox="-165 -85 330 170">
 <rect x="-165" y="-85" width="330" height="170" fill="white"/>
 <g font-family="sans-serif" fill="#172033"><text x="-155" y="-73" font-size="5">No.1/60 NoLeaf / {count} keys / LOCAL MECHANICAL STUDY</text>
@@ -130,6 +134,7 @@ def build(count, layout, face, blank, donor):
     t, half, radius = s['plate_thickness'], s['carrier_width']/2, s['opening_diameter']/2
     variant = 'preferred' if count == 66 else 'rear_clearance'
     keys = layout[variant]['keys']
+    key_count = len(keys)
     directory = ROOT / 'design/pcb' / ('63' if count == 63 else '')
     report = json.loads((directory/'reports/validation.json').read_text())
     pcb = directory/f'keycult{count}.kicad_pcb'
@@ -165,7 +170,7 @@ def build(count, layout, face, blank, donor):
     for x,y in holes:
         carrier = carrier.cut(Part.Face(Part.Wire([Part.makeCircle(s['mount_hole_diameter']/2,V(x,y,0))])))
     carrier = carrier.removeSplitter()
-    adapter = feature(doc,'CarrierConcept',carrier.extrude(V(0,0,s['carrier_thickness'])),'Own mounting concept: M2 clearance holes; no verified holder or sensor interface. Rear shelf only on 63 keys.')
+    adapter = feature(doc,'CarrierConcept',carrier.extrude(V(0,0,s['carrier_thickness'])),'Own mounting concept: M2 clearance holes; no verified holder or sensor interface. Rear shelf only on Keycult63.')
     xmin,ymin,xmax,ymax = report['envelope_bounds_mm']
     board = Part.makeBox(xmax-xmin,ymax-ymin,s['pcb_thickness'],V(xmin-180,ymin-100,s['pcb_top_z']-s['pcb_thickness']))
     board_obj = feature(doc,'CurrentPCBEnvelope',board,'Actual XY envelope; top Z assumed in Study; no central cutout in native PCB')
@@ -173,7 +178,7 @@ def build(count, layout, face, blank, donor):
     ball_obj = feature(doc,'BallAtIllustrativeZ8',ball,'Illustration, not the supported position in an actual holder')
     raised = feature(doc,'BallAtAlternativeZ13',Part.makeSphere(s['ball_radius'],V(0,0,s['alternative_ball_center_z'])),'Alternative height only; holder clearance unverified')
     proposal = feature(doc,'UnappliedPCBOpeningTool',Part.makeCylinder(radius,s['pcb_thickness'],V(0,0,s['pcb_top_z']-s['pcb_thickness'])),'Proposed mechanical opening, NOT applied to KiCad and NOT approved holder opening')
-    caps = feature(doc,'KeycapPlanProxies',Part.makeCompound([rect(k['x_mm']-9,k['y_mm']-9,18,18,5).extrude(V(0,0,5)) for k in keys]),'18mm XY and Z=5..10 illustrative, no switch travel or real keycap height model')
+    caps = feature(doc,'KeycapPlanProxies',Part.makeCompound([rect(k['x_mm']-cap_width(k)/2,k['y_mm']-9,cap_width(k),18,5).extrude(V(0,0,5)) for k in keys]),'Width 18+(width_u-1)*19.05mm, height 18mm; Z=5..10 illustrative, no switch travel or real keycap height model')
     pcb_clash = ball.common(board).Volume
     # A clash is the expected finding of this scenario, not a pass hidden by removal.
     expected_clash = pcb_clash > 0
@@ -186,14 +191,14 @@ def build(count, layout, face, blank, donor):
     plate_face = max((f for f in plate.Shape.Faces if abs(f.CenterOfMass.z)<1e-6 and abs(f.normalAt(0,0).z)>.99),key=lambda f:f.Area)
     restored_face = Part.Face(plate_face.OuterWire)
     perimeter_error = restored_face.cut(face).Area + face.cut(restored_face).Area
-    if perimeter_error > 1e-5 or len(plate_face.Wires)!=1+count+5:
-        raise ValueError(f'Outer contour or hole count differs: area={perimeter_error}, wires={len(plate_face.Wires)}, expected={1+count+5}')
+    if perimeter_error > 1e-5 or len(plate_face.Wires)!=1+key_count+5:
+        raise ValueError(f'Outer contour or hole count differs: area={perimeter_error}, wires={len(plate_face.Wires)}, expected={1+key_count+5}')
     for k,cutter in zip(keys,cuts):
         if cutter.cut(blank).Volume > 1e-6:
             raise ValueError('Switch opening outside donor perimeter: '+k['id'])
     if any(carrier.common(f).Area > 1e-6 for f in switch_faces):
         raise ValueError('Carrier intersects switch aperture')
-    clearance = min(carrier.distToShape(rect(k['x_mm']-9,k['y_mm']-9,18,18))[0] for k in keys)
+    clearance = min(carrier.distToShape(rect(k['x_mm']-cap_width(k)/2,k['y_mm']-9,cap_width(k),18))[0] for k in keys)
     doc.recompute()
     doc.saveAs(str(folder/f'plate-{count}.FCStd'))
     Part.export([plate],str(folder/f'plate-{count}.step'))
@@ -202,11 +207,11 @@ def build(count, layout, face, blank, donor):
     if not reread.isValid() or abs(reread.Volume-plate.Shape.Volume)>1e-4:
         raise ValueError('STEP roundtrip mismatch')
     write_dxf(plate_face,folder/f'plate-{count}-DRAFT.dxf')
-    svg(plate_face,carrier,keys,count,folder/'plan.svg')
-    measurements = dict(keys=count,plate_valid=True,plate_solids=len(plate.Shape.Solids),
+    svg(plate_face,carrier,keys,key_count,folder/'plan.svg')
+    measurements = dict(keys=key_count,plate_valid=True,plate_solids=len(plate.Shape.Solids),
         exact_outer_wire_preserved_area_error_mm2=perimeter_error,switch_coordinate_max_error_mm=max(math.dist(actual[k['id']],[k['x_mm'],k['y_mm']]) for k in keys),
-        switch_openings=count,central_openings=1,carrier_mount_holes=4,
-        carrier_to_18mm_keycap_plan_clearance_mm=clearance,
+        switch_openings=key_count,central_openings=1,carrier_mount_holes=4,
+        carrier_to_keycap_plan_clearance_mm=clearance,
         plate_to_switch_opening_min_edge_mm=min(face.OuterWire.distToShape(c.Wires[0])[0] for c in cuts),
         ball_pcb_interference_mm3=pcb_clash,expected_ball_pcb_conflict=expected_clash,
         ball_plate_interference_mm3=ball.common(plate.Shape).Volume,

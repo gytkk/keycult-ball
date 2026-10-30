@@ -33,6 +33,15 @@ def apply_usb_route(path):
         if isinstance(x, list) and x and str(x[0]) in ("segment", "via", "zone"):
             net = child(x, "net")
             identifier = child(x, "uuid")
+            # SES import replaces UUIDs, so recognize our stitching vias by geometry.
+            at = child(x, "at")
+            imported_stitch = (str(x[0]) == "via" and net == node("net", "GND")
+                               and at and tuple(at[1:]) in ground_points
+                               and child(x, "size") == node("size", .6)
+                               and child(x, "drill") == node("drill", .3)
+                               and child(x, "layers") == node("layers", "F.Cu", "B.Cu"))
+            if imported_stitch:
+                continue
             if (str(x[0]) in ("segment", "via") and net and net[1] in USB_NETS) or (identifier and identifier[1] in ground_ids):
                 continue
         clean.append(x)

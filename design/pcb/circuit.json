@@ -4055,7 +4055,7 @@
       "ref": "SW58",
       "lib": "Switch:SW_Push",
       "value": "r4c6 M1",
-      "fp": "Button_Switch_Keyboard:SW_Cherry_MX_1.00u_PCB",
+      "fp": "Button_Switch_Keyboard:SW_Cherry_MX_1.50u_PCB",
       "nets": {
         "1": "COL6",
         "2": "K_r4c6"
@@ -4065,7 +4065,7 @@
         492.76
       ],
       "pos": [
-        163.48999999999998,
+        168.2525,
         133.01999999999998
       ],
       "angle": 0,
@@ -4089,7 +4089,7 @@
         508.0
       ],
       "pos": [
-        156.95,
+        161.7125,
         144.7
       ],
       "angle": 0,
@@ -4100,58 +4100,10 @@
       "uuid": "5645a89b-9796-58f2-bdb7-405aef98b103"
     },
     {
-      "ref": "SW59",
-      "lib": "Switch:SW_Push",
-      "value": "r4c7 M3",
-      "fp": "Button_Switch_Keyboard:SW_Cherry_MX_1.00u_PCB",
-      "nets": {
-        "1": "COL7",
-        "2": "K_r4c7"
-      },
-      "sch": [
-        383.53999999999996,
-        492.76
-      ],
-      "pos": [
-        182.54,
-        133.01999999999998
-      ],
-      "angle": 0,
-      "side": "F",
-      "mpn": "Cherry MX PCB-mount solder; exact variant TBD",
-      "status": "provisional sourcing",
-      "note": "Stock footprint origin is pin1, NOT stem; stem offset (-2.54,+5.08)mm",
-      "uuid": "e7682275-ac01-5e46-8940-11dc1c8eae4b"
-    },
-    {
-      "ref": "D59",
-      "lib": "Device:D",
-      "value": "1N4148W",
-      "fp": "Diode_SMD:D_SOD-123",
-      "nets": {
-        "1": "ROW4",
-        "2": "K_r4c7"
-      },
-      "sch": [
-        383.53999999999996,
-        508.0
-      ],
-      "pos": [
-        176.0,
-        144.7
-      ],
-      "angle": 0,
-      "side": "B",
-      "mpn": "1N4148W",
-      "status": "provisional sourcing",
-      "note": "Cathode pad1 to row; QMK COL2ROW; r4c7",
-      "uuid": "b3b8d2a2-71c4-52c2-9cdd-aa9def9b77a3"
-    },
-    {
       "ref": "SW60",
       "lib": "Switch:SW_Push",
       "value": "r4c8 M2",
-      "fp": "Button_Switch_Keyboard:SW_Cherry_MX_1.00u_PCB",
+      "fp": "Button_Switch_Keyboard:SW_Cherry_MX_1.50u_PCB",
       "nets": {
         "1": "COL8",
         "2": "K_r4c8"
@@ -4161,7 +4113,7 @@
         492.76
       ],
       "pos": [
-        201.59,
+        196.8275,
         133.01999999999998
       ],
       "angle": 0,
@@ -4185,7 +4137,7 @@
         508.0
       ],
       "pos": [
-        195.05,
+        190.2875,
         144.7
       ],
       "angle": 0,
@@ -4550,6 +4502,6 @@
     205,
     125
   ],
-  "key_count": 66,
+  "key_count": 65,
   "layout_variant": "preferred"
 }

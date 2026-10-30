@@ -2,8 +2,8 @@
   "status": "numeric 2D checks only; z, opening, tolerances, sockets, wiring and final mounting remain unverified",
   "layouts": {
     "preferred-15u-3u-66": {
-      "keys": 66,
-      "unique_centers": 66,
+      "keys": 65,
+      "unique_centers": 65,
       "keycap_pair_collisions": [],
       "switch_proxy_pair_collisions": [],
       "minimum_keycap_pair_gap_mm": 1.05,
@@ -54,8 +54,8 @@
       ]
     },
     "rear-clearance-15u-3u-63": {
-      "keys": 63,
-      "unique_centers": 63,
+      "keys": 62,
+      "unique_centers": 62,
       "keycap_pair_collisions": [],
       "switch_proxy_pair_collisions": [],
       "minimum_keycap_pair_gap_mm": 1.05,

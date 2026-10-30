@@ -4,13 +4,13 @@
   "jar_url": "https://github.com/freerouting/freerouting/releases/download/v2.0.1/freerouting-2.0.1.jar",
   "jar_sha256": "d7fd0f63f52e6d74b0fad6715f87ca9f0ffd7109d66b2a584638000270592ecf",
   "java": "21",
-  "stop_passes": 12,
+  "stop_passes": 40,
   "note": "v2.0.1 -mp alone does not bound BatchAutorouter; router.stop_pass_no is explicitly supplied. No cloud routing; usage analytics disabled. SES preserves the base route; scripts/usb_routing.py replaces connector-side USB copper and adds the DRAFT E ground changes after import.",
   "input_sha256": {
-    "design/pcb/circuit.json": "66d3d5a2d6b1b795b9ede74188de7f4265051547695a53e1245271466d55210d",
-    "design/preliminary/layout.json": "6bd264684ddc415e40bfe91836bab6dd586f9bf93a91918599737024b11e6fcd",
-    "scripts/build_pcb.py": "1ced233819e63bc83645fde19277fd651269b6e11ede5b14a072a74ed96a61eb",
-    "scripts/usb_routing.py": "4ed48530ed397b2f7f281f4a968e584a554a073bc14f7f5ecd360f9b42e3c9c7"
+    "design/pcb/circuit.json": "fee5bb35da8644f555e54ebbcc4267ac9a7dde32f38eaa2e17ca45cfead9b210",
+    "design/preliminary/layout.json": "45b6b986a26be9c443d7f54473e4b3af3b913258156487e0696f5a74ed82b7fe",
+    "scripts/build_pcb.py": "0783c2035f905be970cbe0cae4be21de7709cd32089588e31c2ff40caba5d7ff",
+    "scripts/usb_routing.py": "2ed59310d5f43c371a0a0a48498daaf08731d277315cf32c09c3bf7f6b90923e"
   },
-  "ses_sha256": "52dd478463e6c56757271b885f099b57198f6d3d106fd455b2a5bf4db31d764b"
+  "ses_sha256": "f7a6ff0a6e6d566569958e8eb8c49505c2a2a76d4061bbdc4231a7c86879cd2a"
 }

@@ -13,6 +13,7 @@
     18.0,
     18.0
   ],
+  "keycap_plan_width_formula": "18 + (width_u - 1) * 19.05 mm; height 18 mm",
   "conservative_key_cell_mm": [
     19.05,
     19.05
@@ -99,7 +100,7 @@
   },
   "preferred": {
     "name": "preferred-15u-3u-66",
-    "key_count": 66,
+    "key_count": 65,
     "center_gap_u": 3,
     "total_width_u": 15,
     "nominal_envelope_mm": {
@@ -803,22 +804,10 @@
         "column": 6,
         "label": "M1",
         "group": "center",
-        "x_mm": -19.05,
+        "x_mm": -14.2875,
         "y_mm": 38.1,
         "rotation_deg": 0,
-        "width_u": 1,
-        "height_u": 1
-      },
-      {
-        "id": "r4c7",
-        "row": 4,
-        "column": 7,
-        "label": "M3",
-        "group": "center",
-        "x_mm": 0.0,
-        "y_mm": 38.1,
-        "rotation_deg": 0,
-        "width_u": 1,
+        "width_u": 1.5,
         "height_u": 1
       },
       {
@@ -827,10 +816,10 @@
         "column": 8,
         "label": "M2",
         "group": "center",
-        "x_mm": 19.05,
+        "x_mm": 14.2875,
         "y_mm": 38.1,
         "rotation_deg": 0,
-        "width_u": 1,
+        "width_u": 1.5,
         "height_u": 1
       },
       {
@@ -1695,7 +1684,7 @@
   },
   "rear_clearance": {
     "name": "rear-clearance-15u-3u-63",
-    "key_count": 63,
+    "key_count": 62,
     "center_gap_u": 3,
     "total_width_u": 15,
     "nominal_envelope_mm": {
@@ -2367,22 +2356,10 @@
         "column": 6,
         "label": "M1",
         "group": "center",
-        "x_mm": -19.05,
+        "x_mm": -14.2875,
         "y_mm": 38.1,
         "rotation_deg": 0,
-        "width_u": 1,
-        "height_u": 1
-      },
-      {
-        "id": "r4c7",
-        "row": 4,
-        "column": 7,
-        "label": "M3",
-        "group": "center",
-        "x_mm": 0.0,
-        "y_mm": 38.1,
-        "rotation_deg": 0,
-        "width_u": 1,
+        "width_u": 1.5,
         "height_u": 1
       },
       {
@@ -2391,10 +2368,10 @@
         "column": 8,
         "label": "M2",
         "group": "center",
-        "x_mm": 19.05,
+        "x_mm": 14.2875,
         "y_mm": 38.1,
         "rotation_deg": 0,
-        "width_u": 1,
+        "width_u": 1.5,
         "height_u": 1
       },
       {

@@ -12,7 +12,7 @@ Python 표준 라이브러리만 필요하다. 입력은 생성기 안의 배열
 
 설계를 바꿀 때 배열과 치수 상수를 먼저 편집한다. JSON은 모든 키 중심을 다른 CAD 도구로 가져가기 위한 교환 파일이지만 이 생성기의 입력은 아니므로 JSON에만 한 수정은 재생성 시 덮어쓴다. SVG는 벡터 편집기로 열 수 있지만 그 수정도 생성기에는 역반영되지 않는다.
 
-`layout.json`은 66키 기준안, 14u 64키 비교안과 `rear_clearance` 63키 옵션의 좌표를 포함한다. 63키 옵션은 `rear-clearance.svg`와 `rear-clearance-print.svg`/`.html`로 생성하며, 볼 지름 34mm와 나머지 키를 유지하고 상단 중앙 Vol-/Mute/Vol+만 제거한다. 중앙 57.15 × 76.20mm 빈 명목 영역은 가공 구멍이나 확대된 홀더 예약 영역이 아니다.
+`layout.json`은 65키 기준안, 14u 64키 비교안과 `rear_clearance` 62키 옵션의 좌표를 포함한다. 62키 옵션은 `rear-clearance.svg`와 `rear-clearance-print.svg`/`.html`로 생성하며, 볼 지름 34mm와 나머지 키를 유지하고 상단 중앙 Vol-/Mute/Vol+만 제거한다. 중앙 57.15 × 76.20mm 빈 명목 영역은 가공 구멍이나 확대된 홀더 예약 영역이 아니다.
 
 ## 2. PNG·1:1 PDF
 
@@ -22,7 +22,7 @@ Python 표준 라이브러리만 필요하다. 입력은 생성기 안의 배열
 uv run scripts/render.py
 ```
 
-`chromium` 또는 `chromium-browser`가 PATH에 없으면 `KEYCULT_CHROMIUM=/절대/경로/chromium`을 지정한다. 명령은 평면 PNG, 단면 PNG, A3 PDF와 63키 옵션의 `rear-clearance.png`, `rear-clearance-print.pdf`를 다시 만든다. SVG/HTML에 외부 폰트·스크립트·이미지 요청은 없다. PNG 렌더는 브라우저/설치 폰트에 따라 작은 차이가 날 수 있다.
+`chromium` 또는 `chromium-browser`가 PATH에 없으면 `KEYCULT_CHROMIUM=/절대/경로/chromium`을 지정한다. 명령은 평면 PNG, 단면 PNG, A3 PDF와 62키 옵션의 `rear-clearance.png`, `rear-clearance-print.pdf`를 다시 만든다. SVG/HTML에 외부 폰트·스크립트·이미지 요청은 없다. PNG 렌더는 브라우저/설치 폰트에 따라 작은 차이가 날 수 있다.
 
 ## 3. 독립 검증
 
@@ -33,13 +33,13 @@ uv run scripts/validate.py
 Shapely 2.1.2와 PyMuPDF 1.26.7을 사용한다. 다음을 검사한다.
 
 - Python AST, JSON, SVG/XML, HTML 파싱과 문서/HTML 로컬 링크.
-- 66/64/63키 개수, 중복 좌표, 19.05mm 피치, 중앙 정렬, 문자 키, 키캡 쌍 충돌. 63키 옵션은 기준안에서 상단 중앙 세 키만 제거했는지도 확인.
+- 65/64/62키 개수, 중복 좌표, 19.05mm 기본 피치와 하단 1.5u 두 키의 중심, 중앙 정렬, 문자 키, 키캡 쌍 충돌. 62키 옵션은 기준안에서 상단 중앙 세 키만 제거했는지도 확인.
 - 원–사각형 거리로 볼 간섭을 다시 계산하고 저장된 결과와 비교.
 - 임시 50mm 영역의 양수/음수 간격 및 일반적인 사각 치수 경계에 대한 Shapely 포함·최소 거리. 결과는 `envelope-containment.json`에 저장한다. 공개 SVG에 상세 윤곽이 아닌 사각 치수 경계가 있는지도 확인한다.
 - 미확정 케이스 개구부·깊이·홀더 치수가 JSON에서 계속 `null`인지 확인.
-- 기준안과 63키 옵션의 PDF가 각각 한 페이지 A3 가로인지, 벡터상의 100mm 기준선 길이가 맞는지 확인. 결과는 `print-validation.json`과 `rear-clearance-print-validation.json`에 기록.
+- 기준안과 62키 옵션의 PDF가 각각 한 페이지 A3 가로인지, 벡터상의 100mm 기준선 길이가 맞는지 확인. 결과는 `print-validation.json`과 `rear-clearance-print-validation.json`에 기록.
 
-공개 검증은 공식 윤곽을 사용하지 않으며 실제 윤곽 포함을 증명하지 않는다. `plate-containment.json`은 초기 66/64키 공식 윤곽 조사에서 얻은 스칼라 결과 기록이며 이 명령으로 재계산하지 않고 63키 옵션도 다루지 않는다. 상세 윤곽 재현은 아래 로컬 전용 절차로 수행한다. 이 검증은 PCB DRC, 실제 케이스 개구부, 3D 수납, 소켓·다이오드·배선·하중 검증을 대체하지 않는다.
+공개 검증은 공식 윤곽을 사용하지 않으며 실제 윤곽 포함을 증명하지 않는다. `plate-containment.json`은 초기 66/64키 공식 윤곽 조사에서 얻은 스칼라 결과 기록이며 이 명령으로 재계산하지 않고 현재 65키/62키 배열도 다루지 않는다. 상세 윤곽 재현은 아래 로컬 전용 절차로 수행한다. 이 검증은 PCB DRC, 실제 케이스 개구부, 3D 수납, 소켓·다이오드·배선·하중 검증을 대체하지 않는다.
 
 종이 출력은 **A3 가로 / 100% 실제 크기 / 페이지 맞춤 끄기**로 하고 100mm 선을 자로 확인한다. PDF 내부 길이가 정확해도 프린터 배율까지 보증하지는 않는다.
 
@@ -85,15 +85,17 @@ open -n -a /Applications/FreeCAD.app --args "$PWD/scripts/preview_plate.FCMacro"
 
 설치 위치가 다르면 `FREECAD_ROOT`를 `Contents/Resources` 경로로 지정하고 `--python`도 해당 앱의 Python으로 바꾼다. Linux 실행 환경에서는 FreeCAD와 Python 바인딩 경로를 별도로 확인해야 하며 이 절차를 Linux에서 시험하지는 않았다. GUI는 앱의 정식 실행 파일로 열고 매크로가 두 모델의 표시 설정과 이미지를 저장한다. 외부 Python에서 `FreeCADGui.showMainWindow()`를 호출하는 방식은 이 Mac에서 종료 시 비정상 종료가 발생하여 사용하지 않는다.
 
-결과는 Git에서 제외되는 `design/preliminary/sources/local/plate-study/` 아래에 생성된다. `66/`와 `63/`에 `plate-<keys>.FCStd`, `plate-<keys>.step`, `carrier-<keys>.step`, `plate-<keys>-DRAFT.dxf`, `plan.svg`, `checks.json`을 두며 GUI 매크로는 `top.png`와 `assembly.png`, 상위 `preview-status.json`을 추가한다. 재생성은 이 초안을 덮어쓰므로 수동 CAD 변경은 별도 이름으로 먼저 저장한다. 공개 저장소에는 생성 스크립트와 형상을 복제하지 않는 설명만 둔다.
+결과는 Git에서 제외되는 `design/preliminary/sources/local/plate-study/` 아래에 생성된다. `66/`와 `63/`은 기존 경로 이름이며 현재 65키/62키 결과를 담는다. 각 디렉터리에 `plate-<keys>.FCStd`, `plate-<keys>.step`, `carrier-<keys>.step`, `plate-<keys>-DRAFT.dxf`, `plan.svg`, `checks.json`을 두며 GUI 매크로는 `top.png`와 `assembly.png`, 상위 `preview-status.json`을 추가한다. 재생성은 이 초안을 덮어쓰므로 수동 CAD 변경은 별도 이름으로 먼저 저장한다. 공개 저장소에는 생성 스크립트와 형상을 복제하지 않는 설명만 둔다.
 
 배열 원본은 기존 `design/preliminary/build_artifacts.py`이고, 새 기구 검토 치수는 `scripts/build_plate.py`의 `STUDY`다. FCStd의 `Study` 속성은 사용한 값을 기록한 것으로 형상을 자동 구동하지 않는다. `Plate`는 원본 외곽의 판과 검토용 절삭 객체를 연결한 Boolean cut이며, 재현 가능한 치수 변경은 생성기에 반영한다. 생성 검사는 원본 해시, PCB 좌표 및 CAD 해시, 단일 솔리드, 구멍 수, 외곽 보존, STEP/FCStd/DXF 재열기를 확인한다. `review.json`의 PCB-볼 간섭은 알려진 미해결 항목이며, 스크립트 성공을 실물 조립 통과로 해석하지 않는다.
 
-## KiCad 66키·63키 회로·PCB 초안
+## KiCad 65키·62키 회로·PCB 초안
 
-[PCB 재현 안내](../design/pcb/README.md#reproduction)를 별도로 따른다. 기존 예비 키 좌표는 변경하지 않았으므로 예비 도면 생성기나 PNG/PDF 렌더를 다시 실행할 필요는 없다. Python은 설치된 KiCad 10.0.7의 `pcbnew` 바인딩과 버전이 일치해야 한다. 기존 Nix 환경은 Python 3.14, 아래 공식 Docker 환경은 Python 3.13을 사용한다. 66키 원본은 `design/pcb/keycult66.*`, 63키 원본은 `design/pcb/63/keycult63.*`이며, 각 디렉터리에 BOM·핀맵·배선과 `reports/`, `exports/`를 둔다.
+Keycult66/Keycult63 파일명과 `--keys 66`/`--keys 63` 선택자는 기존 이름이며 실제 키 수는 각각 65/62다.
 
-아래 명령은 저장된 배선을 재적용한 뒤 실제 ERC/DRC, netlist, 키 좌표와 예약 영역을 검사하고 SVG/PDF를 내보낸다. 생성기는 현재 CAD를 덮어쓰므로 수동 편집을 보존한 뒤 실행한다. `--keys`를 생략하면 66키를 선택한다.
+[PCB 재현 안내](../design/pcb/README.md#reproduction)를 별도로 따른다. 키 배열을 변경하면 예비 도면 생성기와 PNG/PDF 렌더를 먼저 실행한다. Python은 설치된 KiCad 10.0.7의 `pcbnew` 바인딩과 버전이 일치해야 한다. 기존 Nix 환경은 Python 3.14, 아래 공식 Docker 환경은 Python 3.13을 사용한다. 65키 원본은 `design/pcb/keycult66.*`, 62키 원본은 `design/pcb/63/keycult63.*`이며, 각 디렉터리에 BOM·핀맵·배선과 `reports/`, `exports/`를 둔다.
+
+아래 명령은 저장된 배선을 재적용한 뒤 실제 ERC/DRC, netlist, 키 좌표와 예약 영역을 검사하고 SVG/PDF를 내보낸다. 생성기는 현재 CAD를 덮어쓰므로 수동 편집을 보존한 뒤 실행한다. `--keys`를 생략하면 65키를 선택한다.
 
 ```bash
 uv run --python "$(command -v python3)" scripts/build_pcb.py --keys 66
@@ -104,9 +106,9 @@ uv run --python "$(command -v python3)" scripts/route_pcb.py --keys 63 --import-
 uv run --python "$(command -v python3)" scripts/validate_pcb.py --keys 63
 ```
 
-각 SES는 기존 기본 배선을 보존한다. `scripts/usb_routing.py`는 seed 생성과 SES 가져오기 이후 J1 측 USB 배선을 교체하고 DRAFT E의 접지 비아·접지면 및 후보 stackup을 적용한다. `route-manifest.json`은 회로, 배열, 생성기와 이 스크립트의 해시를 검사하므로 입력을 변경하면 기존 배선을 그대로 가져올 수 없다. 회로나 배열을 변경하면 `--import-saved` 대신 `--route`로 다시 배선하고 전체 결과를 검토한다.
+각 SES는 현재 키 좌표에 맞춰 다시 생성한 기본 배선을 저장한다. `scripts/usb_routing.py`는 seed 생성과 SES 가져오기 이후 J1 측 USB 배선을 교체하고 DRAFT E의 접지 비아·접지면 및 후보 stackup을 적용한다. `route-manifest.json`은 회로, 배열, 생성기와 이 스크립트의 해시를 검사하므로 입력을 변경하면 기존 배선을 그대로 가져올 수 없다. 회로나 배열을 변경하면 `--import-saved` 대신 `--route`로 다시 배선하고 전체 결과를 검토한다.
 
-검증은 기본적으로 미배선이나 DRC 위반이 있으면 실패한다. `--draft`는 미배선만 허용하고 실제 수를 보고하는 검토 모드이며, 기하 DRC 위반은 그대로 실패한다. 새로 채운 In1.Cu 접지면이 F.Cu USB 배선 아래를 덮는지 검사하며, 신호 비아 중심 반경 0.51mm는 접지면의 절연 간격(antipad) 때문에 별도로 제외한다. 선폭 0.29mm, 최소 간격 0.2mm와 신호 비아에서 접지 비아까지 3mm 이내라는 설계 조건도 검사한다. 이 수치는 프로젝트의 배선 검토 조건이며 USB 적합성 판정 기준이 아니다. 검사 상태는 [66키 보고서](../design/pcb/reports/validation.json)와 [63키 보고서](../design/pcb/63/reports/validation.json)를 기준으로 하며 제조 승인으로 해석하지 않는다. KiCad 없이 실행하는 검사 회귀 테스트는 `uv run scripts/test_pcb_validation_gate.py`다.
+검증은 기본적으로 미배선이나 DRC 위반이 있으면 실패한다. `--draft`는 미배선만 허용하고 실제 수를 보고하는 검토 모드이며, 기하 DRC 위반은 그대로 실패한다. 새로 채운 In1.Cu 접지면이 F.Cu USB 배선 아래를 덮는지 검사하며, 신호 비아 중심 반경 0.51mm는 접지면의 절연 간격(antipad) 때문에 별도로 제외한다. 선폭 0.29mm, 최소 간격 0.2mm와 신호 비아에서 접지 비아까지 3mm 이내라는 설계 조건도 검사한다. 이 수치는 프로젝트의 배선 검토 조건이며 USB 적합성 판정 기준이 아니다. 검사 상태는 [65키 보고서](../design/pcb/reports/validation.json)와 [62키 보고서](../design/pcb/63/reports/validation.json)를 기준으로 하며 제조 승인으로 해석하지 않는다. KiCad 없이 실행하는 검사 회귀 테스트는 `uv run scripts/test_pcb_validation_gate.py`다.
 
 ### 전원과 USB의 실물 없는 검토
 
@@ -143,4 +145,4 @@ docker run --rm --platform linux/amd64 --entrypoint /bin/sh \
   '
 ```
 
-63키는 위 실행 명령의 `--keys 66` 세 곳을 `--keys 63`으로 바꾼다. `--no-project --active`는 미리 설치한 가상 환경과 시스템 KiCad 바인딩을 함께 사용하기 위한 옵션이다. USB 배선 및 배선 정리 하위 스크립트는 자체 메타데이터에 따라 `uv` 캐시를 만들 수 있으므로 첫 실행에는 네트워크가 필요하다. DRAFT E의 두 버전은 이 환경에서 생성하고 ERC/DRC와 연결 일치를 검사했다.
+62키는 위 실행 명령의 `--keys 66` 세 곳을 `--keys 63`으로 바꾼다. `--no-project --active`는 미리 설치한 가상 환경과 시스템 KiCad 바인딩을 함께 사용하기 위한 옵션이다. USB 배선 및 배선 정리 하위 스크립트는 자체 메타데이터에 따라 `uv` 캐시를 만들 수 있으므로 첫 실행에는 네트워크가 필요하다. DRAFT E의 두 버전은 이 환경에서 생성하고 ERC/DRC와 연결 일치를 검사했다.

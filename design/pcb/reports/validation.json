@@ -1,6 +1,6 @@
 {
   "status": "reviewable draft; NOT manufacturing approval",
-  "key_count": 66,
+  "key_count": 65,
   "layout_variant": "preferred",
   "keepout_mm": [
     155,
@@ -24,30 +24,30 @@
     322.5,
     147.3
   ],
-  "switch_count": 66,
-  "diode_count": 66,
-  "footprint_count": 182,
-  "net_count": 120,
-  "track_segment_count": 1380,
-  "via_count": 187,
+  "switch_count": 65,
+  "diode_count": 65,
+  "footprint_count": 180,
+  "net_count": 119,
+  "track_segment_count": 1407,
+  "via_count": 182,
   "signal_tracks_on_ground_layer": 3,
   "keepout_intersections": [],
   "structural_errors": [],
   "native_export_readback": {
     "exports/back.svg": {
-      "bytes": 340252,
+      "bytes": 341871,
       "viewBox": "0.0000 0.0000 284.9880 94.5896"
     },
     "exports/front.svg": {
-      "bytes": 296747,
+      "bytes": 294968,
       "viewBox": "0.0000 0.0000 284.9880 94.5896"
     },
     "exports/ground.svg": {
-      "bytes": 554869,
+      "bytes": 545091,
       "viewBox": "0.0000 0.0000 284.9880 94.5896"
     },
     "exports/schematic/keycult66.svg": {
-      "bytes": 3005866,
+      "bytes": 2991910,
       "viewBox": "0.0000 0.0000 840.9940 594.0044"
     },
     "exports/schematic.pdf": {
@@ -204,8 +204,8 @@
   ],
   "artifact_sha256": {
     "keycult66.kicad_pro": "b5a503cd556a6bbe61f1a9eb762cf2cf5d497e39cf04dedc9c8dc7b64c547d2f",
-    "keycult66.kicad_sch": "ee3328eed80f19ed68a63f56f9d7a99b7447f4077b0bc407b5026591b9f49448",
-    "keycult66.kicad_pcb": "be6e1a45ca894b523d146a19b8c9807ba47bc4ba59504aad5ab99d8ef1abf5af"
+    "keycult66.kicad_sch": "000c895f67d40b64a6e49ea2d72671f68baca08dad5717b61394ea26e31b84a7",
+    "keycult66.kicad_pcb": "c1ca19019050afbc43ac65f96025b560fbaf5fd63599017939dac27e669a5110"
   },
   "usb_reference_review": {
     "f_cu_width_mm": 0.29,

@@ -65,5 +65,29 @@ class ElectricalReviewTests(unittest.TestCase):
             self.assertNotIn('"In2.Cu") (net "USB_DM")', first)
 
 
+    def test_usb_stitches_replace_imported_uuids_without_removing_other_vias(self):
+        stitches = [sexpdata.loads(f'''(via (at {x} {y}) (size .6) (drill .3)
+          (layers "F.Cu" "B.Cu") (net "GND") (uuid "imported-{i}"))''')
+          for i, (x, y) in enumerate([(38.5, 113.2), (113.4, 55.7), (118.5, 54.7)])]
+        retained = [sexpdata.loads(f'''(via (at 38.5 113.2) (size {size}) (drill {drill})
+          (layers "F.Cu" "{layer}") (net "{net}") (uuid "other-{i}"))''')
+          for i, (size, drill, layer, net) in enumerate([
+              (.6, .3, 'B.Cu', '+3V3'), (.8, .3, 'B.Cu', 'GND'),
+              (.6, .4, 'B.Cu', 'GND'), (.6, .3, 'In1.Cu', 'GND')])]
+        with TemporaryDirectory() as directory:
+            path = Path(directory) / 'board.kicad_pcb'
+            path.write_text(sexpdata.dumps(sexpdata.loads('(kicad_pcb (setup))') + stitches + retained))
+            apply_usb_route(path)
+            first = path.read_text()
+            board = sexpdata.loads(first)
+            for via in stitches:
+                self.assertNotIn(via, board)
+                self.assertEqual(sum(isinstance(item, list) and item[:-1] == via[:-1] for item in board), 1)
+            for via in retained:
+                self.assertIn(via, board)
+            apply_usb_route(path)
+            self.assertEqual(path.read_text(), first)
+
+
 if __name__ == "__main__":
     unittest.main()

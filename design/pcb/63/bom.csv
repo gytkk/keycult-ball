@@ -158,11 +158,9 @@ SW56,r4c4 Space,Cherry MX PCB-mount solder; exact variant TBD,Button_Switch_Keyb
 D56,1N4148W,1N4148W,Diode_SMD:D_SOD-123,Bottom SMT,provisional sourcing,Cathode pad1 to row; QMK COL2ROW; r4c4
 SW57,r4c5 Del,Cherry MX PCB-mount solder; exact variant TBD,Button_Switch_Keyboard:SW_Cherry_MX_1.00u_PCB,THT solder,provisional sourcing,"Stock footprint origin is pin1, NOT stem; stem offset (-2.54,+5.08)mm"
 D57,1N4148W,1N4148W,Diode_SMD:D_SOD-123,Bottom SMT,provisional sourcing,Cathode pad1 to row; QMK COL2ROW; r4c5
-SW58,r4c6 M1,Cherry MX PCB-mount solder; exact variant TBD,Button_Switch_Keyboard:SW_Cherry_MX_1.00u_PCB,THT solder,provisional sourcing,"Stock footprint origin is pin1, NOT stem; stem offset (-2.54,+5.08)mm"
+SW58,r4c6 M1,Cherry MX PCB-mount solder; exact variant TBD,Button_Switch_Keyboard:SW_Cherry_MX_1.50u_PCB,THT solder,provisional sourcing,"Stock footprint origin is pin1, NOT stem; stem offset (-2.54,+5.08)mm"
 D58,1N4148W,1N4148W,Diode_SMD:D_SOD-123,Bottom SMT,provisional sourcing,Cathode pad1 to row; QMK COL2ROW; r4c6
-SW59,r4c7 M3,Cherry MX PCB-mount solder; exact variant TBD,Button_Switch_Keyboard:SW_Cherry_MX_1.00u_PCB,THT solder,provisional sourcing,"Stock footprint origin is pin1, NOT stem; stem offset (-2.54,+5.08)mm"
-D59,1N4148W,1N4148W,Diode_SMD:D_SOD-123,Bottom SMT,provisional sourcing,Cathode pad1 to row; QMK COL2ROW; r4c7
-SW60,r4c8 M2,Cherry MX PCB-mount solder; exact variant TBD,Button_Switch_Keyboard:SW_Cherry_MX_1.00u_PCB,THT solder,provisional sourcing,"Stock footprint origin is pin1, NOT stem; stem offset (-2.54,+5.08)mm"
+SW60,r4c8 M2,Cherry MX PCB-mount solder; exact variant TBD,Button_Switch_Keyboard:SW_Cherry_MX_1.50u_PCB,THT solder,provisional sourcing,"Stock footprint origin is pin1, NOT stem; stem offset (-2.54,+5.08)mm"
 D60,1N4148W,1N4148W,Diode_SMD:D_SOD-123,Bottom SMT,provisional sourcing,Cathode pad1 to row; QMK COL2ROW; r4c8
 SW61,r4c9 Bksp,Cherry MX PCB-mount solder; exact variant TBD,Button_Switch_Keyboard:SW_Cherry_MX_1.00u_PCB,THT solder,provisional sourcing,"Stock footprint origin is pin1, NOT stem; stem offset (-2.54,+5.08)mm"
 D61,1N4148W,1N4148W,Diode_SMD:D_SOD-123,Bottom SMT,provisional sourcing,Cathode pad1 to row; QMK COL2ROW; r4c9

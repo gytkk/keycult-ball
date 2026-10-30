@@ -20,8 +20,9 @@ from shapely.ops import unary_union
 import pymupdf
 VARIANTS={66:('preferred',[155,75,205,125]),63:('rear_clearance',[151.425,52.7,208.575,128.575])}
 def indexed_keys(layout,variant):
+ refs={key_id:i for i,key_id in enumerate([f'r{r}c{c}' for r in range(5) for c in range(15) if r in (0,4) or c not in (6,7,8)],1)}
  selected={k['id'] for k in layout[variant]['keys']}
- return [(i,k) for i,k in enumerate(layout['preferred']['keys'],1) if k['id'] in selected]
+ return [(refs[k['id']],k) for k in layout['preferred']['keys'] if k['id'] in selected]
 def circuit_net_matches(expected,actual,ref,pin,net_pad_count):
  if expected is None:
   return actual.startswith(f'unconnected-({ref}-') and actual.endswith(f'-Pad{pin})') and net_pad_count==1
@@ -61,8 +62,8 @@ if 'J1' in fps:
  check(usb_connector_matches({p.GetNumber():p.GetNetname() for p in j.Pads()}),'J1 differs from the UDB contact pinout')
  check(j.GetFPID().GetLibItemName()=='JST_SH_SM04B-SRSS-TB_1x04-1MP_P1.00mm_Horizontal','Wrong J1 connector footprint')
  check(j.GetLayer()==pcb.B_Cu and abs(j.GetOrientationDegrees()-90)<.00001,'J1 must face the left edge from the bottom side')
-check(circuit['key_count']==args.keys and circuit['layout_variant']==variant,'Circuit layout variant differs from selected key count')
-check(len(keys)==args.keys and len(layout[variant]['keys'])==args.keys,'Unexpected layout key count')
+check(circuit['key_count']==args.keys-1 and circuit['layout_variant']==variant,'Circuit layout variant differs from selected key count')
+check(len(keys)==args.keys-1 and layout[variant]['key_count']==args.keys-1,'Unexpected layout key count')
 check([k for _,k in keys]==layout[variant]['keys'],'Variant must preserve baseline key coordinates and order')
 switch_refs={f'SW{i}' for i,_ in keys};diode_refs={f'D{i}' for i,_ in keys}
 check({ref for ref in fps if ref.startswith('SW') and ref not in {'SW67','SW68'}}==switch_refs,'Wrong matrix switch references')
@@ -78,6 +79,7 @@ for i,k in keys:
  stem=stems[0]
  actual=xy(stem.GetPosition());delta=max(abs(actual[j]-expected[j]) for j in [0,1]);check(delta<.00001,'Stem position '+k['id'])
  check(f.GetValue().startswith(k['id']+' '),'Wrong key ID '+k['id'])
+ check(f.GetFPID().GetLibItemName()==f'SW_Cherry_MX_{k["width_u"]:.2f}u_PCB','Wrong switch width '+k['id'])
  check(fps[f'D{i}'].GetLayer()==pcb.B_Cu,'Diode not bottom-mounted '+k['id'])
  for ref,nets in [(f'SW{i}',{'1':f'COL{k["column"]}','2':'K_'+k['id']}),(f'D{i}',{'1':f'ROW{k["row"]}','2':'K_'+k['id']})]:
   check({p.GetNumber():p.GetNetname() for p in fps[ref].Pads() if p.GetNumber()}==nets,'Wrong matrix pad nets '+ref)
@@ -182,7 +184,7 @@ pair_gap=usb_areas['USB_DM'].distance(usb_areas['USB_DP'])
 check(pair_gap>=.2-1e-5,'F.Cu USB pair edge gap below .2mm study')
 via_ground_distances=[min((Point(xy(v.GetPosition())).distance(Point(p)) for p in gnd_vias),default=float('inf')) for v in usb_vias]
 check(len(usb_vias)==8 and all(d<=3 for d in via_ground_distances),'USB transitions require nearby ground vias within 3mm study rule')
-summary={'status':('validation failed' if errs or viol or (not args.draft and unconn) else 'reviewable draft; NOT manufacturing approval'),'key_count':args.keys,'layout_variant':variant,'keepout_mm':circuit['keepout_mm'],'kicad_version':pcb.GetBuildVersion(),'erc_count':len(eitems),'erc_by_type':dict(Counter(v['type'] for v in eitems)),'drc_count':len(viol),'drc_by_type':dict(Counter(v['type'] for v in viol)),'drc_by_severity':dict(Counter(v['severity'] for v in viol)),'unconnected_item_count':len(unconn),'unconnected_nets':sorted({i['description'].split('[')[1].split(']')[0] for v in unconn for i in v['items'] if '[' in i['description']}),'schematic_parity_count':len(parity),'independent_netlist_mismatch_count':len(netdiff),'envelope_bounds_mm':bounds,'switch_count':len(set(fps)&switch_refs),'diode_count':len(set(fps)&diode_refs),'footprint_count':len(fps),'net_count':len(list(b.GetNetInfo().NetsByNetcode()))-1,'track_segment_count':sum(not isinstance(t,pcb.PCB_VIA) for t in b.GetTracks()),'via_count':sum(isinstance(t,pcb.PCB_VIA) for t in b.GetTracks()),'signal_tracks_on_ground_layer':sum(t.GetLayer()==pcb.In1_Cu and t.GetNetname() not in ('GND','+3V3','+1V1') for t in b.GetTracks() if not isinstance(t,pcb.PCB_VIA)),'keepout_intersections':sorted(set(bad)),'structural_errors':errs,'native_export_readback':readback,'commands':commands,'artifact_sha256':{p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in [D/(NAME+ext) for ext in ['.kicad_pro','.kicad_sch','.kicad_pcb']]}}
+summary={'status':('validation failed' if errs or viol or (not args.draft and unconn) else 'reviewable draft; NOT manufacturing approval'),'key_count':len(keys),'layout_variant':variant,'keepout_mm':circuit['keepout_mm'],'kicad_version':pcb.GetBuildVersion(),'erc_count':len(eitems),'erc_by_type':dict(Counter(v['type'] for v in eitems)),'drc_count':len(viol),'drc_by_type':dict(Counter(v['type'] for v in viol)),'drc_by_severity':dict(Counter(v['severity'] for v in viol)),'unconnected_item_count':len(unconn),'unconnected_nets':sorted({i['description'].split('[')[1].split(']')[0] for v in unconn for i in v['items'] if '[' in i['description']}),'schematic_parity_count':len(parity),'independent_netlist_mismatch_count':len(netdiff),'envelope_bounds_mm':bounds,'switch_count':len(set(fps)&switch_refs),'diode_count':len(set(fps)&diode_refs),'footprint_count':len(fps),'net_count':len(list(b.GetNetInfo().NetsByNetcode()))-1,'track_segment_count':sum(not isinstance(t,pcb.PCB_VIA) for t in b.GetTracks()),'via_count':sum(isinstance(t,pcb.PCB_VIA) for t in b.GetTracks()),'signal_tracks_on_ground_layer':sum(t.GetLayer()==pcb.In1_Cu and t.GetNetname() not in ('GND','+3V3','+1V1') for t in b.GetTracks() if not isinstance(t,pcb.PCB_VIA)),'keepout_intersections':sorted(set(bad)),'structural_errors':errs,'native_export_readback':readback,'commands':commands,'artifact_sha256':{p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in [D/(NAME+ext) for ext in ['.kicad_pro','.kicad_sch','.kicad_pcb']]}}
 summary['usb_reference_review']={'f_cu_width_mm':.29,'minimum_f_cu_pair_edge_gap_mm':round(pair_gap,6),'uncovered_projection_mm2':uncovered,'transition_exclusion_radius_mm':.51,'maximum_signal_via_to_ground_via_mm':round(max(via_ground_distances,default=0),6),'note':'Saved refilled In1 polygons, make_valid for KiCad touching contours. Projection only; .51mm disks exclude signal-via antipads. 3mm stitching rule is a project study condition, not USB compliance. Finite plane edges, transitions and actual impedance still require qualification.'}
 summary['ground_layer_tracks_by_net']=dict(Counter(t.GetNetname() for t in b.GetTracks() if not isinstance(t,pcb.PCB_VIA) and t.GetLayer()==pcb.In1_Cu))
 (R/'validation.json').write_text(json.dumps(summary,indent=2,ensure_ascii=False)+'\n');(R/'switch-coordinates.json').write_text(json.dumps(coord,indent=2)+'\n')

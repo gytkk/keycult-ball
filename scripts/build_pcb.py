@@ -69,7 +69,8 @@ def cap(ref,value,net,sch,pos,angle=0,fp=CFP): return part(ref,'Device:C',value,
 layout=json.loads((ROOT/'design/preliminary/layout.json').read_text())
 variant='preferred' if args.keys==66 else 'rear_clearance'
 keys=layout[variant]['keys']
-refs={k['id']:i for i,k in enumerate(layout['preferred']['keys'],1)}
+# Keep original switch/diode references when a matrix cell is removed.
+refs={key_id:i for i,key_id in enumerate([f'r{r}c{c}' for r in range(5) for c in range(15) if r in (0,4) or c not in (6,7,8)],1)}
 indexed_keys=[(refs[k['id']],k) for k in keys]
 keepout=[155,75,205,125] if args.keys==66 else [151.425,52.7,208.575,128.575]
 ROW_GPIO=[4,5,6,7,8]; COL_GPIO=[9,10,11,12,13,14,15,16,17,18,19,20,21,22,26]
@@ -77,6 +78,7 @@ ROW_GPIO=[4,5,6,7,8]; COL_GPIO=[9,10,11,12,13,14,15,16,17,18,19,20,21,22,26]
 gpio={0:'SENSOR_MISO_3V3',1:'SENSOR_CS_3V3',2:'SENSOR_SCLK_3V3',3:'SENSOR_MOSI_3V3'}
 gpio.update({n:f'ROW{i}' for i,n in enumerate(ROW_GPIO)})
 gpio.update({n:f'COL{i}' for i,n in enumerate(COL_GPIO)})
+if args.keys==63:gpio[COL_GPIO[7]]=None  # No switches remain in COL7 on this variant.
 gpio.update({23:'SENSOR_MOTION_3V3',24:'SENSOR_RESET_3V3'})
 u1={}
 for p in pins('MCU_RaspberryPi:RP2040'):
@@ -131,7 +133,7 @@ for n,net in enumerate(['VBUS_FUSED','GND'],1):
 for i,k in indexed_keys:
     x,y=180+k['x_mm'],100+k['y_mm']; r,c=k['row'],k['column']; nodekey='K_'+k['id']
     sx0,sy0=27.94+50.8*c,309.88+45.72*r
-    part(f'SW{i}','Switch:SW_Push',k['id']+' '+k['label'],'Button_Switch_Keyboard:SW_Cherry_MX_1.00u_PCB',{1:f'COL{c}',2:nodekey},(sx0,sy0),(x+2.54,y-5.08),side='F',mpn='Cherry MX PCB-mount solder; exact variant TBD',note='Stock footprint origin is pin1, NOT stem; stem offset (-2.54,+5.08)mm')
+    part(f'SW{i}','Switch:SW_Push',k['id']+' '+k['label'],f'Button_Switch_Keyboard:SW_Cherry_MX_{k["width_u"]:.2f}u_PCB',{1:f'COL{c}',2:nodekey},(sx0,sy0),(x+2.54,y-5.08),side='F',mpn='Cherry MX PCB-mount solder; exact variant TBD',note='Stock footprint origin is pin1, NOT stem; stem offset (-2.54,+5.08)mm')
     part(f'D{i}','Device:D','1N4148W','Diode_SMD:D_SOD-123',{1:f'ROW{r}',2:nodekey},(sx0,sy0+15.24),(x-4,y+6.6),mpn='1N4148W',note='Cathode pad1 to row; QMK COL2ROW; '+k['id'])
 
 
@@ -223,7 +225,7 @@ for text,x,y,size in [
  ('No module connector or 5V sensor connection. Verify revision and level translation before connection.',551.18,190.5,1.5),
  ('DECOUPLING: individual IOVDD / USB / ADC / DVDD pins; VREG 1uF input + output',25.4,195.58,1.5),
  ('4 / 5 ROW x 15 COLUMN MATRIX: COL -> switch -> diode ANODE -> CATHODE -> ROW (COL2ROW)',25.4,284.48,2.2),
- (f'{args.keys} keys; stable references from preferred.keys. Central reservation is NOT A HOLE.',25.4,294.64,1.5),
+ (f'{len(keys)} keys; legacy Keycult{args.keys} references. Bottom M1/M2: 1.5u each. Central reservation is NOT A HOLE.',25.4,294.64,1.5),
  ('DB1: EXTERNAL C5-JSH assumed; CC 5.1k x2 / TPD4E05U06 ESD / PTC / SMF6.0A TVS.',292.1,35.56,1.2),
  ('J1: 1=protected USB power 2=D- 3=D+ 4=GND; 1:1 cable. Main-board F1 retained.',292.1,43.18,1.2),
  ('Shield joins GND on DB1. No active sustained-overvoltage disconnect. Mechanical fit provisional.',292.1,50.8,1.2)]:
@@ -282,6 +284,7 @@ ground_offsets={'C10':(.42,.5),'C12':(.82,.1),'C11':(.42,.6),'C16':(0,.8),'U1':(
 for ref,f in fps.items():
  for p in f.Pads():
   if p.GetNetname()!='GND':continue
+  if ref=='J1' and p.GetNumber()=='MP':continue  # USB overlay ground patch connects both mounting pads.
   a=xy(p.GetPosition())
   if ref=='U1' and p.GetNumber()=='57':via('GND',a);continue
   dx,dy=ground_offsets.get(ref,(.72,0))
@@ -331,7 +334,7 @@ for x,y in [(38,53.2),(322,53.2),(322,146.8),(38,146.8)]:g.Outline().Append(mm(x
 board.Add(g)
 # Local ground and support routing are performed by the detailed router.
 # Board notes are on fabrication/documentation layers, not over copper/silkscreen.
-for text0,xy0,size in [(f'DRAFT E / {args.keys} KEYS - NOT FOR FABRICATION',(180,150),1.5),('RESERVED / NO CUTOUT',(180,100),1),('USB F.Cu 0.29/0.20mm; 7628 STACKUP STUDY / IMPEDANCE NOT QUALIFIED',(85,50),.8),('SENSOR 3V3 LOGIC ONLY / NO MODULE CONNECTOR',(98,98),.9)]:
+for text0,xy0,size in [(f'DRAFT E / {len(keys)} KEYS - NOT FOR FABRICATION',(180,150),1.5),('RESERVED / NO CUTOUT',(180,100),1),('USB F.Cu 0.29/0.20mm; 7628 STACKUP STUDY / IMPEDANCE NOT QUALIFIED',(85,50),.8),('SENSOR 3V3 LOGIC ONLY / NO MODULE CONNECTOR',(98,98),.9)]:
  t=pcb.PCB_TEXT(board);t.SetText(text0);t.SetPosition(pt(*xy0));t.SetTextSize(pt(size,size));t.SetTextThickness(mm(.15));t.SetLayer(pcb.Dwgs_User);board.Add(t)
 for i,k in indexed_keys:
  t=pcb.PCB_TEXT(board);t.SetText(k['id']);t.SetPosition(pt(180+k['x_mm'],100+k['y_mm']+8.2));t.SetTextSize(pt(.8,.8));t.SetTextThickness(mm(.12));t.SetLayer(pcb.F_SilkS);board.Add(t)
@@ -346,7 +349,7 @@ pro['net_settings']['netclass_patterns']=[{'netclass':'USB','pattern':net} for n
 (OUT/(NAME+'.kicad_pro')).write_text(json.dumps(pro,indent=2)+'\n')
 (OUT/'sym-lib-table').write_text('(sym_lib_table\n'+''.join(f'  (lib (name "{lib}")(type "KiCad")(uri "${{KICAD10_SYMBOL_DIR}}/{lib}.kicad_sym")(options "")(descr "KiCad stock"))\n' for lib in sorted({p['lib'].split(':')[0] for p in parts}))+')\n')
 (OUT/'fp-lib-table').write_text('(fp_lib_table\n'+''.join(f'  (lib (name "{lib}")(type "KiCad")(uri "${{KICAD10_FOOTPRINT_DIR}}/{lib}.pretty")(options "")(descr "KiCad stock"))\n' for lib in sorted({p['fp'].split(':')[0] for p in parts if p['fp']}))+')\n')
-(OUT/'circuit.json').write_text(json.dumps({'parts':parts,'rows':ROW_GPIO,'columns':COL_GPIO,'gpio':gpio,'origin_mm':[180,100],'envelope_mm':[W,H],'keepout_mm':keepout,'key_count':args.keys,'layout_variant':variant},ensure_ascii=False,indent=2)+'\n')
+(OUT/'circuit.json').write_text(json.dumps({'parts':parts,'rows':ROW_GPIO,'columns':COL_GPIO,'gpio':gpio,'origin_mm':[180,100],'envelope_mm':[W,H],'keepout_mm':keepout,'key_count':len(keys),'layout_variant':variant},ensure_ascii=False,indent=2)+'\n')
 with (OUT/'bom.csv').open('w') as f:
  w=csv.writer(f,lineterminator='\n');w.writerow(['Reference','Value','Manufacturer part / candidate','Footprint','Assembly','Status','Notes'])
  for p in parts:

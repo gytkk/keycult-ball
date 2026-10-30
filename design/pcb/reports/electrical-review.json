@@ -2,10 +2,10 @@
   "status": "conditional desk review; no power, signal-integrity or manufacturing pass",
   "source_facts": "../sources.md#electrical-desk-review-sources",
   "input_sha256": {
-    "design/pcb/circuit.json": "66d3d5a2d6b1b795b9ede74188de7f4265051547695a53e1245271466d55210d",
-    "design/pcb/keycult66.kicad_pcb": "be6e1a45ca894b523d146a19b8c9807ba47bc4ba59504aad5ab99d8ef1abf5af",
-    "design/pcb/63/circuit.json": "865ce96e45462d58bd120c4e26beca92cc97ede038e2ebf889033acce223d84f",
-    "design/pcb/63/keycult63.kicad_pcb": "7f7421deea6f86f025b1b182df60d6c47f97143183d383a3b72ef384ff365eb2"
+    "design/pcb/circuit.json": "fee5bb35da8644f555e54ebbcc4267ac9a7dde32f38eaa2e17ca45cfead9b210",
+    "design/pcb/keycult66.kicad_pcb": "c1ca19019050afbc43ac65f96025b560fbaf5fd63599017939dac27e669a5110",
+    "design/pcb/63/circuit.json": "5e9125dbf7a1e1dd975cf6974be440a79bf85a93ee02ddc2479fce3080e5d0a3",
+    "design/pcb/63/keycult63.kicad_pcb": "8b6f9a4bf89f93828c9e9e7662f0e9d79b40464e1b8af73f767ac4d56198b6b3"
   },
   "assumptions": {
     "power": "150mA total 3V3 planning allocation; MCU 80mA and other loads 5mA are engineering allowances, not measured maxima. Flash 25mA requires cited operating conditions and read clock <=104MHz. LDO ground-current reserve 1mA is assumed.",
