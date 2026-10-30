@@ -74,6 +74,20 @@ J1's footprint origin is PCB **(40.6,112.0)mm**, B.Cu, rotation 90 degrees, with
 
 J1's data pair runs together on In2.Cu along the left and top margins, referenced to the In1.Cu ground pour, then joins the existing local USB route. VBUS uses a separate 0.4mm feed to the retained main-board fuse. Trace width/gap and cable length still require stackup and signal-integrity review; the route is not impedance-qualified.
 
+The 2026-10-30 resume review measured the saved native PCB segments in both variants. Their USB copper is identical. Lengths below are the sum of segment centreline lengths, including branches to test pads; they exclude pad traversal, via barrels and the external cable, so they are not end-to-end electrical lengths.
+
+| Saved copper | D- | D+ |
+| --- | --- | --- |
+| J1-side net, before the series resistor | 156.4214mm | 159.9906mm |
+| Vias on the J1-side net | 4 | 4 |
+| MCU-side net, after the series resistor | 6.6253mm | 6.6253mm |
+
+The long In2.Cu margin runs have 0.2mm trace width and 0.2mm edge gap. The J1-side copper-length difference is 3.5692mm. These are measured routing properties, not acceptance limits or evidence of signal-integrity failure. The project netclass's 0.15mm differential-gap setting is a routing default, not a measurement of this pair or a qualified impedance rule. The saved board has no explicit dielectric stackup.
+
+The saved layer PDF was enlarged to inspect the J1 escape, margin pair, MCU-side transitions and In1.Cu pour. The native saved fill polygons cover the full trace-width projection of the long In2.Cu margin runs; uncovered areas occur only within 0.505mm of their transition-via centres. This is a check of saved fill geometry, not a new zone refill. Connector and transition fan-outs separate the pair locally, and the signal vias have antipads in the reference plane. These checks do not qualify those return paths or the connector/cable discontinuities. Preserve these as review items when selecting the manufacturing stackup and confirming the installed cable.
+
+During this review, all native CAD hashes matched the existing validation reports, and both saved-route manifests matched their inputs and SES files. The nine validation regression tests and repository validation passed. Fresh ERC/DRC and native exports could not run because this Mac has no `kicad-cli`; the zero-count reports remain the earlier KiCad 10.0.7 results. No copper or connector position was changed.
+
 No USB-C receptacle or CC resistors are placed on the main board: CC must be handled at the daughterboard's USB-C connector. A UDB C3 schematic has CC and protection components, but **the actual Keycult board's ESD, overvoltage, fuse and shield circuitry has not been established**. Main-board F1 remains fitted; confirm total resistance/drop and protection coordination if the daughterboard also has a fuse. The [current NovelKeys replacement PCB](https://novelkeys.com/products/keycult-no-1-60-pcb) has a different board design from the old WT60-A, so its name alone does not establish the owned interface revision.
 
 Before connection, identify the board/revision, verify all four cable paths with USB power disconnected, and check the actual connector position, cable reach and protection arrangement in issue #3. The electrical interface is implemented; installed compatibility remains conditional on those checks.
