@@ -80,12 +80,11 @@ macOS에서 설치된 FreeCAD 1.1.4의 Python 3.11과 OpenCascade를 사용한�
 uv run scripts/fetch_sources.py
 uv run scripts/verify_official_contour.py
 uv run --python /Applications/FreeCAD.app/Contents/Resources/bin/python scripts/build_plate.py
-open -n -a /Applications/FreeCAD.app --args "$PWD/scripts/preview_plate.FCMacro"
 ```
 
-설치 위치가 다르면 `FREECAD_ROOT`를 `Contents/Resources` 경로로 지정하고 `--python`도 해당 앱의 Python으로 바꾼다. Linux 실행 환경에서는 FreeCAD와 Python 바인딩 경로를 별도로 확인해야 하며 이 절차를 Linux에서 시험하지는 않았다. GUI는 앱의 정식 실행 파일로 열고 매크로가 두 모델의 표시 설정과 이미지를 저장한다. 외부 Python에서 `FreeCADGui.showMainWindow()`를 호출하는 방식은 이 Mac에서 종료 시 비정상 종료가 발생하여 사용하지 않는다.
+설치 위치가 다르면 `FREECAD_ROOT`를 `Contents/Resources` 경로로 지정하고 `--python`도 해당 앱의 Python으로 바꾼다. Linux 실행 환경에서는 FreeCAD와 Python 바인딩 경로를 별도로 확인해야 하며 이 절차를 Linux에서 시험하지는 않았다. 생성된 FCStd는 FreeCAD 앱에서 열고 객체의 표시 여부, 색상과 투명도를 직접 조정한다. PNG가 필요하면 GUI에서 저장한다. 외부 Python에서 `FreeCADGui.showMainWindow()`를 호출하는 방식은 이 Mac에서 종료 시 비정상 종료가 발생하여 사용하지 않는다.
 
-결과는 Git에서 제외되는 `design/preliminary/sources/local/plate-study/` 아래에 생성된다. `65/`와 `62/`는 각각 65키와 62키 결과를 저장한다. 각 디렉터리에 `plate-<keys>.FCStd`, `plate-<keys>.step`, `carrier-<keys>.step`, `plate-<keys>-DRAFT.dxf`, `plan.svg`, `checks.json`을 두며 GUI 매크로는 `top.png`와 `assembly.png`, 상위 `preview-status.json`을 추가한다. 재생성은 이 초안을 덮어쓰므로 수동 CAD 변경은 별도 이름으로 먼저 저장한다. 공개 저장소에는 생성 스크립트와 형상을 복제하지 않는 설명만 둔다.
+결과는 Git에서 제외되는 `design/preliminary/sources/local/plate-study/` 아래에 생성된다. `65/`와 `62/`는 각각 65키와 62키 결과를 저장한다. 각 디렉터리에 `plate-<keys>.FCStd`, `plate-<keys>.step`, `carrier-<keys>.step`, `plate-<keys>-DRAFT.dxf`, `plan.svg`, `checks.json`을 둔다. 재생성은 이 초안을 덮어쓰므로 수동 CAD 변경은 별도 이름으로 먼저 저장한다. 공개 저장소에는 생성 스크립트와 형상을 복제하지 않는 설명만 둔다.
 
 배열 원본은 기존 `design/preliminary/build_artifacts.py`이고, 새 기구 검토 치수는 `scripts/build_plate.py`의 `STUDY`다. FCStd의 `Study` 속성은 사용한 값을 기록한 것으로 형상을 자동 구동하지 않는다. `Plate`는 원본 외곽의 판과 검토용 절삭 객체를 연결한 Boolean cut이며, 재현 가능한 치수 변경은 생성기에 반영한다. 생성 검사는 원본 해시, PCB 좌표 및 CAD 해시, 단일 솔리드, 구멍 수, 외곽 보존, STEP/FCStd/DXF 재열기를 확인한다. `review.json`의 PCB-볼 간섭은 알려진 미해결 항목이며, 스크립트 성공을 실물 조립 통과로 해석하지 않는다.
 
@@ -96,12 +95,11 @@ open -n -a /Applications/FreeCAD.app --args "$PWD/scripts/preview_plate.FCMacro"
 ```bash
 uv run scripts/fetch_sources.py
 uv run --python /Applications/FreeCAD.app/Contents/Resources/bin/python scripts/build_holder_study.py
-open -n -a /Applications/FreeCAD.app --args "$PWD/scripts/preview_holder.FCMacro"
 ```
 
 생성기는 필요한 Keyball44 호스트 원본 ZIP이 없으면 고정 커밋에서 받아 SHA-256을 확인하고, 있으면 해시를 대조한다. DXF 단위 헤더의 불일치는 KiCad 장착점 7개와 대조해 기록한다. 현재 배열과 두 PCB의 stem 좌표, 사각 `Edge.Cuts`를 직접 읽으며 실행 중 입력 파일이 바뀌면 실패한다. 기존 보강판 도구의 공식 외곽 추출 함수를 사용하지만 기존 보강판 초안과 KiCad 파일은 덮어쓰지 않는다.
 
-Git에서 제외하는 `design/preliminary/sources/local/holder-study/65/`와 `62/`에 기본 시나리오의 `holder-study.FCStd`, `Basket-EXPERIMENT.step`, `Plate-EXPERIMENT.step`, `ProposedOpenPCB-EXPERIMENT.step`, `section.svg`를 생성한다. 매크로는 `assembly.png`, `underside.png`, `basket.png`와 표시 설정을 저장한다. 상위 `review.json`에는 높이와 외피 크기를 바꾼 18개 비교 결과, 입력 해시와 가정을 기록한다. 재생성은 이 실험 파일을 덮어쓰므로 수동 편집은 다른 이름으로 먼저 저장한다. FreeCAD의 `Assumptions` 속성은 기록용이며 형상을 구동하지 않는다. 가정 변경은 생성기에서 수행한다.
+Git에서 제외하는 `design/preliminary/sources/local/holder-study/65/`와 `62/`에 기본 시나리오의 `holder-study.FCStd`, `Basket-EXPERIMENT.step`, `Plate-EXPERIMENT.step`, `ProposedOpenPCB-EXPERIMENT.step`, `section.svg`를 생성한다. FCStd는 FreeCAD 앱에서 열어 검토하며 표시 설정과 PNG 저장은 GUI에서 직접 수행한다. 상위 `review.json`에는 높이와 외피 크기를 바꾼 18개 비교 결과, 입력 해시와 가정을 기록한다. 재생성은 이 실험 파일을 덮어쓰므로 수동 편집은 다른 이름으로 먼저 저장한다. FreeCAD의 `Assumptions` 속성은 기록용이며 형상을 구동하지 않는다. 가정 변경은 생성기에서 수행한다.
 
 생성기는 브래킷 단일 솔리드, 공식 보강판 외곽 보존, 플랜지 접촉면, 구성품별 현재/개구 PCB 간섭, 키 영역 및 체결부 간섭, STEP/FCStd 재열기를 검사한다. 볼과 센서의 실제 광학 간격, 케이스 공간 및 강성은 이 검사에 포함되지 않는다. 나사산과 실제 커넥터 결합 형상을 모델링하지 않았으므로 단순 형상 사이 간섭이 없어도 체결·조립이 검증된 것은 아니다.
 
