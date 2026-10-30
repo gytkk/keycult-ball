@@ -1,5 +1,5 @@
 # /// script
-# requires-python = ">=3.14"
+# requires-python = ">=3.11"
 # dependencies = ["shapely==2.1.2", "pymupdf==1.26.7"]
 # ///
 """Run genuine KiCad checks, compare nets and coordinates, and export/read back CAD.
@@ -47,6 +47,9 @@ def check(ok,message):
 def xy(p):return (pcb.ToMM(p.x),pcb.ToMM(p.y))
 layout=json.loads((ROOT/'design/preliminary/layout.json').read_text());variant,expected_keepout=VARIANTS[args.keys];keys=indexed_keys(layout,variant)
 circuit=json.loads((D/'circuit.json').read_text());expectedparts={p['ref']:p for p in circuit['parts'] if p['fp']}
+external=[p for p in circuit['parts'] if p['ref']=='DB1']
+check(len(external)==1 and external[0]['value']=='UDB C5-JSH / EXTERNAL' and not external[0]['fp'],'Expected external C5-JSH assembly DB1 without main-board footprint')
+check('DB1' not in fps,'External daughterboard must not be placed on the main PCB')
 check(set(fps)==set(expectedparts),'Schematic/PCB footprint reference set differs')
 check('J1' in fps,'Missing UDB cable connector')
 if 'J1' in fps:
@@ -77,6 +80,7 @@ for i,k in keys:
  coord.append({'id':k['id'],'switch':f'SW{i}','expected_stem_mm':expected,'actual_stem_mm':actual,'error_mm':delta})
 netroot=ET.parse(R/'netlist.xml').getroot()
 schnet={(n.attrib['ref'],n.attrib['pin']):net.attrib['name'].replace('/','{slash}') for net in netroot.find('nets') for n in net.findall('node')}
+check({pin:net for (ref,pin),net in schnet.items() if ref=='DB1'}=={'1':'VBUS_USB','2':'USB_DM','3':'USB_DP','4':'GND'},'External C5-JSH netlist pinout differs from J1')
 netdiff=[]
 net_pad_counts=Counter(p.GetNetname() for f in fps.values() for p in f.Pads() if p.GetNumber())
 for ref,f in fps.items():

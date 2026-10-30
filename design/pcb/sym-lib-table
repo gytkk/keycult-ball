@@ -1,5 +1,6 @@
 (sym_lib_table
   (lib (name "Connector")(type "KiCad")(uri "${KICAD10_SYMBOL_DIR}/Connector.kicad_sym")(options "")(descr "KiCad stock"))
+  (lib (name "Connector_Generic")(type "KiCad")(uri "${KICAD10_SYMBOL_DIR}/Connector_Generic.kicad_sym")(options "")(descr "KiCad stock"))
   (lib (name "Connector_Generic_MountingPin")(type "KiCad")(uri "${KICAD10_SYMBOL_DIR}/Connector_Generic_MountingPin.kicad_sym")(options "")(descr "KiCad stock"))
   (lib (name "Device")(type "KiCad")(uri "${KICAD10_SYMBOL_DIR}/Device.kicad_sym")(options "")(descr "KiCad stock"))
   (lib (name "MCU_RaspberryPi")(type "KiCad")(uri "${KICAD10_SYMBOL_DIR}/MCU_RaspberryPi.kicad_sym")(options "")(descr "KiCad stock"))

@@ -35,19 +35,19 @@
   "structural_errors": [],
   "native_export_readback": {
     "exports/back.svg": {
-      "bytes": 321778,
+      "bytes": 323752,
       "viewBox": "0.0000 0.0000 284.9880 94.5896"
     },
     "exports/front.svg": {
-      "bytes": 285445,
+      "bytes": 288059,
       "viewBox": "0.0000 0.0000 284.9880 94.5896"
     },
     "exports/ground.svg": {
-      "bytes": 543623,
+      "bytes": 545085,
       "viewBox": "0.0000 0.0000 284.9880 94.5896"
     },
     "exports/schematic/keycult66.svg": {
-      "bytes": 2923481,
+      "bytes": 3016420,
       "viewBox": "0.0000 0.0000 840.9940 594.0044"
     },
     "exports/schematic.pdf": {
@@ -98,8 +98,8 @@
       "json",
       "--severity-all",
       "-o",
-      "/home/gytkk/development/keycult-ball/design/pcb/reports/erc.json",
-      "/home/gytkk/development/keycult-ball/design/pcb/keycult66.kicad_sch"
+      "/work/design/pcb/reports/erc.json",
+      "/work/design/pcb/keycult66.kicad_sch"
     ],
     [
       "kicad-cli",
@@ -109,8 +109,8 @@
       "--format",
       "kicadxml",
       "-o",
-      "/home/gytkk/development/keycult-ball/design/pcb/reports/netlist.xml",
-      "/home/gytkk/development/keycult-ball/design/pcb/keycult66.kicad_sch"
+      "/work/design/pcb/reports/netlist.xml",
+      "/work/design/pcb/keycult66.kicad_sch"
     ],
     [
       "kicad-cli",
@@ -123,8 +123,8 @@
       "json",
       "--severity-all",
       "-o",
-      "/home/gytkk/development/keycult-ball/design/pcb/reports/drc.json",
-      "/home/gytkk/development/keycult-ball/design/pcb/keycult66.kicad_pcb"
+      "/work/design/pcb/reports/drc.json",
+      "/work/design/pcb/keycult66.kicad_pcb"
     ],
     [
       "kicad-cli",
@@ -133,8 +133,8 @@
       "pdf",
       "--exclude-pdf-property-popups",
       "-o",
-      "/home/gytkk/development/keycult-ball/design/pcb/exports/schematic.pdf",
-      "/home/gytkk/development/keycult-ball/design/pcb/keycult66.kicad_sch"
+      "/work/design/pcb/exports/schematic.pdf",
+      "/work/design/pcb/keycult66.kicad_sch"
     ],
     [
       "kicad-cli",
@@ -142,8 +142,8 @@
       "export",
       "svg",
       "-o",
-      "/home/gytkk/development/keycult-ball/design/pcb/exports/schematic/",
-      "/home/gytkk/development/keycult-ball/design/pcb/keycult66.kicad_sch"
+      "/work/design/pcb/exports/schematic/",
+      "/work/design/pcb/keycult66.kicad_sch"
     ],
     [
       "kicad-cli",
@@ -156,8 +156,8 @@
       "--fit-page-to-board",
       "--exclude-drawing-sheet",
       "-o",
-      "/home/gytkk/development/keycult-ball/design/pcb/exports/front.svg",
-      "/home/gytkk/development/keycult-ball/design/pcb/keycult66.kicad_pcb"
+      "/work/design/pcb/exports/front.svg",
+      "/work/design/pcb/keycult66.kicad_pcb"
     ],
     [
       "kicad-cli",
@@ -170,8 +170,8 @@
       "--fit-page-to-board",
       "--exclude-drawing-sheet",
       "-o",
-      "/home/gytkk/development/keycult-ball/design/pcb/exports/back.svg",
-      "/home/gytkk/development/keycult-ball/design/pcb/keycult66.kicad_pcb"
+      "/work/design/pcb/exports/back.svg",
+      "/work/design/pcb/keycult66.kicad_pcb"
     ],
     [
       "kicad-cli",
@@ -184,8 +184,8 @@
       "--fit-page-to-board",
       "--exclude-drawing-sheet",
       "-o",
-      "/home/gytkk/development/keycult-ball/design/pcb/exports/ground.svg",
-      "/home/gytkk/development/keycult-ball/design/pcb/keycult66.kicad_pcb"
+      "/work/design/pcb/exports/ground.svg",
+      "/work/design/pcb/keycult66.kicad_pcb"
     ],
     [
       "kicad-cli",
@@ -198,14 +198,14 @@
       "--scale",
       "0",
       "-o",
-      "/home/gytkk/development/keycult-ball/design/pcb/exports/board-layers.pdf",
-      "/home/gytkk/development/keycult-ball/design/pcb/keycult66.kicad_pcb"
+      "/work/design/pcb/exports/board-layers.pdf",
+      "/work/design/pcb/keycult66.kicad_pcb"
     ]
   ],
   "artifact_sha256": {
-    "keycult66.kicad_pro": "e95a4eaf57c1e7d4cb9778cd5b775b4a353739b0b8f5544a6c2fe390f7ce2dbc",
-    "keycult66.kicad_sch": "c4c07602a9dbe1ea38fec44fdc22811bef8a34070ec84f63f6e6075910cafcb1",
-    "keycult66.kicad_pcb": "b06a21d9bf2f36a72dfb89bd5ea958fe442990fe1aae0750c0a4b2cd197ec7a4"
+    "keycult66.kicad_pro": "4eefed8e33c8618eb3ab3103b09edbda1cd1bfe9d5551950ee791ebb9687abb7",
+    "keycult66.kicad_sch": "2277d03497498446ce3deede5937b3d825bc2173057b649fbc168bcacbb0be7b",
+    "keycult66.kicad_pcb": "175d065eff1a4931c2ed35cc3c743428f904b82b92a3e9d52502c05927a83b1c"
   },
   "ground_layer_tracks_by_net": {
     "COL12": 3,

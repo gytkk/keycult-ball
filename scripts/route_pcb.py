@@ -1,5 +1,5 @@
 # /// script
-# requires-python = ">=3.14"
+# requires-python = ">=3.11"
 # dependencies = []
 # ///
 """Reapply the checked-in initial route, or run the pinned local Freerouting.

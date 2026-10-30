@@ -4,10 +4,12 @@
 # ///
 """Regression-test the real final validator gate without running KiCad."""
 import ast
+import csv
 import json
 from pathlib import Path
 from types import SimpleNamespace
 import unittest
+import xml.etree.ElementTree as ET
 from shapely.geometry import box
 
 SOURCE = Path(__file__).with_name("validate_pcb.py")
@@ -82,6 +84,26 @@ class VariantTests(unittest.TestCase):
         self.assertFalse(matches({'1':'GND','2':'USB_DP','3':'USB_DM','4':'VBUS_USB','MP':'GND'}))
         self.assertFalse(matches({'1':'VBUS_USB','2':'GND','3':'USB_DM','4':'USB_DP','MP':'GND'}))
         self.assertFalse(matches({'1':'VBUS_USB','2':'USB_DP','3':'USB_DM','4':'GND','MP':'GND'}))
+
+    def test_external_c5_jsh_assembly_and_retained_main_board_protection(self):
+        for count in (66, 63):
+            with self.subTest(keys=count):
+                directory = SOURCE.parents[1] / 'design/pcb' / ('63' if count == 63 else '')
+                parts = {p['ref']: p for p in json.loads((directory / 'circuit.json').read_text())['parts']}
+                expected = {'1': 'VBUS_USB', '2': 'USB_DM', '3': 'USB_DP', '4': 'GND'}
+                self.assertEqual(parts['DB1']['nets'], expected)
+                self.assertEqual(parts['DB1']['value'], 'UDB C5-JSH / EXTERNAL')
+                self.assertEqual(parts['DB1']['fp'], '')
+                self.assertEqual(parts['F1']['nets'], {'1': 'VBUS_USB', '2': 'VBUS_FUSED'})
+                self.assertEqual(parts['F1']['mpn'], 'Bourns MF-PSMF050X-2')
+                for ref in ('R1', 'R2'):
+                    self.assertEqual(parts[ref]['value'], '27R')
+                with (directory / 'bom.csv').open() as file:
+                    bom = {row['Reference']: row for row in csv.DictReader(file)}
+                self.assertEqual(bom['DB1']['Assembly'], 'External assembly')
+                netlist = ET.parse(directory / 'reports/netlist.xml').getroot()
+                actual = {n.attrib['pin']: net.attrib['name'] for net in netlist.find('nets') for n in net.findall('node') if n.attrib['ref'] == 'DB1'}
+                self.assertEqual(actual, expected)
 
     def test_reservation_accepts_native_rounding_but_rejects_geometry_changes(self):
         matches = self.namespace['reservation_matches']

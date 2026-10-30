@@ -1,5 +1,5 @@
 # /// script
-# requires-python = ">=3.14"
+# requires-python = ">=3.11"
 # dependencies = ["sexpdata==1.0.2"]
 # ///
 """Create the review seed using KiCad's installed symbols, footprints and pcbnew.
@@ -90,10 +90,11 @@ part('U1','MCU_RaspberryPi:RP2040','RP2040','Package_DFN_QFN:QFN-56-1EP_7x7mm_P0
 part('U2','Memory_Flash:W25Q16JVSS','W25Q16JVSSIQ','Package_SO:SOIC-8_5.3x5.3mm_P1.27mm',{1:'QSPI_SS',2:'QSPI_SD1',3:'QSPI_SD2',4:'GND',5:'QSPI_SD0',6:'QSPI_SCLK_FLASH',7:'QSPI_SD3',8:'+3V3'},(215.9,83.82),(194.5,68.5),mpn='W25Q16JVSSIQ',note='208 mil SOIC, NOT 150mil package; QMK RP2040 flash boot stage must match')
 part('U3','Regulator_Linear:AP2112K-3.3','AP2112K-3.3TRG1','Package_TO_SOT_SMD:SOT-23-5',{1:'VBUS_FUSED',2:'GND',3:'VBUS_FUSED',4:None,5:'+3V3'},(330.2,73.66),(158,68.5),mpn='AP2112K-3.3TRG1',note='600mA part rating is NOT USB budget; 5V->3V3 thermal/load budget unresolved')
 # UDB pin numbers are connector contacts, independent of the legacy test-pad numbering.
-part('J1','Connector_Generic_MountingPin:Conn_01x04_MountingPin','USB / UDB JST-SH','Connector_JST:JST_SH_SM04B-SRSS-TB_1x04-1MP_P1.00mm_Horizontal',{1:'VBUS_USB',2:'USB_DM',3:'USB_DP',4:'GND','MP':'GND'},(375.92,91.44),(116.8,112),angle=90,mpn='JST SM04B-SRSS-TB(LF)(SN)',status='UDB electrical pinout; stock cable fit unverified',note='1 VBUS, 2 D-, 3 D+, 4 GND; 1:1 JST-SH cable. Left-edge placement is provisional, not measured WT60-A registration; confirm owned daughterboard revision and CC/ESD protection')
+part('J1','Connector_Generic_MountingPin:Conn_01x04_MountingPin','USB / C5-JSH JST-SH','Connector_JST:JST_SH_SM04B-SRSS-TB_1x04-1MP_P1.00mm_Horizontal',{1:'VBUS_USB',2:'USB_DM',3:'USB_DP',4:'GND','MP':'GND'},(391.16,91.44),(116.8,112),angle=90,mpn='JST SM04B-SRSS-TB(LF)(SN)',status='C5-JSH interface selected; mechanical fit provisional',note='1 protected USB power, 2 D-, 3 D+, 4 GND; 1:1 JST-SH cable of suitable length. External DB1 supplies CC/ESD/PTC/TVS; VBUS_USB is after its PTC and before main-board F1')
+part('DB1','Connector_Generic:Conn_01x04','UDB C5-JSH / EXTERNAL','',{1:'VBUS_USB',2:'USB_DM',3:'USB_DP',4:'GND'},(375.92,63.5),mpn='Unified Daughterboard C5-JSH',status='user-approved design assumption; external assembly',note='Pinned 2b6c52aa2de6f9f60ca99c6250e4bdf01e8f4eea; 5.1k CC, TPD4E05U06DQAR ESD, ASMD1206-150 PTC, SMF6.0A TVS, direct shield/GND connection; no active sustained-overvoltage disconnect; not fitted on main PCB')
 for i,(net,x) in enumerate([('VBUS_USB',145),('GND',148),('USB_DM',151),('USB_DP',154)],1):
     part(f'TP{i}','Connector:TestPoint',net+' / USB TEST','TestPoint:TestPoint_Pad_D1.5mm',{1:net},(300.99+17.78*i,111.76),(x,56),mpn='PCB pad',status='test access; J1 is the cable connector',note='Test-pad numbering differs from J1 contact numbering')
-part('F1','Device:Polyfuse','500mA hold / provisional','Fuse:Fuse_0805_2012Metric',{1:'VBUS_USB',2:'VBUS_FUSED'},(300.99,139.7),(148,68),mpn='Bourns MF-PSMF050X-2',note='USB total load/inrush and daughterboard protection need verification')
+part('F1','Device:Polyfuse','500mA hold / provisional','Fuse:Fuse_0805_2012Metric',{1:'VBUS_USB',2:'VBUS_FUSED'},(300.99,139.7),(148,68),mpn='Bourns MF-PSMF050X-2',note='Retained local main-board PTC after C5-JSH PTC; total drop, load/inrush and trip coordination need verification; not a USB current entitlement')
 cap('C1','1uF','VBUS_FUSED',(325.12,139.7),(153,68.5),fp='Capacitor_SMD:C_0603_1608Metric')
 cap('C2','1uF','+3V3',(350.52,139.7),(162,68.5),fp='Capacitor_SMD:C_0603_1608Metric')
 # One 100nF for each IOVDD group, ADC_AVDD, USB_VDD and each DVDD pin.
@@ -173,7 +174,7 @@ for p in parts:
 
 # Embed the stock symbols so the native schematic is self-contained.
 rootuuid=uid('schematic')
-sch=[S('kicad_sch'),node('version',20250114),node('generator','eeschema'),node('uuid',rootuuid),node('paper','A1'),node('title_block',node('title',f'Keycult{args.keys} / electrical review draft'),node('date','2026-10-29'),node('rev','DRAFT-C'),node('comment',1,'NOT FOR FABRICATION - sensor and physical cable fit provisional')),node('lib_symbols',*SYMS.values())]
+sch=[S('kicad_sch'),node('version',20250114),node('generator','eeschema'),node('uuid',rootuuid),node('paper','A1'),node('title_block',node('title',f'Keycult{args.keys} / electrical review draft'),node('date','2026-10-30'),node('rev','DRAFT-D'),node('comment',1,'C5-JSH ASSUMED - NOT FOR FABRICATION - sensor and mechanical fit provisional')),node('lib_symbols',*SYMS.values())]
 def effect(size=1.27,just=None,hide=False):
     a=node('effects',node('font',node('size',size,size)))
     if just:a.append(node('justify',S(just)))
@@ -181,14 +182,18 @@ def effect(size=1.27,just=None,hide=False):
     return a
 for p in parts:
     x,y=p['sch']; lib=symbol(p['lib'])
-    sym=node('symbol',node('lib_id',p['lib']),node('at',x,y,0),node('unit',1),node('in_bom',S('no' if not p['fp'] or p['ref'].startswith('TP') else 'yes')),node('on_board',S('no' if not p['fp'] else 'yes')),node('dnp',S('no')),node('uuid',p['uuid']))
+    sym=node('symbol',node('lib_id',p['lib']),node('at',x,y,0),node('unit',1),node('in_bom',S('no' if (not p['fp'] and p['ref']!='DB1') or p['ref'].startswith('TP') else 'yes')),node('on_board',S('no' if not p['fp'] else 'yes')),node('dnp',S('no')),node('uuid',p['uuid']))
     for n,v,dy,hide in [('Reference',p['ref'],-4.1,False),('Value',p['value'],-1.6,False),('Footprint',p['fp'],0,True),('Datasheet','',0,True)]:
         prop=next((q for q in lib if tag(q,'property') and q[1]==n),None)
         pos=item(prop,'at') if prop else None
         tx,ty=(x+pos[1],y-pos[2]) if pos and not hide else (x,y+dy)
         if p['lib'] in ('Device:R','Device:C','Device:Polyfuse') and n in ('Reference','Value'):
             tx,ty=x+5.08,y+(-1.27 if n=='Reference' else 1.27)
-        sym.append(node('property',n,v,node('at',round(tx,4),round(ty,4),0),effect(1.0,hide=hide)))
+        if p['ref']=='J1' and n=='Value':tx,ty=x+2.54,y-1.27
+        if p['ref']=='F1' and n in ('Reference','Value'):tx=x+2.54
+        left=(p['ref']=='J1' and n=='Value') or (p['ref']=='F1' and n in ('Reference','Value'))
+        size=0.9 if p['ref']=='F1' and n=='Value' else 1.0
+        sym.append(node('property',n,v,node('at',round(tx,4),round(ty,4),0),effect(size,'left' if left else None,hide=hide)))
     sym.append(node('instances',node('project',NAME,node('path','/'+rootuuid,node('reference',p['ref']),node('unit',1)))))
     sch.append(sym)
     for pin in pins(p['lib']):
@@ -219,7 +224,9 @@ for text,x,y,size in [
  ('DECOUPLING: individual IOVDD / USB / ADC / DVDD pins; VREG 1uF input + output',25.4,195.58,1.5),
  ('4 / 5 ROW x 15 COLUMN MATRIX: COL -> switch -> diode ANODE -> CATHODE -> ROW (COL2ROW)',25.4,284.48,2.2),
  (f'{args.keys} keys; stable references from preferred.keys. Central reservation is NOT A HOLE.',25.4,294.64,1.5),
- ('J1: UDB 1=VBUS 2=D- 3=D+ 4=GND; 1:1 cable. Owned daughterboard revision, CC/ESD and cable fit unverified.',292.1,45.72,1.3)]:
+ ('DB1: EXTERNAL C5-JSH assumed; CC 5.1k x2 / TPD4E05U06 ESD / PTC / SMF6.0A TVS.',292.1,35.56,1.2),
+ ('J1: 1=protected USB power 2=D- 3=D+ 4=GND; 1:1 cable. Main-board F1 retained.',292.1,43.18,1.2),
+ ('Shield joins GND on DB1. No active sustained-overvoltage disconnect. Mechanical fit provisional.',292.1,50.8,1.2)]:
  sch.append(node('text',text,node('at',x,y,0),effect(size,'left'),node('uuid',uid('text'+text))))
 (OUT/(NAME+'.kicad_sch')).write_text(txt(sch)+'\n')
 
@@ -332,7 +339,7 @@ for x,y in [(38,53.2),(322,53.2),(322,146.8),(38,146.8)]:g.Outline().Append(mm(x
 board.Add(g)
 # Local ground and support routing are performed by the detailed router.
 # Board notes are on fabrication/documentation layers, not over copper/silkscreen.
-for text0,xy0,size in [(f'DRAFT C / {args.keys} KEYS - NOT FOR FABRICATION',(180,150),1.5),('RESERVED / NO CUTOUT',(180,100),1),('J1 UDB: 1 VBUS / 2 D- / 3 D+ / 4 GND; CABLE FIT TBD',(85,50),.8),('SENSOR 3V3 LOGIC ONLY / NO MODULE CONNECTOR',(98,98),.9)]:
+for text0,xy0,size in [(f'DRAFT D / {args.keys} KEYS - NOT FOR FABRICATION',(180,150),1.5),('RESERVED / NO CUTOUT',(180,100),1),('J1 TO EXTERNAL C5-JSH: 1 POWER / 2 D- / 3 D+ / 4 GND; F1 RETAINED',(85,50),.8),('SENSOR 3V3 LOGIC ONLY / NO MODULE CONNECTOR',(98,98),.9)]:
  t=pcb.PCB_TEXT(board);t.SetText(text0);t.SetPosition(pt(*xy0));t.SetTextSize(pt(size,size));t.SetTextThickness(mm(.15));t.SetLayer(pcb.Dwgs_User);board.Add(t)
 for i,k in indexed_keys:
  t=pcb.PCB_TEXT(board);t.SetText(k['id']);t.SetPosition(pt(180+k['x_mm'],100+k['y_mm']+8.2));t.SetTextSize(pt(.8,.8));t.SetTextThickness(mm(.12));t.SetLayer(pcb.F_SilkS);board.Add(t)
@@ -347,7 +354,7 @@ pro={'meta':{'filename':NAME+'.kicad_pro','version':1},'board':{'design_settings
 with (OUT/'bom.csv').open('w') as f:
  w=csv.writer(f,lineterminator='\n');w.writerow(['Reference','Value','Manufacturer part / candidate','Footprint','Assembly','Status','Notes'])
  for p in parts:
-  if p['fp']:w.writerow([p['ref'],p['value'],p['mpn'],p['fp'],'THT solder' if p['side']=='F' else 'Bottom SMT',p['status'],p['note']])
+  if p['fp'] or p['ref']=='DB1':w.writerow([p['ref'],p['value'],p['mpn'],p['fp'],'External assembly' if p['ref']=='DB1' else ('THT solder' if p['side']=='F' else 'Bottom SMT'),p['status'],p['note']])
 with (OUT/'gpio-map.csv').open('w') as f:
  w=csv.writer(f,lineterminator='\n');w.writerow(['key_id','label','switch','diode','matrix_row','matrix_col','row_gpio','column_gpio','x_mm','y_mm','diode_direction'])
  for i,k in indexed_keys:w.writerow([k['id'],k['label'],f'SW{i}',f'D{i}',k['row'],k['column'],f'GP{ROW_GPIO[k["row"]]}',f'GP{COL_GPIO[k["column"]]}',k['x_mm'],k['y_mm'],'COL2ROW'])

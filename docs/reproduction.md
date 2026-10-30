@@ -74,7 +74,7 @@ ezdxf 1.4.3와 Shapely 2.1.2를 사용한다. 로컬 ZIP 및 내부 DXF의 고�
 
 ## KiCad 66키·63키 회로·PCB 초안
 
-[PCB 재현 안내](../design/pcb/README.md#reproduction)를 별도로 따른다. 기존 예비 키 좌표는 변경하지 않았으므로 예비 도면 생성기나 PNG/PDF 렌더를 다시 실행할 필요는 없다. 설치된 KiCad 10.0.7의 Python 바인딩은 Python 3.14를 사용한다. 66키 원본은 `design/pcb/keycult66.*`, 63키 원본은 `design/pcb/63/keycult63.*`이며, 각 디렉터리에 BOM·핀맵·배선과 `reports/`, `exports/`를 둔다.
+[PCB 재현 안내](../design/pcb/README.md#reproduction)를 별도로 따른다. 기존 예비 키 좌표는 변경하지 않았으므로 예비 도면 생성기나 PNG/PDF 렌더를 다시 실행할 필요는 없다. Python은 설치된 KiCad 10.0.7의 `pcbnew` 바인딩과 버전이 일치해야 한다. 기존 Nix 환경은 Python 3.14, 아래 공식 Docker 환경은 Python 3.13을 사용한다. 66키 원본은 `design/pcb/keycult66.*`, 63키 원본은 `design/pcb/63/keycult63.*`이며, 각 디렉터리에 BOM·핀맵·배선과 `reports/`, `exports/`를 둔다.
 
 아래 명령은 저장된 배선을 재적용한 뒤 실제 ERC/DRC, netlist, 키 좌표와 예약 영역을 검사하고 SVG/PDF를 내보낸다. 생성기는 현재 CAD를 덮어쓰므로 수동 편집을 보존한 뒤 실행한다. `--keys`를 생략하면 66키를 선택한다.
 
@@ -90,3 +90,31 @@ uv run --python "$(command -v python3)" scripts/validate_pcb.py --keys 63
 회로나 배열을 변경하면 저장된 배선의 입력 해시가 일치하지 않으므로 `--import-saved` 대신 `--route`로 다시 배선한다.
 
 검증은 기본적으로 미배선이나 DRC 위반이 있으면 실패한다. `--draft`는 미배선만 허용하고 실제 수를 보고하는 검토 모드이며, 기하 DRC 위반은 그대로 실패한다. 검사 상태는 [66키 보고서](../design/pcb/reports/validation.json)와 [63키 보고서](../design/pcb/63/reports/validation.json)를 기준으로 하며 제조 승인으로 해석하지 않는다. KiCad 없이 실행하는 검사 회귀 테스트는 `uv run scripts/test_pcb_validation_gate.py`다.
+
+### Docker에서 KiCad 검증
+
+호스트에 KiCad가 없으면 공식 `kicad/kicad:10.0.7`의 Linux amd64 이미지를 사용한다. Docker 실행 환경이 필요하며 Apple Silicon에서는 amd64 에뮬레이션을 사용한다. 아래 이미지는 기존 스크립트 의존성을 KiCad의 Python 3.13 가상 환경에 설치한다. 3D 모델과 Java는 포함하지 않으므로 저장된 SES 배선 재적용과 회로 검증에 사용하고, 새 자동 배선에는 별도의 Java/Freerouting 환경이 필요하다.
+
+```bash
+docker build --platform linux/amd64 -t keycult-kicad-runtime:10.0.7 - <<'DOCKERFILE'
+FROM kicad/kicad:10.0.7@sha256:3224d1bf143185ecc1bd3a1082a36f37f0f4e59d707983a16515a845e3737fc6
+USER root
+COPY --from=ghcr.io/astral-sh/uv:0.9.13 /uv /usr/local/bin/uv
+RUN uv venv --python /usr/bin/python3 --system-site-packages /opt/keycult-venv && uv pip install --python /opt/keycult-venv/bin/python sexpdata==1.0.2 shapely==2.1.2 pymupdf==1.26.7
+ENV PATH="/opt/keycult-venv/bin:${PATH}"
+DOCKERFILE
+
+docker run --rm --platform linux/amd64 --entrypoint /bin/sh \
+  -v "$PWD:/work" -w /work \
+  -e KICAD10_SYMBOL_DIR=/usr/share/kicad/symbols \
+  -e KICAD10_FOOTPRINT_DIR=/usr/share/kicad/footprints \
+  -e PYTHONPATH=/usr/lib/python3/dist-packages \
+  -e VIRTUAL_ENV=/opt/keycult-venv \
+  keycult-kicad-runtime:10.0.7 -c '
+    uv run --no-project --active python scripts/build_pcb.py --keys 66 &&
+    uv run --no-project --active python scripts/route_pcb.py --keys 66 --import-saved &&
+    uv run --no-project --active python scripts/validate_pcb.py --keys 66
+  '
+```
+
+63키는 위 실행 명령의 `--keys 66` 세 곳을 `--keys 63`으로 바꾼다. `--no-project --active`는 미리 설치한 가상 환경과 시스템 KiCad 바인딩을 함께 사용하기 위한 옵션이다. 배선 정리 하위 스크립트는 자체 메타데이터에 따라 `uv` 캐시를 만들 수 있으므로 첫 실행에는 네트워크가 필요하다. DRAFT D의 두 버전은 이 환경에서 생성하고 ERC/DRC와 연결 일치를 검사했다.

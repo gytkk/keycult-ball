@@ -67,6 +67,7 @@ Downloaded schematic originals are ignored under `../preliminary/sources/upstrea
 
 ## Maintained tools and stock libraries
 
+- DRAFT D was regenerated and validated on 2026-10-30 with official `kicad/kicad:10.0.7`, Linux amd64, Python 3.13.5 and its stock symbol/footprint libraries. The image is pinned by manifest digest `sha256:3224d1bf143185ecc1bd3a1082a36f37f0f4e59d707983a16515a845e3737fc6`; the [Docker procedure](../../docs/reproduction.md#docker에서-kicad-검증) records the runtime dependencies. This image has no 3D model package. The following Nix versions record the earlier environment.
 - **KiCad 10.0.7** GUI/CLI and its installed Python `pcbnew` binding, Python 3.14.7.
   Native ERC, DRC, zone refill, schematic parity, XML netlist, PDF/SVG exports and
   Specctra transfer are performed by KiCad, not fabricated report text.

@@ -1,13 +1,13 @@
 # Keycult66 and Keycult63 KiCad designs
 
-**DRAFT C, not for fabrication or assembly.** Both variants use the same RP2040 circuit and stable key references. Open the corresponding project in **KiCad 10.0.7**. The schematic and PCB are native editable CAD.
+**DRAFT D, not for fabrication or assembly.** Both variants use the same RP2040 circuit and stable key references. Open the corresponding project in **KiCad 10.0.7**. The schematic and PCB are native editable CAD.
 
 | Variant | Project | Schematic | PCB | Validation |
 | --- | --- | --- | --- | --- |
 | 66 keys | [keycult66.kicad_pro](keycult66.kicad_pro) | [Schematic](keycult66.kicad_sch) | [PCB](keycult66.kicad_pcb) | [Report](reports/validation.json) |
 | 63 keys | [keycult63.kicad_pro](63/keycult63.kicad_pro) | [Schematic](63/keycult63.kicad_sch) | [PCB](63/keycult63.kicad_pcb) | [Report](63/reports/validation.json) |
 
-Both variants pass strict validation with zero ERC violations, DRC violations, unconnected items and schematic/PCB net mismatches. The reports contain the actual counts and CAD hashes. Static electrical checks do not establish powered operation or case fit. J1 implements the documented Unified Daughterboard (UDB) electrical interface; the owned Keycult daughterboard revision and stock-cable fit remain unverified. The sensor interface remains logical pads pending hardware identification.
+Both variants pass strict validation with zero ERC violations, DRC violations, unconnected items and schematic/PCB net mismatches. The reports contain the actual counts and CAD hashes. Static electrical checks do not establish powered operation or case fit. The user-approved design assumption is an unmodified external UDB C5-JSH, represented by DB1 in the schematic and assembly BOM, with no footprint on the main PCB. J1 implements its 1:1 cable interface. The sensor interface remains logical pads pending hardware identification.
 
 ## Review entry points
 
@@ -62,7 +62,7 @@ select a sensor revision, flash boot stage, descriptor power or a final keymap.
 
 | J1 contact | Signal | Existing test pad |
 | --- | --- | --- |
-| 1 | VBUS_USB, USB supply before main-board F1 | TP1 |
+| 1 | VBUS_USB, after C5-JSH protection and before main-board F1 | TP1 |
 | 2 | USB_DM, D- | TP3 |
 | 3 | USB_DP, D+ | TP4 |
 | 4 | GND | TP2 |
@@ -70,7 +70,7 @@ select a sensor revision, flash boot stage, descriptor power or a final keymap.
 
 Use a **1:1 contact-number cable**, 1-to-1 through 4-to-4. Wire color and apparent left-to-right order are not pin-number evidence. TP1-TP4 retain their earlier numbering and are test access, not the connector's contact order. The validator independently checks J1 against the UDB map, including rejection of reversed power and swapped data contacts.
 
-J1's footprint origin is PCB **(40.6,112.0)mm**, B.Cu, rotation 90 degrees, with its mouth facing keyboard-left. Looking down from the switch side, pad centres are x=42.6mm and y=113.5,112.5,111.5,110.5mm for contacts 1-4. The [official WT60-A photo](https://keycult.com/products/wt60-a-pcb-60) supports a left-edge connector facing outward, but supplies no exact coordinates. Our position is an independent placement between the ortholinear switch/diode footprints, **not a measured WT60-A connector registration**. Stock cable reach, case-channel alignment, mating clearance and the connector's full installed height below the PCB need physical checking. JST specifies a nominal 2.9mm body height; do not infer assembled clearance from the footprint courtyard alone.
+J1's footprint origin is PCB **(40.6,112.0)mm**, B.Cu, rotation 90 degrees, with its mouth facing keyboard-left. Looking down from the switch side, pad centres are x=42.6mm and y=113.5,112.5,111.5,110.5mm for contacts 1-4. The [official WT60-A photo](https://keycult.com/products/wt60-a-pcb-60) supports a left-edge connector facing outward, but supplies no exact coordinates. Our position is an independent placement between the ortholinear switch/diode footprints, **not a measured WT60-A connector registration**. Case-channel alignment, mating clearance and the connector's full installed height below the PCB need physical checking. JST specifies a nominal 2.9mm body height; do not infer assembled clearance from the footprint courtyard alone.
 
 J1's data pair runs together on In2.Cu along the left and top margins, referenced to the In1.Cu ground pour, then joins the existing local USB route. VBUS uses a separate 0.4mm feed to the retained main-board fuse. Trace width/gap and cable length still require stackup and signal-integrity review; the route is not impedance-qualified.
 
@@ -86,13 +86,15 @@ The long In2.Cu margin runs have 0.2mm trace width and 0.2mm edge gap. The J1-si
 
 The saved layer PDF was enlarged to inspect the J1 escape, margin pair, MCU-side transitions and In1.Cu pour. The native saved fill polygons cover the full trace-width projection of the long In2.Cu margin runs; uncovered areas occur only within 0.505mm of their transition-via centres. This is a check of saved fill geometry, not a new zone refill. Connector and transition fan-outs separate the pair locally, and the signal vias have antipads in the reference plane. These checks do not qualify those return paths or the connector/cable discontinuities. Preserve these as review items when selecting the manufacturing stackup and confirming the installed cable.
 
-During this review, all native CAD hashes matched the existing validation reports, and both saved-route manifests matched their inputs and SES files. The nine validation regression tests and repository validation passed. Fresh ERC/DRC and native exports could not run because this Mac has no `kicad-cli`; the zero-count reports remain the earlier KiCad 10.0.7 results. No copper or connector position was changed.
+DRAFT D was regenerated and checked with official KiCad 10.0.7 in a local Docker container. The physical parts, pad nets and placement remain unchanged, allowing the existing SES copper to be recaptured against the new external-assembly metadata. The native copper, schematic parity, external DB1 netlist, coordinates and central reservations are checked again; the manifests retain the original SES hashes. Both variants have fresh native PDF/SVG exports and validation reports.
 
-No USB-C receptacle or CC resistors are placed on the main board: CC must be handled at the daughterboard's USB-C connector. A UDB C3 schematic has CC and protection components, but **the actual Keycult board's ESD, overvoltage, fuse and shield circuitry has not been established**. Main-board F1 remains fitted; confirm total resistance/drop and protection coordination if the daughterboard also has a fuse. The [current NovelKeys replacement PCB](https://novelkeys.com/products/keycult-no-1-60-pcb) has a different board design from the old WT60-A, so its name alone does not establish the owned interface revision.
+DB1 is the unmodified [C5-JSH at revision `2b6c52aa2de6f9f60ca99c6250e4bdf01e8f4eea`](https://github.com/Unified-Daughterboard/UDB-C-JSH/blob/2b6c52aa2de6f9f60ca99c6250e4bdf01e8f4eea/UDB.kicad_sch), adopted as a design assumption on 2026-10-30. Its USB-C connector, two 5.1k CC pull-downs, TPD4E05U06DQAR data-line ESD array, ASMD1206-150 PTC and SMF6.0A TVS stay on the external daughterboard. Its shield joins signal ground on that board; no extra shield wire, CC resistors or duplicate ESD/TVS array is added to the main PCB. This assumption is not a measurement of the factory Keycult board.
+
+Main-board F1 remains a 500mA-hold PTC for local protection, and R1/R2 remain the RP2040's 27-ohm USB series resistors. The two PTCs are in series, so their total voltage drop, trip coordination and actual load/inrush need verification. The TVS suppresses transients; this design has no active sustained-overvoltage disconnect. DB1's BOM row is an external assembly requirement, not a component to populate on the main PCB.
 
 The WT compatibility research supports continuing with the existing J1 pin map. [WT60-C's product documentation](https://dailyclack.com/products/wt60-c-kate-60-pcb) explicitly specifies the same JST part and UDB compatibility; WT60-D does likewise for the interface, and the [Keycult FAQ](https://resources.keycult.com/faq_keycult_faq.html) lists WT60-G for No.1/60. This evidence establishes the design interface without requiring a measurement of the stock cable. It does not establish that every WT-family or Keycult daughterboard contains the same protection components. [Pinned circuit evidence](sources.md#usb-daughterboard-evidence) records the UDB revision differences.
 
-As confirmed by the user on 2026-10-30, a suitable cable length can be sourced; stock-cable reach is no longer a design constraint. Before powered assembly, verify the selected cable's four contact paths and identify the installed daughterboard's protection arrangement. Connector insertion, routing and bend clearance remain mechanical checks in issue #3. The electrical interface is implemented; these assembly checks do not block further circuit design against the documented UDB interface.
+As confirmed by the user on 2026-10-30, a suitable cable length can be sourced; stock-cable reach is no longer a design constraint. Before powered assembly, verify the selected cable's four contact paths and that the assembled external board matches the assumed C5-JSH design. Connector insertion, routing and bend clearance remain mechanical checks in issue #3. Factory-board identification is not a prerequisite for circuit design under this explicit assumption.
 
 ## Sensor interface remains unresolved
 
@@ -141,8 +143,7 @@ A small cleanup script removes only KiCad-reported dead-ended copper after zone 
 The saved copper includes manual QFN escapes and local routing corrections. Replaying the saved SES reproduces those edits; rerunning the autorouter from a new seed does not replace layout review or guarantee completion.
 See [sources](sources.md) for versions, licenses and hashes.
 
-From the repository root, with the Python version matching KiCad's installed
-binding (this Nix installation is **Python 3.14**):
+From the repository root, with the Python version matching KiCad's installed binding (the original Nix runtime uses Python 3.14; the official 10.0.7 Docker image uses Python 3.13). Scripts require Python 3.11 or newer, but `pcbnew` must match the chosen interpreter. Use the [Docker procedure](../../docs/reproduction.md#docker에서-kicad-검증) when KiCad is not installed on the host.
 
 ```bash
 uv run --python "$(command -v python3)" scripts/build_pcb.py --keys 66
