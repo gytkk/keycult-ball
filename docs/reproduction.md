@@ -89,6 +89,22 @@ open -n -a /Applications/FreeCAD.app --args "$PWD/scripts/preview_plate.FCMacro"
 
 배열 원본은 기존 `design/preliminary/build_artifacts.py`이고, 새 기구 검토 치수는 `scripts/build_plate.py`의 `STUDY`다. FCStd의 `Study` 속성은 사용한 값을 기록한 것으로 형상을 자동 구동하지 않는다. `Plate`는 원본 외곽의 판과 검토용 절삭 객체를 연결한 Boolean cut이며, 재현 가능한 치수 변경은 생성기에 반영한다. 생성 검사는 원본 해시, PCB 좌표 및 CAD 해시, 단일 솔리드, 구멍 수, 외곽 보존, STEP/FCStd/DXF 재열기를 확인한다. `review.json`의 PCB-볼 간섭은 알려진 미해결 항목이며, 스크립트 성공을 실물 조립 통과로 해석하지 않는다.
 
+## 홀더 받침 CAD 실험
+
+이 실험은 생산 홀더 CAD 없이 가정한 외피와 높이를 비교한다. [조건부 결과와 미확정 항목](../design/preliminary/design.md#순정-홀더를-받치는-브래킷의-조건부-cad-실험)을 먼저 읽는다. 설치된 macOS FreeCAD의 Python으로 실행한다.
+
+```bash
+uv run scripts/fetch_sources.py
+uv run --python /Applications/FreeCAD.app/Contents/Resources/bin/python scripts/build_holder_study.py
+open -n -a /Applications/FreeCAD.app --args "$PWD/scripts/preview_holder.FCMacro"
+```
+
+생성기는 필요한 Keyball44 호스트 원본 ZIP이 없으면 고정 커밋에서 받아 SHA-256을 확인하고, 있으면 해시를 대조한다. DXF 단위 헤더의 불일치는 KiCad 장착점 7개와 대조해 기록한다. 현재 배열과 두 PCB의 stem 좌표, 사각 `Edge.Cuts`를 직접 읽으며 실행 중 입력 파일이 바뀌면 실패한다. 기존 보강판 도구의 공식 외곽 추출 함수를 사용하지만 기존 보강판 초안과 KiCad 파일은 덮어쓰지 않는다.
+
+Git에서 제외하는 `design/preliminary/sources/local/holder-study/65/`와 `62/`에 기본 시나리오의 `holder-study.FCStd`, `Basket-EXPERIMENT.step`, `Plate-EXPERIMENT.step`, `ProposedOpenPCB-EXPERIMENT.step`, `section.svg`를 생성한다. 매크로는 `assembly.png`, `underside.png`, `basket.png`와 표시 설정을 저장한다. 상위 `review.json`에는 높이와 외피 크기를 바꾼 18개 비교 결과, 입력 해시와 가정을 기록한다. 재생성은 이 실험 파일을 덮어쓰므로 수동 편집은 다른 이름으로 먼저 저장한다. FreeCAD의 `Assumptions` 속성은 기록용이며 형상을 구동하지 않는다. 가정 변경은 생성기에서 수행한다.
+
+생성기는 브래킷 단일 솔리드, 공식 보강판 외곽 보존, 플랜지 접촉면, 구성품별 현재/개구 PCB 간섭, 키 영역 및 체결부 간섭, STEP/FCStd 재열기를 검사한다. 볼과 센서의 실제 광학 간격, 케이스 공간 및 강성은 이 검사에 포함되지 않는다. 나사산과 실제 커넥터 결합 형상을 모델링하지 않았으므로 단순 형상 사이 간섭이 없어도 체결·조립이 검증된 것은 아니다.
+
 ## KiCad 65키·62키 회로·PCB 초안
 
 [PCB 재현 안내](../design/pcb/README.md#reproduction)를 별도로 따른다. 키 배열을 변경하면 예비 도면 생성기와 PNG/PDF 렌더를 먼저 실행한다. Python은 설치된 KiCad 10.0.7의 `pcbnew` 바인딩과 버전이 일치해야 한다. 기존 Nix 환경은 Python 3.14, 아래 공식 Docker 환경은 Python 3.13을 사용한다. 65키 원본은 `design/pcb/keycult65.*`, 62키 원본은 `design/pcb/62/keycult62.*`이며, 각 디렉터리에 BOM·핀맵·배선과 `reports/`, `exports/`를 둔다.

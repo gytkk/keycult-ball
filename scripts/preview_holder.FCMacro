@@ -1,0 +1,74 @@
+"""Render the conditional holder study through the native FreeCAD application."""
+import json
+from pathlib import Path
+import FreeCAD as App
+import FreeCADGui as Gui
+from pivy import coin  # Load the camera node's SWIG bindings before getCameraNode.
+from PySide6.QtCore import QEventLoop, QTimer
+
+
+def settle():
+    loop = QEventLoop()
+    QTimer.singleShot(600, loop.quit)
+    loop.exec()
+
+
+root = Path(__file__).resolve().parents[1]
+local = root / 'design/preliminary/sources/local/holder-study'
+try:
+    for selector in (65, 62):
+        folder = local / str(selector)
+        doc = App.openDocument(str(folder / 'holder-study.FCStd'))
+        for obj in doc.Objects:
+            if obj.ViewObject:
+                obj.ViewObject.Visibility = False
+        for name, color, transparency in (
+            ('Plate', (.7, .74, .8), 65),
+            ('ProposedOpenPCB', (.16, .45, .25), 70),
+            ('Basket', (.08, .65, .55), 0),
+            ('Ball', (.95, .6, .2), 30),
+            ('HolderEnvelopeAssumption', (.25, .45, .9), 88),
+            ('ConnectorBoardProxy', (.15, .4, .2), 0),
+            ('SensorBoardProxy', (.45, .25, .7), 0),
+            ('HolderScrewHeadsProxy', (.3, .3, .3), 0),
+            ('ConnectorScrewHeadsProxy', (.3, .3, .3), 0),
+            ('FlangeFastenersProxy', (.3, .3, .3), 0),
+            ('KeycapProxies', (.8, .85, .9), 85),
+        ):
+            view = doc.getObject(name).ViewObject
+            view.Visibility = True
+            view.ShapeColor = color
+            view.Transparency = transparency
+        view = Gui.activeDocument().activeView()
+        view.setCameraType('Orthographic')
+        view.viewAxonometric()
+        settle()
+        view.fitAll()
+        camera = view.getCameraNode()
+        camera.height.setValue(camera.height.getValue() * .55)
+        Gui.updateGui()
+        settle()
+        view.saveImage(str(folder / 'assembly.png'), 1800, 1100, 'White')
+        for name in ('Plate', 'ProposedOpenPCB', 'KeycapProxies'):
+            doc.getObject(name).ViewObject.Visibility = False
+        view.viewBottom()
+        settle()
+        view.fitAll()
+        camera.height.setValue(camera.height.getValue() * .55)
+        Gui.updateGui()
+        settle()
+        view.saveImage(str(folder / 'underside.png'), 1500, 1200, 'White')
+        view.viewAxonometric()
+        settle()
+        view.fitAll()
+        camera.height.setValue(camera.height.getValue() * .55)
+        Gui.updateGui()
+        settle()
+        view.saveImage(str(folder / 'basket.png'), 1500, 1200, 'White')
+        doc.save()
+        if selector == 65:
+            App.closeDocument(doc.Name)
+    (local / 'preview-status.json').write_text(json.dumps({'status': 'saved', 'selectors': [65, 62]})+'\n')
+except Exception as error:
+    (local / 'preview-status.json').write_text(json.dumps({'status': 'failed', 'error': str(error)})+'\n')
+    raise
