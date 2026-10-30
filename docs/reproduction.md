@@ -69,8 +69,25 @@ ezdxf 1.4.3와 Shapely 2.1.2를 사용한다. 로컬 ZIP 및 내부 DXF의 고�
 - STEP: `cadquery.importers.importStep(path).val().BoundingBox()`로 x/z 평면과 y 두께를 읽는다. 원본 및 Rev.1 3종 결과는 `measured-official-step.json`에 있다.
 - Gerber: 고정 Keyball46 센서 `ball_sensor-Edge_Cuts.gbr`는 mm/4.6 좌표 형식이며 x=100…122, y=−100…−75mm이다. 현재 판매 부품 전체 크기를 뜻하지 않는다.
 
-현재 스크립트는 원본 CAD 측정 전체를 자동화하는 범용 CAD 파이프라인은 아니다. 이후 공식 STEP+실물 홀더를 FreeCAD에서 합쳐 높이와 체결부를 검토한다.
+이 윤곽 검사는 원본 CAD 측정 전체를 자동화하지 않는다. 아래 FreeCAD 초안은 공식 STEP에 보강판과 중앙 프레임을 구성하며, 실물 홀더의 높이와 체결부는 아직 검증하지 않는다.
 
+
+## FreeCAD 보강판 초안
+
+macOS에서 설치된 FreeCAD 1.1.4의 Python 3.11과 OpenCascade를 사용한다. `uv`는 기존에 사용하던 `ezdxf==1.4.3`을 별도 환경에 준비하며 FreeCAD 앱 자체를 수정하지 않는다. 저장소 루트에서 실행한다.
+
+```bash
+uv run scripts/fetch_sources.py
+uv run scripts/verify_official_contour.py
+uv run --python /Applications/FreeCAD.app/Contents/Resources/bin/python scripts/build_plate.py
+open -n -a /Applications/FreeCAD.app --args "$PWD/scripts/preview_plate.FCMacro"
+```
+
+설치 위치가 다르면 `FREECAD_ROOT`를 `Contents/Resources` 경로로 지정하고 `--python`도 해당 앱의 Python으로 바꾼다. Linux 실행 환경에서는 FreeCAD와 Python 바인딩 경로를 별도로 확인해야 하며 이 절차를 Linux에서 시험하지는 않았다. GUI는 앱의 정식 실행 파일로 열고 매크로가 두 모델의 표시 설정과 이미지를 저장한다. 외부 Python에서 `FreeCADGui.showMainWindow()`를 호출하는 방식은 이 Mac에서 종료 시 비정상 종료가 발생하여 사용하지 않는다.
+
+결과는 Git에서 제외되는 `design/preliminary/sources/local/plate-study/` 아래에 생성된다. `66/`와 `63/`에 `plate-<keys>.FCStd`, `plate-<keys>.step`, `carrier-<keys>.step`, `plate-<keys>-DRAFT.dxf`, `plan.svg`, `checks.json`을 두며 GUI 매크로는 `top.png`와 `assembly.png`, 상위 `preview-status.json`을 추가한다. 재생성은 이 초안을 덮어쓰므로 수동 CAD 변경은 별도 이름으로 먼저 저장한다. 공개 저장소에는 생성 스크립트와 형상을 복제하지 않는 설명만 둔다.
+
+배열 원본은 기존 `design/preliminary/build_artifacts.py`이고, 새 기구 검토 치수는 `scripts/build_plate.py`의 `STUDY`다. FCStd의 `Study` 속성은 사용한 값을 기록한 것으로 형상을 자동 구동하지 않는다. `Plate`는 원본 외곽의 판과 검토용 절삭 객체를 연결한 Boolean cut이며, 재현 가능한 치수 변경은 생성기에 반영한다. 생성 검사는 원본 해시, PCB 좌표 및 CAD 해시, 단일 솔리드, 구멍 수, 외곽 보존, STEP/FCStd/DXF 재열기를 확인한다. `review.json`의 PCB-볼 간섭은 알려진 미해결 항목이며, 스크립트 성공을 실물 조립 통과로 해석하지 않는다.
 
 ## KiCad 66키·63키 회로·PCB 초안
 

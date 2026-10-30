@@ -1,0 +1,58 @@
+"""Open the local studies, set review visibility, and save native previews."""
+import json
+from pathlib import Path
+
+import FreeCAD as App
+import FreeCADGui as Gui
+from PySide6.QtCore import QEventLoop, QTimer
+
+
+def settle_view():
+    # Let the native camera animation and paint events complete before capture.
+    loop = QEventLoop()
+    QTimer.singleShot(600, loop.quit)
+    loop.exec()
+
+root = Path(__file__).resolve().parents[1]
+local = root / "design/preliminary/sources/local/plate-study"
+try:
+    for count in (66, 63):
+        folder = local / str(count)
+        path = folder / f"plate-{count}.FCStd"
+        doc = App.openDocument(str(path))
+        for obj in doc.Objects:
+            if obj.ViewObject:
+                obj.ViewObject.Visibility = False
+        for name, color, transparency in (
+            ("Plate", (.70, .74, .80), 0),
+            ("CarrierConcept", (.10, .65, .55), 0),
+            ("CurrentPCBEnvelope", (.12, .40, .22), 75),
+            ("BallAtIllustrativeZ8", (.95, .55, .15), 35),
+            ("BallPCBInterference", (.95, .10, .12), 0),
+            ("KeycapPlanProxies", (.8, .85, .9), 80),
+        ):
+            view = doc.getObject(name).ViewObject
+            view.Visibility = True
+            view.ShapeColor = color
+            view.Transparency = transparency
+        doc.recompute()
+        view = Gui.activeDocument().activeView()
+        view.setCameraType("Orthographic")
+        view.setCameraOrientation((0, 0, 0, 1))
+        view.fitAll()
+        Gui.updateGui()
+        settle_view()
+        view.saveImage(str(folder / "top.png"), 1800, 950, "White")
+        view.viewAxonometric()
+        settle_view()
+        view.fitAll()
+        Gui.updateGui()
+        settle_view()
+        view.saveImage(str(folder / "assembly.png"), 1800, 1050, "White")
+        doc.save()
+        if count == 66:
+            App.closeDocument(doc.Name)
+    (local / "preview-status.json").write_text(json.dumps({"status": "saved", "variants": [66, 63]}) + "\n")
+except Exception as error:
+    (local / "preview-status.json").write_text(json.dumps({"status": "failed", "error": str(error)}) + "\n")
+    raise

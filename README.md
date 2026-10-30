@@ -6,6 +6,8 @@ Keycult No.1/60에 트랙볼을 결합하기 위한 PCB와 보강판(플레이�
 
 보유 케이스는 NovelKeys 최신 판매 버전의 WK이며, 정확한 리비전과 과거 공개 도면의 호환성은 확인이 필요합니다. G/H 사이 중앙 통합은 필수 조건이며 외부 별도 장치는 범위에서 제외합니다. 34mm Keyball은 현재 예비 배치의 기준이고, 작은 볼과 터치패드도 중앙 통합 후보로 검토합니다. 최종 장치는 아직 선택하지 않았으며 [실현 가능성과 대안 조사](docs/feasibility.md)를 참고합니다.
 
+[로컬 FreeCAD 보강판 초안](design/preliminary/design.md#로컬-freecad-보강판-초안)은 공식 NoLeaf 외곽에 현재 PCB의 66키·63키 좌표를 적용하고 중앙 개구와 네 점으로 고정하는 프레임을 검토합니다. 편집용 FCStd와 STEP/DXF는 원본 사용 조건에 따라 로컬에만 생성합니다. 설명용 볼 높이에서 현재 PCB와 간섭하므로 제조용 도면은 아니며, 홀더·센서의 실제 고정부와 PCB 개구 또는 볼 높이를 추가로 결정해야 합니다. [FreeCAD 실행 및 재현 절차](docs/reproduction.md#freecad-보강판-초안)를 따릅니다.
+
 ![추천 66키 배치](design/preliminary/layout.png)
 
 ## 현재 검토 중인 배치
