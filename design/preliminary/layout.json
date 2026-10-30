@@ -99,7 +99,7 @@
     }
   },
   "preferred": {
-    "name": "preferred-15u-3u-66",
+    "name": "preferred-15u-3u-65",
     "key_count": 65,
     "center_gap_u": 3,
     "total_width_u": 15,
@@ -1683,7 +1683,7 @@
     ]
   },
   "rear_clearance": {
-    "name": "rear-clearance-15u-3u-63",
+    "name": "rear-clearance-15u-3u-62",
     "key_count": 62,
     "center_gap_u": 3,
     "total_width_u": 15,

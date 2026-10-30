@@ -12,8 +12,8 @@ from pathlib import Path
 import argparse,json,subprocess
 import sexpdata as sx
 ROOT=Path(__file__).resolve().parents[1]
-parser=argparse.ArgumentParser();parser.add_argument('--keys',type=int,choices=(66,63),default=66);args=parser.parse_args()
-FP=ROOT/'design/pcb'/('63' if args.keys==63 else '')/f'keycult{args.keys}.kicad_pcb'
+parser=argparse.ArgumentParser();parser.add_argument('--keys',type=int,choices=(65,62),default=65);args=parser.parse_args()
+FP=ROOT/'design/pcb'/('62' if args.keys==62 else '')/f'keycult{args.keys}.kicad_pcb'
 REPORT=ROOT/f'.cache/pcb-tools/cleanup-drc-{args.keys}.json'
 S=sx.Symbol
 def tag(x,name):return isinstance(x,list) and x and str(x[0])==name

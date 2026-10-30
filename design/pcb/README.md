@@ -1,21 +1,19 @@
-# Keycult66 and Keycult63 KiCad designs
+# Keycult65 and Keycult62 KiCad designs
 
 **DRAFT E, not for fabrication or assembly.** Both variants use the same RP2040 circuit and stable key references. Open the corresponding project in **KiCad 10.0.7**. The schematic and PCB are native editable CAD.
 
-Keycult66 and Keycult63 are legacy filenames and `--keys 66`/`--keys 63` selectors; their current physical key counts are 65 and 62.
-
 | Variant | Project | Schematic | PCB | Validation |
 | --- | --- | --- | --- | --- |
-| 65 keys | [keycult66.kicad_pro](keycult66.kicad_pro) | [Schematic](keycult66.kicad_sch) | [PCB](keycult66.kicad_pcb) | [Report](reports/validation.json) |
-| 62 keys | [keycult63.kicad_pro](63/keycult63.kicad_pro) | [Schematic](63/keycult63.kicad_sch) | [PCB](63/keycult63.kicad_pcb) | [Report](63/reports/validation.json) |
+| 65 keys | [keycult65.kicad_pro](keycult65.kicad_pro) | [Schematic](keycult65.kicad_sch) | [PCB](keycult65.kicad_pcb) | [Report](reports/validation.json) |
+| 62 keys | [keycult62.kicad_pro](62/keycult62.kicad_pro) | [Schematic](62/keycult62.kicad_sch) | [PCB](62/keycult62.kicad_pcb) | [Report](62/reports/validation.json) |
 
 Both variants pass strict validation after regeneration and saved-route replay: zero ERC violations, DRC violations, unconnected items and schematic/PCB mismatches. The reports contain the counts and CAD hashes. Static electrical checks do not establish powered operation or case fit. The user-approved design assumption is an unmodified external UDB C5-JSH, represented by DB1 in the schematic and assembly BOM, with no footprint on the main PCB. J1 implements its 1:1 cable interface. The sensor interface remains logical pads pending hardware identification.
 
 ## Review entry points
 
-- [Native schematic](keycult66.kicad_sch), [native PCB](keycult66.kicad_pcb), [project](keycult66.kicad_pro).
+- [Native schematic](keycult65.kicad_sch), [native PCB](keycult65.kicad_pcb), [project](keycult65.kicad_pro).
 - [Schematic PDF](exports/schematic.pdf), [front copper SVG](exports/front.svg), [back copper SVG](exports/back.svg), [ground plane SVG](exports/ground.svg), [layer PDF](exports/board-layers.pdf).
-- 62-key exports: [schematic PDF](63/exports/schematic.pdf), [front](63/exports/front.svg), [back](63/exports/back.svg), [ground plane](63/exports/ground.svg), [layer PDF](63/exports/board-layers.pdf), [BOM](63/bom.csv), [key/GPIO map](63/gpio-map.csv).
+- 62-key exports: [schematic PDF](62/exports/schematic.pdf), [front](62/exports/front.svg), [back](62/exports/back.svg), [ground plane](62/exports/ground.svg), [layer PDF](62/exports/board-layers.pdf), [BOM](62/bom.csv), [key/GPIO map](62/gpio-map.csv).
 - [Real validation summary](reports/validation.json), [KiCad ERC](reports/erc.json), [KiCad DRC including native schematic parity](reports/drc.json), [actual exported netlist](reports/netlist.xml).
 The layer PDF is auto-fitted for review, **not a 1:1 print or manufacturing template**.
 
@@ -190,12 +188,12 @@ See [sources](sources.md) for versions, licenses and hashes.
 From the repository root, with the Python version matching KiCad's installed binding (the original Nix runtime uses Python 3.14; the official 10.0.7 Docker image uses Python 3.13). Scripts require Python 3.11 or newer, but `pcbnew` must match the chosen interpreter. Use the [Docker procedure](../../docs/reproduction.md#docker에서-kicad-검증) when KiCad is not installed on the host.
 
 ```bash
-uv run --python "$(command -v python3)" scripts/build_pcb.py --keys 66
-uv run --python "$(command -v python3)" scripts/route_pcb.py --keys 66 --import-saved
-uv run --python "$(command -v python3)" scripts/validate_pcb.py --keys 66
-uv run --python "$(command -v python3)" scripts/build_pcb.py --keys 63
-uv run --python "$(command -v python3)" scripts/route_pcb.py --keys 63 --import-saved
-uv run --python "$(command -v python3)" scripts/validate_pcb.py --keys 63
+uv run --python "$(command -v python3)" scripts/build_pcb.py --keys 65
+uv run --python "$(command -v python3)" scripts/route_pcb.py --keys 65 --import-saved
+uv run --python "$(command -v python3)" scripts/validate_pcb.py --keys 65
+uv run --python "$(command -v python3)" scripts/build_pcb.py --keys 62
+uv run --python "$(command -v python3)" scripts/route_pcb.py --keys 62 --import-saved
+uv run --python "$(command -v python3)" scripts/validate_pcb.py --keys 62
 uv run scripts/test_pcb_validation_gate.py
 uv run scripts/validate.py
 ```

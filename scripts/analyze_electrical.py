@@ -68,7 +68,7 @@ def usb_geometry(board):
 def main():
     variants = {}
     hashes = {}
-    for keys, directory in ((66, ROOT / "design/pcb"), (63, ROOT / "design/pcb/63")):
+    for keys, directory in ((65, ROOT / "design/pcb"), (62, ROOT / "design/pcb/62")):
         circuit_path = directory / "circuit.json"
         circuit = json.loads(circuit_path.read_text())
         parts = {part["ref"]: part for part in circuit["parts"]}

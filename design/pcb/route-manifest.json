@@ -8,8 +8,8 @@
   "note": "v2.0.1 -mp alone does not bound BatchAutorouter; router.stop_pass_no is explicitly supplied. No cloud routing; usage analytics disabled. SES preserves the base route; scripts/usb_routing.py replaces connector-side USB copper and adds the DRAFT E ground changes after import.",
   "input_sha256": {
     "design/pcb/circuit.json": "fee5bb35da8644f555e54ebbcc4267ac9a7dde32f38eaa2e17ca45cfead9b210",
-    "design/preliminary/layout.json": "45b6b986a26be9c443d7f54473e4b3af3b913258156487e0696f5a74ed82b7fe",
-    "scripts/build_pcb.py": "0783c2035f905be970cbe0cae4be21de7709cd32089588e31c2ff40caba5d7ff",
+    "design/preliminary/layout.json": "3f4018e8de87bd8a0751f4fc7513168f342ea2b2bf9f17dca7712dbb5974984b",
+    "scripts/build_pcb.py": "d8ba8532db1a4e0be53e3eaf574f84ebc6d797fcf5582701b0af78b6a46bba38",
     "scripts/usb_routing.py": "2ed59310d5f43c371a0a0a48498daaf08731d277315cf32c09c3bf7f6b90923e"
   },
   "ses_sha256": "f7a6ff0a6e6d566569958e8eb8c49505c2a2a76d4061bbdc4231a7c86879cd2a"

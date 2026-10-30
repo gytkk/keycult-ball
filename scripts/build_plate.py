@@ -132,10 +132,10 @@ def svg(face, carrier_face, keys, count, path):
 def build(count, layout, face, blank, donor):
     s = STUDY
     t, half, radius = s['plate_thickness'], s['carrier_width']/2, s['opening_diameter']/2
-    variant = 'preferred' if count == 66 else 'rear_clearance'
+    variant = 'preferred' if count == 65 else 'rear_clearance'
     keys = layout[variant]['keys']
     key_count = len(keys)
-    directory = ROOT / 'design/pcb' / ('63' if count == 63 else '')
+    directory = ROOT / 'design/pcb' / ('62' if count == 62 else '')
     report = json.loads((directory/'reports/validation.json').read_text())
     pcb = directory/f'keycult{count}.kicad_pcb'
     if sha(pcb) != report['artifact_sha256'][pcb.name]:
@@ -164,13 +164,13 @@ def build(count, layout, face, blank, donor):
     tool = feature(doc,'ProposedPlateCutters',Part.makeCompound(cuts+[opening]+mount_cuts),'Square switch openings and central window; nominal dimensions recorded in Study')
     plate = cut(doc,'Plate',base,tool)
     carrier = rect(-half,-half,s['carrier_width'],s['carrier_width'])
-    if count == 63:
+    if count == 62:
         carrier = carrier.fuse(rect(-s['rear_shelf_width']/2,s['rear_extension_y'],s['rear_shelf_width'],-s['rear_extension_y'])).removeSplitter()
     carrier = carrier.cut(Part.Face(Part.Wire([Part.makeCircle(radius)])))
     for x,y in holes:
         carrier = carrier.cut(Part.Face(Part.Wire([Part.makeCircle(s['mount_hole_diameter']/2,V(x,y,0))])))
     carrier = carrier.removeSplitter()
-    adapter = feature(doc,'CarrierConcept',carrier.extrude(V(0,0,s['carrier_thickness'])),'Own mounting concept: M2 clearance holes; no verified holder or sensor interface. Rear shelf only on Keycult63.')
+    adapter = feature(doc,'CarrierConcept',carrier.extrude(V(0,0,s['carrier_thickness'])),'Own mounting concept: M2 clearance holes; no verified holder or sensor interface. Rear shelf only on Keycult62.')
     xmin,ymin,xmax,ymax = report['envelope_bounds_mm']
     board = Part.makeBox(xmax-xmin,ymax-ymin,s['pcb_thickness'],V(xmin-180,ymin-100,s['pcb_top_z']-s['pcb_thickness']))
     board_obj = feature(doc,'CurrentPCBEnvelope',board,'Actual XY envelope; top Z assumed in Study; no central cutout in native PCB')
@@ -231,7 +231,7 @@ def main():
     LOCAL.mkdir(parents=True,exist_ok=True)
     layout = json.loads((ROOT/'design/preliminary/layout.json').read_text())
     face,blank,donor = source_blank()
-    results = [build(count,layout,face,blank,donor) for count in (66,63)]
+    results = [build(count,layout,face,blank,donor) for count in (65,62)]
     report = dict(status='mechanical study only; known PCB interference, no fit or manufacturing approval',
                   freecad=App.Version(),parameters=STUDY,source_step_sha256=STEP_SHA,
                   transform='x=STEP.x-142.875; y=STEP.z-47.625; z=STEP.y. PCB x-180,y-100. Physical datum unverified.',

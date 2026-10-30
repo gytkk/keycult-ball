@@ -85,30 +85,28 @@ open -n -a /Applications/FreeCAD.app --args "$PWD/scripts/preview_plate.FCMacro"
 
 설치 위치가 다르면 `FREECAD_ROOT`를 `Contents/Resources` 경로로 지정하고 `--python`도 해당 앱의 Python으로 바꾼다. Linux 실행 환경에서는 FreeCAD와 Python 바인딩 경로를 별도로 확인해야 하며 이 절차를 Linux에서 시험하지는 않았다. GUI는 앱의 정식 실행 파일로 열고 매크로가 두 모델의 표시 설정과 이미지를 저장한다. 외부 Python에서 `FreeCADGui.showMainWindow()`를 호출하는 방식은 이 Mac에서 종료 시 비정상 종료가 발생하여 사용하지 않는다.
 
-결과는 Git에서 제외되는 `design/preliminary/sources/local/plate-study/` 아래에 생성된다. `66/`와 `63/`은 기존 경로 이름이며 현재 65키/62키 결과를 담는다. 각 디렉터리에 `plate-<keys>.FCStd`, `plate-<keys>.step`, `carrier-<keys>.step`, `plate-<keys>-DRAFT.dxf`, `plan.svg`, `checks.json`을 두며 GUI 매크로는 `top.png`와 `assembly.png`, 상위 `preview-status.json`을 추가한다. 재생성은 이 초안을 덮어쓰므로 수동 CAD 변경은 별도 이름으로 먼저 저장한다. 공개 저장소에는 생성 스크립트와 형상을 복제하지 않는 설명만 둔다.
+결과는 Git에서 제외되는 `design/preliminary/sources/local/plate-study/` 아래에 생성된다. `65/`와 `62/`는 각각 65키와 62키 결과를 저장한다. 각 디렉터리에 `plate-<keys>.FCStd`, `plate-<keys>.step`, `carrier-<keys>.step`, `plate-<keys>-DRAFT.dxf`, `plan.svg`, `checks.json`을 두며 GUI 매크로는 `top.png`와 `assembly.png`, 상위 `preview-status.json`을 추가한다. 재생성은 이 초안을 덮어쓰므로 수동 CAD 변경은 별도 이름으로 먼저 저장한다. 공개 저장소에는 생성 스크립트와 형상을 복제하지 않는 설명만 둔다.
 
 배열 원본은 기존 `design/preliminary/build_artifacts.py`이고, 새 기구 검토 치수는 `scripts/build_plate.py`의 `STUDY`다. FCStd의 `Study` 속성은 사용한 값을 기록한 것으로 형상을 자동 구동하지 않는다. `Plate`는 원본 외곽의 판과 검토용 절삭 객체를 연결한 Boolean cut이며, 재현 가능한 치수 변경은 생성기에 반영한다. 생성 검사는 원본 해시, PCB 좌표 및 CAD 해시, 단일 솔리드, 구멍 수, 외곽 보존, STEP/FCStd/DXF 재열기를 확인한다. `review.json`의 PCB-볼 간섭은 알려진 미해결 항목이며, 스크립트 성공을 실물 조립 통과로 해석하지 않는다.
 
 ## KiCad 65키·62키 회로·PCB 초안
 
-Keycult66/Keycult63 파일명과 `--keys 66`/`--keys 63` 선택자는 기존 이름이며 실제 키 수는 각각 65/62다.
-
-[PCB 재현 안내](../design/pcb/README.md#reproduction)를 별도로 따른다. 키 배열을 변경하면 예비 도면 생성기와 PNG/PDF 렌더를 먼저 실행한다. Python은 설치된 KiCad 10.0.7의 `pcbnew` 바인딩과 버전이 일치해야 한다. 기존 Nix 환경은 Python 3.14, 아래 공식 Docker 환경은 Python 3.13을 사용한다. 65키 원본은 `design/pcb/keycult66.*`, 62키 원본은 `design/pcb/63/keycult63.*`이며, 각 디렉터리에 BOM·핀맵·배선과 `reports/`, `exports/`를 둔다.
+[PCB 재현 안내](../design/pcb/README.md#reproduction)를 별도로 따른다. 키 배열을 변경하면 예비 도면 생성기와 PNG/PDF 렌더를 먼저 실행한다. Python은 설치된 KiCad 10.0.7의 `pcbnew` 바인딩과 버전이 일치해야 한다. 기존 Nix 환경은 Python 3.14, 아래 공식 Docker 환경은 Python 3.13을 사용한다. 65키 원본은 `design/pcb/keycult65.*`, 62키 원본은 `design/pcb/62/keycult62.*`이며, 각 디렉터리에 BOM·핀맵·배선과 `reports/`, `exports/`를 둔다.
 
 아래 명령은 저장된 배선을 재적용한 뒤 실제 ERC/DRC, netlist, 키 좌표와 예약 영역을 검사하고 SVG/PDF를 내보낸다. 생성기는 현재 CAD를 덮어쓰므로 수동 편집을 보존한 뒤 실행한다. `--keys`를 생략하면 65키를 선택한다.
 
 ```bash
-uv run --python "$(command -v python3)" scripts/build_pcb.py --keys 66
-uv run --python "$(command -v python3)" scripts/route_pcb.py --keys 66 --import-saved
-uv run --python "$(command -v python3)" scripts/validate_pcb.py --keys 66
-uv run --python "$(command -v python3)" scripts/build_pcb.py --keys 63
-uv run --python "$(command -v python3)" scripts/route_pcb.py --keys 63 --import-saved
-uv run --python "$(command -v python3)" scripts/validate_pcb.py --keys 63
+uv run --python "$(command -v python3)" scripts/build_pcb.py --keys 65
+uv run --python "$(command -v python3)" scripts/route_pcb.py --keys 65 --import-saved
+uv run --python "$(command -v python3)" scripts/validate_pcb.py --keys 65
+uv run --python "$(command -v python3)" scripts/build_pcb.py --keys 62
+uv run --python "$(command -v python3)" scripts/route_pcb.py --keys 62 --import-saved
+uv run --python "$(command -v python3)" scripts/validate_pcb.py --keys 62
 ```
 
 각 SES는 현재 키 좌표에 맞춰 다시 생성한 기본 배선을 저장한다. `scripts/usb_routing.py`는 seed 생성과 SES 가져오기 이후 J1 측 USB 배선을 교체하고 DRAFT E의 접지 비아·접지면 및 후보 stackup을 적용한다. `route-manifest.json`은 회로, 배열, 생성기와 이 스크립트의 해시를 검사하므로 입력을 변경하면 기존 배선을 그대로 가져올 수 없다. 회로나 배열을 변경하면 `--import-saved` 대신 `--route`로 다시 배선하고 전체 결과를 검토한다.
 
-검증은 기본적으로 미배선이나 DRC 위반이 있으면 실패한다. `--draft`는 미배선만 허용하고 실제 수를 보고하는 검토 모드이며, 기하 DRC 위반은 그대로 실패한다. 새로 채운 In1.Cu 접지면이 F.Cu USB 배선 아래를 덮는지 검사하며, 신호 비아 중심 반경 0.51mm는 접지면의 절연 간격(antipad) 때문에 별도로 제외한다. 선폭 0.29mm, 최소 간격 0.2mm와 신호 비아에서 접지 비아까지 3mm 이내라는 설계 조건도 검사한다. 이 수치는 프로젝트의 배선 검토 조건이며 USB 적합성 판정 기준이 아니다. 검사 상태는 [65키 보고서](../design/pcb/reports/validation.json)와 [62키 보고서](../design/pcb/63/reports/validation.json)를 기준으로 하며 제조 승인으로 해석하지 않는다. KiCad 없이 실행하는 검사 회귀 테스트는 `uv run scripts/test_pcb_validation_gate.py`다.
+검증은 기본적으로 미배선이나 DRC 위반이 있으면 실패한다. `--draft`는 미배선만 허용하고 실제 수를 보고하는 검토 모드이며, 기하 DRC 위반은 그대로 실패한다. 새로 채운 In1.Cu 접지면이 F.Cu USB 배선 아래를 덮는지 검사하며, 신호 비아 중심 반경 0.51mm는 접지면의 절연 간격(antipad) 때문에 별도로 제외한다. 선폭 0.29mm, 최소 간격 0.2mm와 신호 비아에서 접지 비아까지 3mm 이내라는 설계 조건도 검사한다. 이 수치는 프로젝트의 배선 검토 조건이며 USB 적합성 판정 기준이 아니다. 검사 상태는 [65키 보고서](../design/pcb/reports/validation.json)와 [62키 보고서](../design/pcb/62/reports/validation.json)를 기준으로 하며 제조 승인으로 해석하지 않는다. KiCad 없이 실행하는 검사 회귀 테스트는 `uv run scripts/test_pcb_validation_gate.py`다.
 
 ### 전원과 USB의 실물 없는 검토
 
@@ -139,10 +137,10 @@ docker run --rm --platform linux/amd64 --entrypoint /bin/sh \
   -e PYTHONPATH=/usr/lib/python3/dist-packages \
   -e VIRTUAL_ENV=/opt/keycult-venv \
   keycult-kicad-runtime:10.0.7 -c '
-    uv run --no-project --active python scripts/build_pcb.py --keys 66 &&
-    uv run --no-project --active python scripts/route_pcb.py --keys 66 --import-saved &&
-    uv run --no-project --active python scripts/validate_pcb.py --keys 66
+    uv run --no-project --active python scripts/build_pcb.py --keys 65 &&
+    uv run --no-project --active python scripts/route_pcb.py --keys 65 --import-saved &&
+    uv run --no-project --active python scripts/validate_pcb.py --keys 65
   '
 ```
 
-62키는 위 실행 명령의 `--keys 66` 세 곳을 `--keys 63`으로 바꾼다. `--no-project --active`는 미리 설치한 가상 환경과 시스템 KiCad 바인딩을 함께 사용하기 위한 옵션이다. USB 배선 및 배선 정리 하위 스크립트는 자체 메타데이터에 따라 `uv` 캐시를 만들 수 있으므로 첫 실행에는 네트워크가 필요하다. DRAFT E의 두 버전은 이 환경에서 생성하고 ERC/DRC와 연결 일치를 검사했다.
+62키는 위 실행 명령의 `--keys 65` 세 곳을 `--keys 62`로 바꾼다. `--no-project --active`는 미리 설치한 가상 환경과 시스템 KiCad 바인딩을 함께 사용하기 위한 옵션이다. USB 배선 및 배선 정리 하위 스크립트는 자체 메타데이터에 따라 `uv` 캐시를 만들 수 있으므로 첫 실행에는 네트워크가 필요하다. DRAFT E의 두 버전은 이 환경에서 생성하고 ERC/DRC와 연결 일치를 검사했다.

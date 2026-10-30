@@ -1,7 +1,7 @@
 {
   "status": "numeric 2D checks only; z, opening, tolerances, sockets, wiring and final mounting remain unverified",
   "layouts": {
-    "preferred-15u-3u-66": {
+    "preferred-15u-3u-65": {
       "keys": 65,
       "unique_centers": 65,
       "keycap_pair_collisions": [],
@@ -53,7 +53,7 @@
         0.0
       ]
     },
-    "rear-clearance-15u-3u-63": {
+    "rear-clearance-15u-3u-62": {
       "keys": 62,
       "unique_centers": 62,
       "keycap_pair_collisions": [],

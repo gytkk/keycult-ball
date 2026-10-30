@@ -90,7 +90,7 @@ The exact router artifact checksum and route-snapshot checksums are recorded in
 independent design's editable copper connectivity. Hash mismatches must be
 investigated; do not silently replace pinned inputs.
 
-The 62-key route has its own [manifest](63/route-manifest.json). The router wrapper rejects empty/invalid SES output before replacing a saved route and retries up to three times for the v2.0.1 CLI export race: its CLI observes `COMPLETED` before the scheduler has necessarily populated the output bytes. The upstream [CLI](https://github.com/freerouting/freerouting/blob/v2.0.1/src/main/java/app/freerouting/Freerouting.java) and [scheduler](https://github.com/freerouting/freerouting/blob/v2.0.1/src/main/java/app/freerouting/management/RoutingJobScheduler.java) establish this ordering. The tool JAR is unchanged.
+The 62-key route has its own [manifest](62/route-manifest.json). The router wrapper rejects empty/invalid SES output before replacing a saved route and retries up to three times for the v2.0.1 CLI export race: its CLI observes `COMPLETED` before the scheduler has necessarily populated the output bytes. The upstream [CLI](https://github.com/freerouting/freerouting/blob/v2.0.1/src/main/java/app/freerouting/Freerouting.java) and [scheduler](https://github.com/freerouting/freerouting/blob/v2.0.1/src/main/java/app/freerouting/management/RoutingJobScheduler.java) establish this ordering. The tool JAR is unchanged.
 
 ## Electrical desk review sources
 

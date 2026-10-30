@@ -271,7 +271,7 @@
     "pinned_symbol_libs": []
   },
   "meta": {
-    "filename": "keycult66.kicad_pro",
+    "filename": "keycult62.kicad_pro",
     "version": 3
   },
   "net_settings": {
@@ -339,8 +339,8 @@
     "legacy_lib_list": [],
     "top_level_sheets": [
       {
-        "filename": "keycult66.kicad_sch",
-        "name": "keycult66",
+        "filename": "keycult62.kicad_sch",
+        "name": "keycult62",
         "uuid": "00000000-0000-0000-0000-000000000000"
       }
     ]

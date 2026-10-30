@@ -53,18 +53,18 @@ class VariantTests(unittest.TestCase):
         for count, (variant, _) in self.namespace['VARIANTS'].items():
             with self.subTest(keys=count):
                 keys = self.namespace['indexed_keys'](self.layout, variant)
-                self.assertEqual(len(keys), count - 1)
+                self.assertEqual(len(keys), count)
                 self.assertEqual([key for _, key in keys], self.layout[variant]['keys'])
-                self.assertEqual({index for index, _ in keys}, set(range(1, 67)) - {59} - ({7, 8, 9} if count == 63 else set()))
+                self.assertEqual({index for index, _ in keys}, set(range(1, 67)) - {59} - ({7, 8, 9} if count == 62 else set()))
                 bottom = {index: key for index, key in keys if key['row'] == 4 and key['group'] == 'center'}
                 self.assertEqual(set(bottom), {58, 60})
                 for index, label, x in [(58, 'M1', -14.2875), (60, 'M2', 14.2875)]:
                     self.assertEqual((bottom[index]['label'], bottom[index]['x_mm'], bottom[index]['y_mm'], bottom[index]['width_u']), (label, x, 38.1, 1.5))
 
     def test_rear_clearance_reservation_is_clipped_to_board(self):
-        self.assertEqual(self.namespace['VARIANTS'][66][1], [155, 75, 205, 125])
-        self.assertEqual(self.namespace['VARIANTS'][63][1], [151.425, 52.7, 208.575, 128.575])
-        x1, y1, x2, y2 = self.namespace['VARIANTS'][63][1]
+        self.assertEqual(self.namespace['VARIANTS'][65][1], [155, 75, 205, 125])
+        self.assertEqual(self.namespace['VARIANTS'][62][1], [151.425, 52.7, 208.575, 128.575])
+        x1, y1, x2, y2 = self.namespace['VARIANTS'][62][1]
         self.assertAlmostEqual(x2 - x1, 57.15)
         self.assertEqual(y1, 52.7)
         self.assertAlmostEqual(y2, 100 + 28.575)
@@ -101,15 +101,15 @@ class VariantTests(unittest.TestCase):
         self.assertGreater(uncovered(trace, reference.difference(box(5, -.1, 5.2, .1)), transitions), .039)
 
     def test_external_c5_jsh_assembly_and_retained_main_board_protection(self):
-        for count in (66, 63):
+        for count in (65, 62):
             with self.subTest(keys=count):
-                directory = SOURCE.parents[1] / 'design/pcb' / ('63' if count == 63 else '')
+                directory = SOURCE.parents[1] / 'design/pcb' / ('62' if count == 62 else '')
                 parts = {p['ref']: p for p in json.loads((directory / 'circuit.json').read_text())['parts']}
                 expected = {'1': 'VBUS_USB', '2': 'USB_DM', '3': 'USB_DP', '4': 'GND'}
                 self.assertEqual(parts['DB1']['nets'], expected)
                 self.assertEqual(parts['DB1']['value'], 'UDB C5-JSH / EXTERNAL')
                 self.assertEqual(parts['DB1']['fp'], '')
-                self.assertEqual(parts['U1']['nets']['27'], None if count == 63 else 'COL7')
+                self.assertEqual(parts['U1']['nets']['27'], None if count == 62 else 'COL7')
                 self.assertEqual(parts['F1']['nets'], {'1': 'VBUS_USB', '2': 'VBUS_FUSED'})
                 self.assertEqual(parts['F1']['mpn'], 'Bourns MF-PSMF050X-2')
                 for ref in ('R1', 'R2'):

@@ -15,8 +15,8 @@ import pcbnew as pcb
 ROOT=Path(__file__).resolve().parents[1];D=ROOT/'design/pcb';CACHE=ROOT/'.cache/pcb-tools';CACHE.mkdir(parents=True,exist_ok=True)
 JAR_SHA='d7fd0f63f52e6d74b0fad6715f87ca9f0ffd7109d66b2a584638000270592ecf'
 URL='https://github.com/freerouting/freerouting/releases/download/v2.0.1/freerouting-2.0.1.jar'
-parser=argparse.ArgumentParser();g=parser.add_mutually_exclusive_group(required=True);g.add_argument('--import-saved',action='store_true');g.add_argument('--route',action='store_true');parser.add_argument('--java');parser.add_argument('--passes',type=int,default=40);parser.add_argument('--keys',type=int,choices=(66,63),default=66);parser.add_argument('--capture',type=Path,help='Capture an already-completed local SES instead of launching router (requires --route)');args=parser.parse_args()
-if args.keys==63:D=D/'63'
+parser=argparse.ArgumentParser();g=parser.add_mutually_exclusive_group(required=True);g.add_argument('--import-saved',action='store_true');g.add_argument('--route',action='store_true');parser.add_argument('--java');parser.add_argument('--passes',type=int,default=40);parser.add_argument('--keys',type=int,choices=(65,62),default=65);parser.add_argument('--capture',type=Path,help='Capture an already-completed local SES instead of launching router (requires --route)');args=parser.parse_args()
+if args.keys==62:D=D/'62'
 CACHE=CACHE/str(args.keys);CACHE.mkdir(parents=True,exist_ok=True)
 def sha(path):return hashlib.sha256(path.read_bytes()).hexdigest()
 fp=D/f'keycult{args.keys}.kicad_pcb';saved=D/'initial-route.ses';manifest=D/'route-manifest.json'

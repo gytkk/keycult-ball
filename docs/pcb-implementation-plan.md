@@ -1,18 +1,18 @@
 # PCB 구현 계획
 
-작성일: 2026-10-29. 갱신일: 2026-10-30. 상태: 단계 1·2의 회로 및 PCB 초안을 65키·62키 배열에 맞춰 갱신한다. DRAFT E는 UDB C5-JSH를 그대로 사용하는 외부 조립체 DB1과 기존 공통 부품 배치를 유지하며, 1.5u M1/M2 좌표에 맞춰 매트릭스를 다시 배선하고 J1 측 USB 배선 규칙과 접지 귀환 경로를 적용한다. 센서 커넥터, 전원·USB 신호 품질 및 3D 조립 검토는 남아 있다. [KiCad 프로젝트](../design/pcb/README.md)에 실제 회로도·PCB, BOM·핀맵과 검증 결과가 있다. 현재 검사 결과는 [65키 검증 JSON](../design/pcb/reports/validation.json)과 [62키 검증 JSON](../design/pcb/63/reports/validation.json)을 기준으로 한다. 제조 준비 완료나 QMK 빌드·실물 동작 검증을 뜻하지 않는다.
+작성일: 2026-10-29. 갱신일: 2026-10-30. 상태: 단계 1·2의 회로 및 PCB 초안을 65키·62키 배열에 맞춰 갱신한다. DRAFT E는 UDB C5-JSH를 그대로 사용하는 외부 조립체 DB1과 기존 공통 부품 배치를 유지하며, 1.5u M1/M2 좌표에 맞춰 매트릭스를 다시 배선하고 J1 측 USB 배선 규칙과 접지 귀환 경로를 적용한다. 센서 커넥터, 전원·USB 신호 품질 및 3D 조립 검토는 남아 있다. [KiCad 프로젝트](../design/pcb/README.md)에 실제 회로도·PCB, BOM·핀맵과 검증 결과가 있다. 현재 검사 결과는 [65키 검증 JSON](../design/pcb/reports/validation.json)과 [62키 검증 JSON](../design/pcb/62/reports/validation.json)을 기준으로 한다. 제조 준비 완료나 QMK 빌드·실물 동작 검증을 뜻하지 않는다.
 
 ## 재개 지점
 
 2026-10-30 [전원 계산과 USB 배선 검토](../design/pcb/README.md#power-and-usb-desk-review)를 수행했다. 전체 3.3V 부하 150mA를 임시 설계 예산으로 두고 MCU·플래시·기타에 110mA, 센서에 40mA를 배분한다. 이는 최대 소비전류를 측정하거나 보증한 값이 아니다. 5.5V 입력과 주변 50 C의 발열 모델에서 150mA는 약 112 C, 200mA는 약 132 C이므로 500mA를 사용 가능한 전류로 간주하지 않는다. DRAFT E는 JLC04161H-7628 후보 stackup의 구리·유전체 모델을 CAD에 명시하고 긴 USB 구간을 In2.Cu에서 F.Cu로 옮긴다. J1 측 데이터 배선은 선폭 0.29mm, 최소 가장자리 간격 0.2mm와 짧은 B.Cu 탈출 배선을 사용한다. 접지 비아 3개와 B.Cu 접지면 3개를 추가하고 In1.Cu 상단 경계를 확장한다. [적용한 배선과 검토 한계](../design/pcb/README.md#usb-routing-findings)를 따르며 제조사 승인 stackup이나 임피던스 검증 완료를 뜻하지 않는다.
 
-- **저장된 설계:** DRAFT E. 65키는 `design/pcb/keycult66.*`, 62키는 `design/pcb/63/keycult63.*`다. 두 배열 모두 SW59/D59를 제외하고, 62키는 SW7-SW9와 D7-D9도 제외한다. COL6과 COL8은 하단 키에 연결되며 62키의 COL7은 키가 없어 GP16을 NC로 표시하며, 공통 15열 GPIO 순서는 유지한다. 각 디렉터리의 `initial-route.ses`는 현재 키 좌표에 맞춰 다시 생성한 기본 배선을 저장한다. seed 생성과 저장 SES 가져오기 이후 `scripts/usb_routing.py`가 기존 J1 측 USB 배선을 교체하고 E의 USB 및 접지 변경을 적용한다. `.cache/`의 작업 파일 없이 재개할 수 있다.
+- **저장된 설계:** DRAFT E. 65키는 `design/pcb/keycult65.*`, 62키는 `design/pcb/62/keycult62.*`다. 두 배열 모두 SW59/D59를 제외하고, 62키는 SW7-SW9와 D7-D9도 제외한다. COL6과 COL8은 하단 키에 연결되며 62키의 COL7은 키가 없어 GP16을 NC로 표시하며, 공통 15열 GPIO 순서는 유지한다. 각 디렉터리의 `initial-route.ses`는 현재 키 좌표에 맞춰 다시 생성한 기본 배선을 저장한다. seed 생성과 저장 SES 가져오기 이후 `scripts/usb_routing.py`가 기존 J1 측 USB 배선을 교체하고 E의 USB 및 접지 변경을 적용한다. `.cache/`의 작업 파일 없이 재개할 수 있다.
 - **USB에서 확인한 근거:** Wilba WT60-D 공식 판매 문서의 No.1/60 및 UDB 호환 설명과 UDB 원본 회로도를 대조했다. J1은 JST SM04B-SRSS-TB(LF)(SN), 1=VBUS_USB(외부 PTC 이후), 2=D-, 3=D+, 4=GND이며 번호 기준 1:1 케이블을 사용한다. 기존 TP1-TP4 번호는 J1 핀 순서와 다르다. [출처 및 고정 리비전](../design/pcb/sources.md#usb-daughterboard-evidence)에 근거와 한계를 기록했다.
 - **검사 상태:** J1과 USB 경로 및 접지면의 선폭·간격·구리 길이·비아 수는 [PCB 안내](../design/pcb/README.md#usb-daughterboard-interface-and-compatibility-limits)를 따른다. native 검사와 F.Cu USB 배선의 In1.Cu 접지면 투영 결과는 각 배열의 현재 검증 보고서를 따른다. 투영 검사는 신호 비아 중심 반경 0.51mm를 제외하며 전환부나 임피던스를 검증한 것은 아니다. 상세 결과는 각 배열의 검증 보고서를 따른다.
 - **USB 조사와 설계 기준:** [리비전별 회로 조사](../design/pcb/sources.md#usb-daughterboard-evidence)와 2026-10-30 사용자 승인에 따라 UDB C5-JSH를 그대로 사용한다. DB1은 회로도에만 표시하는 외부 조립체이며 메인 PCB footprint가 없다. CC 5.1kΩ 저항 2개, TPD4E05U06 ESD 보호, ASMD1206-150 PTC, SMF6.0A TVS 및 실드의 GND 직결은 C5-JSH가 담당한다. 메인 F1 500mA와 USB 27Ω 직렬 저항을 유지한다. 이는 보유 순정 도터보드를 실측으로 확인했다는 뜻이 아니다. 필요한 길이의 케이블은 구할 수 있으므로 기존 케이블의 도달 거리는 설계 제약에서 제외한다.
 - **USB에서 아직 확인하지 못한 항목:** 케이스 장착, 커넥터 체결과 전원 연결 전 케이블 도통, 케이스 통로, 삽입·분리 공간과 하부 높이는 남아 있다. J1 원점 `(40.6,112.0)mm`, B.Cu, 90도는 직교 배열에 맞춘 임시 위치를 유지한다. WT60-A 사진에서 정확한 위치를 측정한 값이 아니다. 실제 부하·돌입전류와 직렬 퓨즈 전압 강하, 제조 stackup과 선택한 케이블을 기준으로 한 신호 품질 및 층 전환부의 접지 귀환 경로 검토도 남아 있다.
 - **센서에서 남은 항목:** 모델·리비전은 사용자가 아직 모른다고 확인했다. TP10-TP17은 MCU 측 3.3V 논리 패드이며, 모듈 커넥터·5V 전원·전압 변환을 확정하지 않았다. 이 패드를 미확인 센서에 바로 연결하지 않는다.
-- **검증과 재현:** strict `validate_pcb.py --keys 66` 및 `--keys 63`, 검사 로직 회귀 테스트와 저장소 검증을 사용한다. [재현 절차](reproduction.md#kicad-65키62키-회로pcb-초안)의 생성기는 현재 CAD를 덮어쓰므로 먼저 수동 편집을 보존한다. 회로·배치가 그대로일 때는 `--import-saved`로 수동 배선까지 복원하며, 자동 라우터 재실행을 복원 수단으로 사용하지 않는다.
+- **검증과 재현:** strict `validate_pcb.py --keys 65` 및 `--keys 62`, 검사 로직 회귀 테스트와 저장소 검증을 사용한다. [재현 절차](reproduction.md#kicad-65키62키-회로pcb-초안)의 생성기는 현재 CAD를 덮어쓰므로 먼저 수동 편집을 보존한다. 회로·배치가 그대로일 때는 `--import-saved`로 수동 배선까지 복원하며, 자동 라우터 재실행을 복원 수단으로 사용하지 않는다.
 
 회로 설계는 승인된 C5-JSH 사용 가정을 기준으로 진행하며, 보유 순정 도터보드의 모델·보호회로 확인을 설계의 선행 조건으로 두지 않는다. 조립 전에는 선택한 케이블의 핀 연결 및 케이스 통로를 확인하고 J1의 체결·삽입 공간을 대조한다. 센서 사양 확인, 중앙 홀더·보강판·높이 실측, QMK 빌드와 실물 동작 시험은 별도 미완료 항목으로 유지한다. 제조 파일 생성이나 발주는 진행하지 않았다.
 
@@ -59,7 +59,7 @@ MCU 회로에는 3.3V 전원, 디커플링, 외부 QSPI flash, 클록, USB 연�
 ### 단계 1. KiCad 작업 기준과 입력 자료 준비
 
 - 사용할 KiCad 버전과 기본 라이브러리 버전을 기록하고 `kicad-cli`의 회로 검사 및 PCB 검사 실행 방법을 확인한다.
-- 65키는 `design/pcb/keycult66.*`, 62키는 `design/pcb/63/keycult63.*`로 관리한다. `.kicad_pro`, `.kicad_sch`, `.kicad_pcb`, 필요한 프로젝트 전용 라이브러리와 재현 설명을 함께 관리한다. 기존 전역 라이브러리를 수정하지 않는다.
+- 65키는 `design/pcb/keycult65.*`, 62키는 `design/pcb/62/keycult62.*`로 관리한다. `.kicad_pro`, `.kicad_sch`, `.kicad_pcb`, 필요한 프로젝트 전용 라이브러리와 재현 설명을 함께 관리한다. 기존 전역 라이브러리를 수정하지 않는다.
 - [GH60 고정 리비전과 참고 파일](../design/preliminary/design.md#pcb-설계-출발점)을 확인한다. 원본 취득 시 출처와 해시를 기록하고 [공개 자료 관리 기준](alternatives-and-licenses.md)을 따른다. 원본 CAD와 형상을 복제한 파일은 기존의 Git 제외 경로에서 취급한다.
 - [layout.json](../design/preliminary/layout.json)의 `preferred.keys`와 `rear_clearance.keys`를 각각 65키와 62키의 스위치 위치 입력으로 사용한다. 편집 원본은 계속 `build_artifacts.py`이며, PCB 좌표를 수동으로 따로 유지하지 않는다. 예비 배치와 PCB의 키 좌표를 함께 갱신한다.
 

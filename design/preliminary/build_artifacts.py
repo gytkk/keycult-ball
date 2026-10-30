@@ -35,10 +35,10 @@ def make_layout(gap):
             keys.append({'id':f'r{row}c{col}','row':row,'column':col,'label':label,'group':group,'x_mm':F((col-(cols-1)/2)*U),'y_mm':F((row-2)*U),'rotation_deg':0,'width_u':1,'height_u':1})
             if gap==3 and row==4 and col in (6,8):
                 keys[-1].update(x_mm=F((-0.75 if col==6 else 0.75)*U),width_u=1.5)
-    return {'name':('preferred-15u-3u-66' if gap==3 else 'alternative-14u-2u-64-not-fit-approved'),'key_count':len(keys),'center_gap_u':gap,'total_width_u':cols,'nominal_envelope_mm':{'width':F(cols*U),'height':F(5*U),'xmin':F(-cols*U/2),'ymin':F(-2.5*U)},'central_empty_cells_mm':{'width':F(gap*U),'height':F(3*U)},'keys':keys}
+    return {'name':('preferred-15u-3u-65' if gap==3 else 'alternative-14u-2u-64-not-fit-approved'),'key_count':len(keys),'center_gap_u':gap,'total_width_u':cols,'nominal_envelope_mm':{'width':F(cols*U),'height':F(5*U),'xmin':F(-cols*U/2),'ymin':F(-2.5*U)},'central_empty_cells_mm':{'width':F(gap*U),'height':F(3*U)},'keys':keys}
 a=make_layout(3);b=make_layout(2)
 rear=make_layout(3)
-rear['name']='rear-clearance-15u-3u-63'
+rear['name']='rear-clearance-15u-3u-62'
 rear['keys']=[k for k in rear['keys'] if not (k['row']==0 and k['group']=='center')]
 rear['key_count']=len(rear['keys'])
 rear['central_empty_cells_mm']={'width':F(3*U),'height':F(4*U),'xmin':F(-1.5*U),'ymin':F(-2.5*U),'xmax':F(1.5*U),'ymax':F(1.5*U)}

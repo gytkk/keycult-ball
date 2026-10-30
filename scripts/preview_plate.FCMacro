@@ -16,7 +16,7 @@ def settle_view():
 root = Path(__file__).resolve().parents[1]
 local = root / "design/preliminary/sources/local/plate-study"
 try:
-    for count in (66, 63):
+    for count in (65, 62):
         folder = local / str(count)
         path = folder / f"plate-{count}.FCStd"
         doc = App.openDocument(str(path))
@@ -50,9 +50,9 @@ try:
         settle_view()
         view.saveImage(str(folder / "assembly.png"), 1800, 1050, "White")
         doc.save()
-        if count == 66:
+        if count == 65:
             App.closeDocument(doc.Name)
-    (local / "preview-status.json").write_text(json.dumps({"status": "saved", "variants": [66, 63]}) + "\n")
+    (local / "preview-status.json").write_text(json.dumps({"status": "saved", "variants": [65, 62]}) + "\n")
 except Exception as error:
     (local / "preview-status.json").write_text(json.dumps({"status": "failed", "error": str(error)}) + "\n")
     raise

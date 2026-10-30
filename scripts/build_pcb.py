@@ -17,9 +17,9 @@ import pcbnew as pcb
 
 ROOT = Path(__file__).resolve().parents[1]
 parser=argparse.ArgumentParser()
-parser.add_argument('--keys',type=int,choices=(66,63),default=66)
+parser.add_argument('--keys',type=int,choices=(65,62),default=65)
 args=parser.parse_args()
-OUT = ROOT / 'design/pcb' / ('63' if args.keys==63 else '')
+OUT = ROOT / 'design/pcb' / ('62' if args.keys==62 else '')
 OUT.mkdir(parents=True,exist_ok=True)
 (OUT/'reports').mkdir(exist_ok=True)
 (ROOT/'.cache/pcb-tools').mkdir(parents=True,exist_ok=True)
@@ -67,18 +67,18 @@ RFP='Resistor_SMD:R_0402_1005Metric'; CFP='Capacitor_SMD:C_0402_1005Metric'
 def res(ref,value,nets,sch,pos,angle=0): return part(ref,'Device:R',value,RFP,dict(enumerate(nets,1)),sch,pos,angle,mpn='TBD 0402 1% 50V',note='value fixed; manufacturer not selected')
 def cap(ref,value,net,sch,pos,angle=0,fp=CFP): return part(ref,'Device:C',value,fp,{1:net,2:'GND'},sch,pos,angle,mpn='TBD X7R 10V' if 'p' not in value else 'TBD C0G 50V',note='voltage rating >=10V; capacitance under DC bias to verify')
 layout=json.loads((ROOT/'design/preliminary/layout.json').read_text())
-variant='preferred' if args.keys==66 else 'rear_clearance'
+variant='preferred' if args.keys==65 else 'rear_clearance'
 keys=layout[variant]['keys']
 # Keep original switch/diode references when a matrix cell is removed.
 refs={key_id:i for i,key_id in enumerate([f'r{r}c{c}' for r in range(5) for c in range(15) if r in (0,4) or c not in (6,7,8)],1)}
 indexed_keys=[(refs[k['id']],k) for k in keys]
-keepout=[155,75,205,125] if args.keys==66 else [151.425,52.7,208.575,128.575]
+keepout=[155,75,205,125] if args.keys==65 else [151.425,52.7,208.575,128.575]
 ROW_GPIO=[4,5,6,7,8]; COL_GPIO=[9,10,11,12,13,14,15,16,17,18,19,20,21,22,26]
 # Reserve hardware SPI0 GP0/1/2/3 before assigning the twenty matrix pins.
 gpio={0:'SENSOR_MISO_3V3',1:'SENSOR_CS_3V3',2:'SENSOR_SCLK_3V3',3:'SENSOR_MOSI_3V3'}
 gpio.update({n:f'ROW{i}' for i,n in enumerate(ROW_GPIO)})
 gpio.update({n:f'COL{i}' for i,n in enumerate(COL_GPIO)})
-if args.keys==63:gpio[COL_GPIO[7]]=None  # No switches remain in COL7 on this variant.
+if args.keys==62:gpio[COL_GPIO[7]]=None  # No switches remain in COL7 on this variant.
 gpio.update({23:'SENSOR_MOTION_3V3',24:'SENSOR_RESET_3V3'})
 u1={}
 for p in pins('MCU_RaspberryPi:RP2040'):
@@ -159,7 +159,7 @@ for p in parts:
  if p['ref'] in ('C5','C7','C8','C9','C10','C11','C12'):p['angle']=0
  if p['ref'].startswith('TP') and int(p['ref'][2:])>=10:
   p['pos']=(209,78+2.5*(int(p['ref'][2:])-10))
- # A four-pitch translation preserves switch-hole registration and frees the 63-key rear band.
+ # A four-pitch translation preserves switch-hole registration and frees the 62-key rear band.
  if p['fp'] and not (p['ref'].startswith('D') or (p['ref'].startswith('SW') and int(p['ref'][2:])<=66)):
   p['pos']=(p['pos'][0]-76.2,p['pos'][1])
 
@@ -225,7 +225,7 @@ for text,x,y,size in [
  ('No module connector or 5V sensor connection. Verify revision and level translation before connection.',551.18,190.5,1.5),
  ('DECOUPLING: individual IOVDD / USB / ADC / DVDD pins; VREG 1uF input + output',25.4,195.58,1.5),
  ('4 / 5 ROW x 15 COLUMN MATRIX: COL -> switch -> diode ANODE -> CATHODE -> ROW (COL2ROW)',25.4,284.48,2.2),
- (f'{len(keys)} keys; legacy Keycult{args.keys} references. Bottom M1/M2: 1.5u each. Central reservation is NOT A HOLE.',25.4,294.64,1.5),
+ (f'{len(keys)} keys; Keycult{args.keys}. Bottom M1/M2: 1.5u each. Central reservation is NOT A HOLE.',25.4,294.64,1.5),
  ('DB1: EXTERNAL C5-JSH assumed; CC 5.1k x2 / TPD4E05U06 ESD / PTC / SMF6.0A TVS.',292.1,35.56,1.2),
  ('J1: 1=protected USB power 2=D- 3=D+ 4=GND; 1:1 cable. Main-board F1 retained.',292.1,43.18,1.2),
  ('Shield joins GND on DB1. No active sustained-overvoltage disconnect. Mechanical fit provisional.',292.1,50.8,1.2)]:

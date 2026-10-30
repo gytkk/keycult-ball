@@ -18,7 +18,7 @@ from shapely.geometry import box, LineString, Point, Polygon
 from shapely import make_valid
 from shapely.ops import unary_union
 import pymupdf
-VARIANTS={66:('preferred',[155,75,205,125]),63:('rear_clearance',[151.425,52.7,208.575,128.575])}
+VARIANTS={65:('preferred',[155,75,205,125]),62:('rear_clearance',[151.425,52.7,208.575,128.575])}
 def indexed_keys(layout,variant):
  refs={key_id:i for i,key_id in enumerate([f'r{r}c{c}' for r in range(5) for c in range(15) if r in (0,4) or c not in (6,7,8)],1)}
  selected={k['id'] for k in layout[variant]['keys']}
@@ -34,8 +34,8 @@ def usb_connector_matches(pad_nets):
 def usb_uncovered_area(trace_area,reference,transition_exclusions):
  return trace_area.difference(reference).difference(transition_exclusions).area
 ROOT=Path(__file__).resolve().parents[1]
-parser=argparse.ArgumentParser();parser.add_argument('--draft',action='store_true');parser.add_argument('--keys',type=int,choices=VARIANTS,default=66);args=parser.parse_args()
-D=ROOT/'design/pcb' if args.keys==66 else ROOT/'design/pcb/63'; R=D/'reports'; E=D/'exports'; NAME=f'keycult{args.keys}'
+parser=argparse.ArgumentParser();parser.add_argument('--draft',action='store_true');parser.add_argument('--keys',type=int,choices=VARIANTS,default=65);args=parser.parse_args()
+D=ROOT/'design/pcb' if args.keys==65 else ROOT/'design/pcb/62'; R=D/'reports'; E=D/'exports'; NAME=f'keycult{args.keys}'
 R.mkdir(parents=True,exist_ok=True); E.mkdir(parents=True,exist_ok=True)
 def run(*args):
  command=['kicad-cli',*map(str,args)];r=subprocess.run(command,check=False,capture_output=True,text=True)
@@ -62,8 +62,8 @@ if 'J1' in fps:
  check(usb_connector_matches({p.GetNumber():p.GetNetname() for p in j.Pads()}),'J1 differs from the UDB contact pinout')
  check(j.GetFPID().GetLibItemName()=='JST_SH_SM04B-SRSS-TB_1x04-1MP_P1.00mm_Horizontal','Wrong J1 connector footprint')
  check(j.GetLayer()==pcb.B_Cu and abs(j.GetOrientationDegrees()-90)<.00001,'J1 must face the left edge from the bottom side')
-check(circuit['key_count']==args.keys-1 and circuit['layout_variant']==variant,'Circuit layout variant differs from selected key count')
-check(len(keys)==args.keys-1 and layout[variant]['key_count']==args.keys-1,'Unexpected layout key count')
+check(circuit['key_count']==args.keys and circuit['layout_variant']==variant,'Circuit layout variant differs from selected key count')
+check(len(keys)==args.keys and layout[variant]['key_count']==args.keys,'Unexpected layout key count')
 check([k for _,k in keys]==layout[variant]['keys'],'Variant must preserve baseline key coordinates and order')
 switch_refs={f'SW{i}' for i,_ in keys};diode_refs={f'D{i}' for i,_ in keys}
 check({ref for ref in fps if ref.startswith('SW') and ref not in {'SW67','SW68'}}==switch_refs,'Wrong matrix switch references')
