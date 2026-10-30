@@ -42,6 +42,29 @@ Checked 2026-10-29. These sources establish an electrical design target, not the
 - [JST SH series datasheet](https://www.jst-mfg.com/product/pdf/eng/eSH.pdf), pages 1-3: 1.00mm pitch, side-entry header and mounting-surface pin numbering; `SHR-04V-S` mating housing and nominal 2.9mm header body height. Installed height and cable clearance still require a case model or measurements.
 - C3's CC/ESD/overvoltage/fuse/shield implementation is evidence about **C3 only**. It is not evidence that the unidentified Keycult daughterboard carries those components. The main-board fuse remains, and protection coordination is an open assembly requirement.
 
+### WT compatibility and revision-specific protection
+
+Checked 2026-10-30. Cable reach is not a design blocker: a sufficiently long replacement cable can be sourced. Contact numbering, connector type, insertion clearance and the installed daughterboard's identity still need to match the assembly.
+
+- [WT60-C official product FAQ](https://dailyclack.com/products/wt60-c-kate-60-pcb) explicitly identifies the UDB interface and `SM04B-SRSS-TB(LF)(SN)` connector. Together with the WT60-D No.1/60 statement above, this supports the current main-board JST-SH interface as a WT-family-compatible target.
+- [Keycult's FAQ](https://resources.keycult.com/faq_keycult_faq.html) recommends WT60-G; [Keycult Graphite PCBs](https://keycult.com/products/graphite-pcbs) includes a daughterboard, and [Salvun's Graphite product page](https://salvun.com/products/wilba-graphite-pcb) explicitly lists Keycult 60% compatibility. These product statements do not publish the factory daughterboard's protection schematic or establish that it is a UDB C3/C5.
+
+The following summarizes inspected official sources, not measurements of the installed board. J2 in both the C3 and C5-JSH schematics maps **1=protected USB power, 2=DN/D-, 3=DP/D+, 4=GND** (`VCC` in C3, `VCOM` in C5). The cable connects contact numbers 1:1; visual left-to-right order changes with the connector viewing direction.
+
+| Revision and pinned evidence | Connector and protection circuit |
+| --- | --- |
+| [C3 schematic, `2ecdd7e0482ecbd3ffe9af04966ab3555f7fc33c`](https://github.com/Unified-Daughterboard/UDB-C-Legacy/blob/2ecdd7e0482ecbd3ffe9af04966ab3555f7fc33c/KiCad/C3/Unified-Daughterboard.sch) | JST-SH `SM04B-SRSS-TB(LF)(SN)`; R1/R2 5.1k CC pull-downs; U1 `TPD4E05U06DQAR` data-line ESD array; F1 `ASMD1206-150` resettable PTC; D1 `SMF9.0CA` bidirectional shunt TVS after the fuse; L1 `60R@100MHz` between shield/chassis ground and signal ground. |
+| [C4-era schematic, `6be39c7f925237a2e7d53eb9ec0c053175fde3e7`](https://github.com/Unified-Daughterboard/UDB-C-JSH/blob/6be39c7f925237a2e7d53eb9ec0c053175fde3e7/UDB.kicad_sch) | Pico-EZmate-family interface, with XKB `X1224WRS-04-LPV01` specified in this file; U1/F1 retained, D1 becomes `SMF6.0A`, and the ferrite bead remains. The source title says `C4-RC1`, so this commit/file identifies the inspected circuit more precisely than its title. |
+| [C5-JSH release schematic, `2b6c52aa2de6f9f60ca99c6250e4bdf01e8f4eea`](https://github.com/Unified-Daughterboard/UDB-C-JSH/blob/2b6c52aa2de6f9f60ca99c6250e4bdf01e8f4eea/UDB.kicad_sch) | JST-SH `SM04B-SRSS-TB(LF)(SN)`; 5.1k CC pull-downs, `TPD4E05U06DQAR`, `ASMD1206-150` and `SMF6.0A`; no ferrite bead. The release is C5 although the schematic title still says `V4.2`. |
+
+These circuits provide transient clamping and PTC overcurrent protection. **None of the inspected schematics includes an active sustained-overvoltage disconnect switch.** The legacy README's term "overvoltage protection" describes its shunt TVS; it does not establish a regulated 5V ceiling or guaranteed isolation from a sustained incorrect supply. TI describes [TPD4E05U06](https://www.ti.com/product/TPD4E05U06) as a TVS-based ESD protection diode array, not a power isolation controller. The main-board fuse does not establish those additional protections either.
+
+The [C5 release announcement, documentation commit `238c6fd99a00859b751757422ce0158f7cb11438`](https://github.com/Unified-Daughterboard/unified-daughterboard.github.io/blob/238c6fd99a00859b751757422ce0158f7cb11438/announcements/announcement-20231022.md) explains the shield change: C3/C4 used a ferrite bead, whereas C5 directly joins shield/chassis and signal ground through a controlled ground region. C5 also offers both JST-SH and Pico-EZmate variants. Therefore, the older legacy page's claim that C3 was the last JST version is superseded by the C5 release. C5-JSH is the relevant current standard candidate for the existing JST interface; C5-EZM requires a different mating connector/cable. This is electrical-interface evidence, not confirmed Keycult case fit.
+
+The [pinned legacy README](https://github.com/Unified-Daughterboard/UDB-C-Legacy/blob/2ecdd7e0482ecbd3ffe9af04966ab3555f7fc33c/README.md) states that C3 retains C1/C2 dimensions and mounting-hole positions. That backward-compatibility statement does not establish C1/C2 protection circuitry; no C1/C2 schematic or exact factory Keycult daughterboard schematic was established in this investigation.
+
+Downloaded schematic originals are ignored under `../preliminary/sources/upstream/udb-protection/`; no original CAD is redistributed. SHA-256: `c3.sch` = `7d150e1e955eca3ec802049248848f61f5315a891d0e1c15e4abd5037f3fe6fb`; `c4.kicad_sch` = `30e8cc0061e69c6cf81bade6fb7cbf2365a4e2df2c5b66107631c401e8d067eb`; `c5.kicad_sch` = `91b0aa1959e195d3565556cdd9dfcd7efa5a4db78779df2ce7dc54f18d92a552`. URLs and revisions are the linked table entries. The current repository's [license](https://github.com/Unified-Daughterboard/UDB-C-JSH/blob/2b6c52aa2de6f9f60ca99c6250e4bdf01e8f4eea/LICENSE) and the legacy license are MIT; only independently worded interface/circuit summaries are added here.
+
 ## Maintained tools and stock libraries
 
 - **KiCad 10.0.7** GUI/CLI and its installed Python `pcbnew` binding, Python 3.14.7.
