@@ -91,6 +91,15 @@ uv run --python "$(command -v python3)" scripts/validate_pcb.py --keys 63
 
 검증은 기본적으로 미배선이나 DRC 위반이 있으면 실패한다. `--draft`는 미배선만 허용하고 실제 수를 보고하는 검토 모드이며, 기하 DRC 위반은 그대로 실패한다. 검사 상태는 [66키 보고서](../design/pcb/reports/validation.json)와 [63키 보고서](../design/pcb/63/reports/validation.json)를 기준으로 하며 제조 승인으로 해석하지 않는다. KiCad 없이 실행하는 검사 회귀 테스트는 `uv run scripts/test_pcb_validation_gate.py`다.
 
+### 전원과 USB의 실물 없는 검토
+
+실물 없이 수행하는 전원·USB 계산은 아래 명령으로 재현한다. 기존 `sexpdata` 의존성만 사용하며 KiCad 실행 파일은 필요 없다. `design/pcb/reports/electrical-review.json`에 조건별 전압 강하·발열, 후보 stackup의 근사값과 두 native PCB에서 읽은 USB 층별 길이·비아 좌표를 기록한다. 입력 CAD 해시를 함께 저장하고, 계산 대상 부품 번호가 달라지거나 필요한 USB net의 배선이 없으면 실패한다. 이 보고서는 ERC/DRC나 실물 신호 품질 통과 보고서가 아니다.
+
+```bash
+uv run scripts/analyze_electrical.py
+uv run scripts/test_electrical_analysis.py
+```
+
 ### Docker에서 KiCad 검증
 
 호스트에 KiCad가 없으면 공식 `kicad/kicad:10.0.7`의 Linux amd64 이미지를 사용한다. Docker 실행 환경이 필요하며 Apple Silicon에서는 amd64 에뮬레이션을 사용한다. 아래 이미지는 기존 스크립트 의존성을 KiCad의 Python 3.13 가상 환경에 설치한다. 3D 모델과 Java는 포함하지 않으므로 저장된 SES 배선 재적용과 회로 검증에 사용하고, 새 자동 배선에는 별도의 Java/Freerouting 환경이 필요하다.

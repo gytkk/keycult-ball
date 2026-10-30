@@ -96,6 +96,48 @@ The WT compatibility research supports continuing with the existing J1 pin map. 
 
 As confirmed by the user on 2026-10-30, a suitable cable length can be sourced; stock-cable reach is no longer a design constraint. Before powered assembly, verify the selected cable's four contact paths and that the assembled external board matches the assumed C5-JSH design. Connector insertion, routing and bend clearance remain mechanical checks in issue #3. Factory-board identification is not a prerequisite for circuit design under this explicit assumption.
 
+## Power and USB desk review
+
+The 2026-10-30 [calculated report](reports/electrical-review.json) records conditional power estimates and native measurements for both boards. It is separate from ERC/DRC and grants no electrical or manufacturing pass. [Primary sources](sources.md#electrical-desk-review-sources) identify the component revisions and public stackups. Native CAD remains DRAFT D; the following allocations and routing candidates have not been applied as component or copper changes.
+
+### Power allocation
+
+Use **150mA total on +3V3 as a provisional planning envelope**. Allocate 80mA to RP2040, 25mA to flash and 5mA to other board loads, leaving **40mA for a future 3.3V sensor**. The MCU and miscellaneous numbers are engineering allowances, not guaranteed maxima. Flash current depends on frequency and output loading; the 25mA allowance requires checking the cited conditions and a read clock no greater than 104MHz. A 5V Keyball module cannot be assessed using the 40mA rail allowance directly. Its supply, regulators and level translation remain unresolved.
+
+The model reserves another 1mA for LDO ground current, giving 151mA input before external-board leakage. This is an assumption; AP2112's 80uA maximum is a no-load specification. The configured USB power declaration must cover the final whole-device load. The 110mA main-board allocation does not demonstrate compliance with the 100mA pre-configuration limit. Startup and the 2.5mA suspend limit need separate firmware budgets; no power-switching or suspend implementation is claimed here.
+
+Heat screening assumes 5.5V input, nominal 3.3V output, no upstream voltage drop, 1mA LDO ground current, 50 C local ambient and the datasheet's 184 C/W junction-to-ambient resistance. This resistance is a reference condition, not a measurement of this PCB or the closed case.
+
+| +3V3 load | Calculated LDO loss | Estimated junction temperature |
+| --- | --- | --- |
+| 100mA | 0.2255W | 91.5 C |
+| 150mA | 0.3355W | 111.7 C |
+| 200mA | 0.4455W | 132.0 C |
+| 300mA | 0.6655W | 172.5 C |
+
+Values beyond device limits indicate unsuitable modeled operating points, not predictions of continued operation. A chosen 125 C planning ceiling permits approximately 183mA under these assumptions, so 150mA retains some modeled margin. At 60 C ambient the 150mA estimate is 121.7 C. Higher final load or temperature requires reconsidering the regulator and layout. The 500mA-hold fuse and 600mA regulator labels are not an available continuous power budget.
+
+The two PTC reference-temperature R1max values sum to 1.03ohm. At 151mA, adding 0.5/1.0/2.0ohm for the remaining internal supply/return path gives drops of 0.231/0.307/0.458V. From an assumed 4.4V at the daughterboard receptacle, the LDO sees approximately 4.169/4.093/3.942V. This is a low-voltage stress scenario, not permission to draw 151mA from a low-power port. External USB cable drop is already represented by receptacle voltage; hot PTC resistance is not bounded by the reference values. Nominal 3.3V plus 0.2V dropout is only a screening threshold. Actual regulation must satisfy the RP2040 USB_VDD minimum of 3.135V and flash supply maximum of 3.6V, among the other component conditions.
+
+Native capacitor sums are 1.0uF on VBUS_FUSED, 2.9uF on +3V3 and 1.2uF on +1V1. They omit external-board/sensor capacitance and do not model tolerance, DC bias, regulator startup or active current. Nominal capacitor sums cannot establish an inrush pass.
+
+### USB routing findings
+
+Both variants have identical USB geometry: the long In2.Cu portions total 136.0mm for D- and 141.0mm for D+, with four signal vias on each connector-side net. Neither board has an explicit dielectric stackup. With the public JLC04161H-7628 candidate, In2.Cu is separated from In1.Cu ground by a 1.065mm core, while F.Cu is only 0.2104mm from that reference. B.Cu has no continuous adjacent reference plane established by this design. Saved planar ground coverage therefore does not establish controlled impedance.
+
+The signal vias near TP3/TP4 are 11.1-12.1mm from the nearest GND via. This distance is a review flag, not a USB pass/fail threshold: pads and filled copper also contribute to return paths. Review transitions and suitable nearby ground stitching when rerouting, then recheck ground fill and clearances.
+
+Use **JLC04161H-7628, four layers, nominal 1.6mm, as the next routing study's candidate**, with the long pair on F.Cu above continuous In1.Cu ground. Compare JLC04161H-3313 using approximate uncoated microstrip calculations at 0.2mm edge gap:
+
+| Candidate | F.Cu width 0.2mm | Trial F.Cu width | Trial differential impedance |
+| --- | --- | --- | --- |
+| JLC04161H-7628 | 108.7ohm | 0.29mm | 90.3ohm |
+| JLC04161H-3313 | 76.9ohm | 0.16mm | 89.2ohm |
+
+These are estimates for a proposed outer-layer route, not the impedance of current In2.Cu traces. The 7628 trial gives more width above the current 0.15mm minimum rule. Mask, etching, nearby copper and tolerances affect the result; obtain fabricator-approved geometry before treating a width as final. Moving the pair requires new clearance, reference-plane and native DRC checks. Changing the netclass width alone does not qualify existing copper. The 3.5692mm difference in total saved segment lengths is not by itself evidence of full-speed failure and is not the first item to optimize.
+
+The next electrical work is rerouting against this candidate and separately budgeting firmware startup/suspend. Sensor integration, actual PTC/cable resistance, thermal measurements, inrush and full-speed waveform tests remain open. The eventual cable construction and length must be included in signal-quality validation.
+
 ## Sensor interface remains unresolved
 
 **TP10–TP17 are MCU-side 3.3V logical/test pads only.** They are not the Keyball

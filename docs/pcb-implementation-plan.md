@@ -4,6 +4,8 @@
 
 ## 재개 지점
 
+2026-10-30 [전원 계산과 USB 배선 검토](../design/pcb/README.md#power-and-usb-desk-review)를 수행했다. 전체 3.3V 부하 150mA를 임시 설계 예산으로 두고 MCU·플래시·기타에 110mA, 센서에 40mA를 배분한다. 이는 최대 소비전류를 측정하거나 보증한 값이 아니다. 5.5V 입력과 주변 50 C의 발열 모델에서 150mA는 약 112 C, 200mA는 약 132 C이므로 500mA를 사용 가능한 전류로 간주하지 않는다. 긴 USB 구간의 In2.Cu 배선은 임피던스 검증을 통과하지 않은 상태다. 다음 배선 검토 후보는 JLC04161H-7628의 F.Cu/연속 In1.Cu 접지, 근사 선폭 0.29mm·간격 0.2mm이며 제조사 검토와 재배선 검증이 필요하다. 이 후보를 현재 CAD에 적용하지는 않았다.
+
 - **저장된 설계:** DRAFT D. 66키는 `design/pcb/keycult66.*`, 63키는 `design/pcb/63/keycult63.*`다. 63키는 SW7-SW9와 D7-D9를 제외하며, 하단 키를 위한 COL6-COL8은 유지한다. 각 디렉터리의 `initial-route.ses`에는 수동 QFN 배선과 J1 배선도 포함한다. `.cache/`의 작업 파일 없이 재개할 수 있다.
 - **USB에서 확인한 근거:** Wilba WT60-D 공식 판매 문서의 No.1/60 및 UDB 호환 설명과 UDB 원본 회로도를 대조했다. J1은 JST SM04B-SRSS-TB(LF)(SN), 1=VBUS_USB(외부 PTC 이후), 2=D-, 3=D+, 4=GND이며 번호 기준 1:1 케이블을 사용한다. 기존 TP1-TP4 번호는 J1 핀 순서와 다르다. [출처 및 고정 리비전](../design/pcb/sources.md#usb-daughterboard-evidence)에 근거와 한계를 기록했다.
 - **검사 상태:** J1과 USB 경로 및 접지면의 선폭·간격·구리 길이·비아 수는 [PCB 안내](../design/pcb/README.md#usb-daughterboard-interface-and-compatibility-limits)를 따른다. DRAFT D의 KiCad 10.0.7 재검사에서 두 버전 모두 ERC/DRC 위반, 미연결과 회로도·PCB 연결 불일치가 0건이다. 상세 결과는 각 배열의 검증 보고서를 따른다.
