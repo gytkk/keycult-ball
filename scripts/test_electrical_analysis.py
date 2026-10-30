@@ -4,10 +4,13 @@
 # ///
 """Check geometry accounting and the boundaries of desk-review calculations."""
 import unittest
+from pathlib import Path
+from tempfile import TemporaryDirectory
 
 import sexpdata
 
 from analyze_electrical import microstrip_ohms, thermal, usb_geometry
+from usb_routing import apply_usb_route
 
 
 class ElectricalReviewTests(unittest.TestCase):
@@ -41,6 +44,25 @@ class ElectricalReviewTests(unittest.TestCase):
         self.assertGreater(microstrip_ohms(0.2, 0.2, 0.2104, 0.035, 4.4), 100)
         with self.assertRaises(ValueError):
             microstrip_ohms(0.2, 0.2, 0, 0.035, 4.4)
+
+    def test_usb_replacement_preserves_other_copper_and_is_repeatable(self):
+        retained = sexpdata.loads('''(segment (start 1 2) (end 3 4)
+          (width .15) (layer "B.Cu") (net "USB_DM_MCU") (uuid "retained"))''')
+        with TemporaryDirectory() as directory:
+            path = Path(directory) / 'board.kicad_pcb'
+            path.write_text('''(kicad_pcb (setup)
+              (segment (start 0 0) (end 3 4) (width .2) (layer "In2.Cu") (net "USB_DM"))
+              (via (at 3 4) (net "USB_DM"))
+              (via (at 4 4) (net "GND") (uuid "existing-ground"))
+              ''' + sexpdata.dumps(retained) + ')')
+            apply_usb_route(path)
+            first = path.read_text()
+            apply_usb_route(path)
+            self.assertEqual(path.read_text(), first)
+            board = sexpdata.loads(first)
+            self.assertIn(retained, board)
+            self.assertIn(sexpdata.loads('(via (at 4 4) (net "GND") (uuid "existing-ground"))'), board)
+            self.assertNotIn('"In2.Cu") (net "USB_DM")', first)
 
 
 if __name__ == "__main__":

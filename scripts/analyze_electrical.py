@@ -122,7 +122,7 @@ def main():
             "thermal": "VBUS 5.5V, no upstream drop credited; thetaJA 184C/W is datasheet No Heatsink reference, not measured board thermal resistance. 125C is a planning ceiling, not a guaranteed device limit.",
             "capacitance": "Main-board capacitor nominal sums only; not effective capacitance or an inrush model. External board, sensor and cable capacitance, DC bias/tolerance, regulator startup and active load are not modeled.",
             "drop": "4.4V at daughterboard USB receptacle with 151mA is a low-voltage stress scenario, not permission to draw high-power current from a low-power port. Fuse R1max sum 1.03ohm is reference-temperature data, not a hot-resistance bound. Other loop resistance includes internal wire, contacts, PCB supply/ground and vias; external USB cable drop is already represented by receptacle voltage. 3.5V is a nominal3.3V plus0.2V dropout screening threshold, not proof of regulated output across tolerances.",
-            "usb": "Segment sums include any branches and exclude pad traversal, via barrels, DB1 and cables. Nearest GND via distance alone does not qualify a return path. Microstrip estimates apply only to proposed F.Cu over In1.Cu, omit solder mask/etch/coplanar copper/tolerances, and are not the impedance of current In2.Cu or B.Cu routing."
+            "usb": "Segment sums include any branches and exclude pad traversal, via barrels, DB1 and cables. Nearest GND via distance alone does not qualify a return path. DRAFT E uses the 7628 candidate stackup and F.Cu pair over In1.Cu. Microstrip estimates omit solder mask, etch, finite plane edges, coplanar copper, tolerances and transitions; they do not qualify the actual route or its B.Cu escapes."
         },
         "power_budget_ma": {"mcu_allocation": 80, "flash_allocation": 25, "other_3v3_allocation": 5,
                             "total_3v3_allocation": 150, "conditional_3v3_sensor_allowance": 40,
@@ -134,7 +134,7 @@ def main():
         "variants": variants,
         "unresolved": ["Sensor supply/logic and maximum current", "Firmware current before configuration and during suspend",
                        "Loaded LDO ground current and actual board/case thermal resistance", "Hot PTC and cable/connector loop resistance",
-                       "Inrush waveform including capacitance behind regulators", "Fabricator-approved impedance geometry and USB rerouting",
+                       "Inrush waveform including capacitance behind regulators", "Fabricator-approved impedance geometry and finite reference-plane/transition effects",
                        "USB cable/connector/ESD/via discontinuities and measured full-speed signal quality"]
     }
     OUTPUT.write_text(json.dumps(result, indent=2) + "\n")

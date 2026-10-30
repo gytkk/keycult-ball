@@ -1,6 +1,6 @@
 # Keycult66 and Keycult63 KiCad designs
 
-**DRAFT D, not for fabrication or assembly.** Both variants use the same RP2040 circuit and stable key references. Open the corresponding project in **KiCad 10.0.7**. The schematic and PCB are native editable CAD.
+**DRAFT E, not for fabrication or assembly.** Both variants use the same RP2040 circuit and stable key references. Open the corresponding project in **KiCad 10.0.7**. The schematic and PCB are native editable CAD.
 
 | Variant | Project | Schematic | PCB | Validation |
 | --- | --- | --- | --- | --- |
@@ -72,21 +72,23 @@ Use a **1:1 contact-number cable**, 1-to-1 through 4-to-4. Wire color and appare
 
 J1's footprint origin is PCB **(40.6,112.0)mm**, B.Cu, rotation 90 degrees, with its mouth facing keyboard-left. Looking down from the switch side, pad centres are x=42.6mm and y=113.5,112.5,111.5,110.5mm for contacts 1-4. The [official WT60-A photo](https://keycult.com/products/wt60-a-pcb-60) supports a left-edge connector facing outward, but supplies no exact coordinates. Our position is an independent placement between the ortholinear switch/diode footprints, **not a measured WT60-A connector registration**. Case-channel alignment, mating clearance and the connector's full installed height below the PCB need physical checking. JST specifies a nominal 2.9mm body height; do not infer assembled clearance from the footprint courtyard alone.
 
-J1's data pair runs together on In2.Cu along the left and top margins, referenced to the In1.Cu ground pour, then joins the existing local USB route. VBUS uses a separate 0.4mm feed to the retained main-board fuse. Trace width/gap and cable length still require stackup and signal-integrity review; the route is not impedance-qualified.
+J1's data pair runs on F.Cu along the left and top margins, above the In1.Cu ground pour, with short B.Cu escapes at J1, TP3/TP4 and R1/R2. Connector-side USB traces are 0.29mm wide; the paired F.Cu portions have a 0.2mm edge gap. VBUS retains its separate 0.4mm feed to the main-board fuse. The MCU-side USB traces and component placement are unchanged.
 
 The 2026-10-30 resume review measured the saved native PCB segments in both variants. Their USB copper is identical. Lengths below are the sum of segment centreline lengths, including branches to test pads; they exclude pad traversal, via barrels and the external cable, so they are not end-to-end electrical lengths.
 
 | Saved copper | D- | D+ |
 | --- | --- | --- |
-| J1-side net, before the series resistor | 156.4214mm | 159.9906mm |
+| J1-side net, before the series resistor | 151.4028mm | 157.3721mm |
+| F.Cu portion of J1-side net | 146.5028mm | 150.4615mm |
+| B.Cu portion of J1-side net | 4.9000mm | 6.9107mm |
 | Vias on the J1-side net | 4 | 4 |
 | MCU-side net, after the series resistor | 6.6253mm | 6.6253mm |
 
-The long In2.Cu margin runs have 0.2mm trace width and 0.2mm edge gap. The J1-side copper-length difference is 3.5692mm. These are measured routing properties, not acceptance limits or evidence of signal-integrity failure. The project netclass's 0.15mm differential-gap setting is a routing default, not a measurement of this pair or a qualified impedance rule. The saved board has no explicit dielectric stackup.
+The J1-side segment-sum difference is 5.9693mm. These are measured routing properties, not acceptance limits or evidence of signal-integrity failure. A USB netclass records the 0.29mm width and 0.2mm gap for these two nets. The candidate dielectric model and the limits of the impedance calculation are described under [USB routing findings](#usb-routing-findings).
 
-The saved layer PDF was enlarged to inspect the J1 escape, margin pair, MCU-side transitions and In1.Cu pour. The native saved fill polygons cover the full trace-width projection of the long In2.Cu margin runs; uncovered areas occur only within 0.505mm of their transition-via centres. This is a check of saved fill geometry, not a new zone refill. Connector and transition fan-outs separate the pair locally, and the signal vias have antipads in the reference plane. These checks do not qualify those return paths or the connector/cable discontinuities. Preserve these as review items when selecting the manufacturing stackup and confirming the installed cable.
+Strict validation refills zones and checks the full-width projection of every F.Cu USB segment against the saved In1.Cu GND polygons. Both variants have zero uncovered area outside explicit 0.51mm-radius disks around USB transition vias. Those disks exclude signal-via antipads, not unrelated voids elsewhere on the route. The measured minimum F.Cu pair edge gap is 0.2mm. The layer PDF supports inspection of the J1 escape, margin pair, test pads, resistor transitions and ground fill. These geometric checks do not qualify finite plane edges, transitions or cable discontinuities.
 
-DRAFT D was regenerated and checked with official KiCad 10.0.7 in a local Docker container. The physical parts, pad nets and placement remain unchanged, allowing the existing SES copper to be recaptured against the new external-assembly metadata. The native copper, schematic parity, external DB1 netlist, coordinates and central reservations are checked again; the manifests retain the original SES hashes. Both variants have fresh native PDF/SVG exports and validation reports.
+DRAFT E was regenerated and checked with official KiCad 10.0.7 in a local Docker container. The saved SES retains the existing base route; `scripts/usb_routing.py` replaces only connector-side USB tracks/vias and applies the ground changes after import. The route manifest includes this script's hash. Native schematic parity, external DB1 netlist, coordinates and central reservations are checked again. Both variants have fresh native PDF/SVG exports and validation reports.
 
 DB1 is the unmodified [C5-JSH at revision `2b6c52aa2de6f9f60ca99c6250e4bdf01e8f4eea`](https://github.com/Unified-Daughterboard/UDB-C-JSH/blob/2b6c52aa2de6f9f60ca99c6250e4bdf01e8f4eea/UDB.kicad_sch), adopted as a design assumption on 2026-10-30. Its USB-C connector, two 5.1k CC pull-downs, TPD4E05U06DQAR data-line ESD array, ASMD1206-150 PTC and SMF6.0A TVS stay on the external daughterboard. Its shield joins signal ground on that board; no extra shield wire, CC resistors or duplicate ESD/TVS array is added to the main PCB. This assumption is not a measurement of the factory Keycult board.
 
@@ -98,7 +100,7 @@ As confirmed by the user on 2026-10-30, a suitable cable length can be sourced; 
 
 ## Power and USB desk review
 
-The 2026-10-30 [calculated report](reports/electrical-review.json) records conditional power estimates and native measurements for both boards. It is separate from ERC/DRC and grants no electrical or manufacturing pass. [Primary sources](sources.md#electrical-desk-review-sources) identify the component revisions and public stackups. Native CAD remains DRAFT D; the following allocations and routing candidates have not been applied as component or copper changes.
+The 2026-10-30 [calculated report](reports/electrical-review.json) records conditional power estimates and native measurements for both boards. It is separate from ERC/DRC and grants no electrical or manufacturing pass. [Primary sources](sources.md#electrical-desk-review-sources) identify the component revisions and public stackups. DRAFT E applies the 7628 routing-study geometry; the provisional power allocations remain assumptions and do not change components or authorize a particular sensor.
 
 ### Power allocation
 
@@ -123,20 +125,20 @@ Native capacitor sums are 1.0uF on VBUS_FUSED, 2.9uF on +3V3 and 1.2uF on +1V1. 
 
 ### USB routing findings
 
-Both variants have identical USB geometry: the long In2.Cu portions total 136.0mm for D- and 141.0mm for D+, with four signal vias on each connector-side net. Neither board has an explicit dielectric stackup. With the public JLC04161H-7628 candidate, In2.Cu is separated from In1.Cu ground by a 1.065mm core, while F.Cu is only 0.2104mm from that reference. B.Cu has no continuous adjacent reference plane established by this design. Saved planar ground coverage therefore does not establish controlled impedance.
+Both variants use identical connector-side USB geometry and an explicit JLC04161H-7628 candidate copper/dielectric model: nominal 1.6mm board, 0.035mm outer copper, 0.0152mm inner copper, 0.2104mm outer-to-inner prepreg with Er=4.4, and a 1.065mm core with Er=4.6. The long pair now runs on F.Cu, 0.2104mm above In1.Cu GND. B.Cu escapes total 4.9mm for D- and 6.91mm for D+ and still lack a continuous adjacent reference plane. Their discontinuities remain part of the signal-integrity review.
 
-The signal vias near TP3/TP4 are 11.1-12.1mm from the nearest GND via. This distance is a review flag, not a USB pass/fail threshold: pads and filled copper also contribute to return paths. Review transitions and suitable nearby ground stitching when rerouting, then recheck ground fill and clearances.
+Three added GND vias at PCB `(38.5,113.2)`, `(113.4,55.7)` and `(118.5,54.7)mm` join local B.Cu ground patches to In1.Cu. The resistor-side transitions use the existing GND via near `(117.312,66.595)mm`. All eight USB vias are within 2.295mm of a GND via. Validation enforces a 3mm project study criterion, not a USB specification limit. Three B.Cu ground patches and the In1.Cu top-boundary extension from y=53.2mm to y=52.96mm are included in the native zone refill and DRC.
 
-Use **JLC04161H-7628, four layers, nominal 1.6mm, as the next routing study's candidate**, with the long pair on F.Cu above continuous In1.Cu ground. Compare JLC04161H-3313 using approximate uncoated microstrip calculations at 0.2mm edge gap:
+The **JLC04161H-7628 model is applied as a routing-study assumption**, not an approved manufacturing order. JLC04161H-3313 remains a comparison only. Approximate uncoated microstrip calculations at 0.2mm edge gap give:
 
 | Candidate | F.Cu width 0.2mm | Trial F.Cu width | Trial differential impedance |
 | --- | --- | --- | --- |
 | JLC04161H-7628 | 108.7ohm | 0.29mm | 90.3ohm |
 | JLC04161H-3313 | 76.9ohm | 0.16mm | 89.2ohm |
 
-These are estimates for a proposed outer-layer route, not the impedance of current In2.Cu traces. The 7628 trial gives more width above the current 0.15mm minimum rule. Mask, etching, nearby copper and tolerances affect the result; obtain fabricator-approved geometry before treating a width as final. Moving the pair requires new clearance, reference-plane and native DRC checks. Changing the netclass width alone does not qualify existing copper. The 3.5692mm difference in total saved segment lengths is not by itself evidence of full-speed failure and is not the first item to optimize.
+The 90.3ohm result applies to an idealized uniform F.Cu section. It omits solder mask, etched trace shape, finite plane edges, nearby copper, tolerances and transitions. The top outer trace edge is only about 0.395mm inside the modeled ground boundary, so finite-plane effects need review. The CAD stackup records copper and dielectric layers only; it does not specify a fabrication mask construction. Obtain fabricator-approved geometry before treating 0.29mm as a final controlled-impedance width. Strict DRC and ground projection checks passed after routing; they do not measure impedance or establish USB compliance.
 
-The next electrical work is rerouting against this candidate and separately budgeting firmware startup/suspend. Sensor integration, actual PTC/cable resistance, thermal measurements, inrush and full-speed waveform tests remain open. The eventual cable construction and length must be included in signal-quality validation.
+The remaining electrical work includes fabricator review and firmware startup/suspend budgets. Sensor integration, actual PTC/cable resistance, thermal measurements, inrush and full-speed waveform tests remain open. The eventual cable construction and length must be included in signal-quality validation.
 
 ## Sensor interface remains unresolved
 
@@ -161,7 +163,7 @@ PMW3360 connections. The sensor connector is not finalized; J1's electrical rout
 - Four copper layers: F.Cu and B.Cu plus In2.Cu carry most signals. In1.Cu carries the GND reference pour outside the reserved centre, with short local +3V3 and COL12 routes beside the MCU. These routes stay away from the USB pair and the filled ground remains connected. Pad/via antipads and the central reservation still require return-path review; this is not an
   impedance-qualified stackup. Bottom SMT electronics coexist
   with top MX switch bodies, with actual drill/courtyard checks. Board thickness
-  is the draft 1.6mm KiCad default, not a verified case height requirement.
+  is nominally 1.6mm in the candidate model, not a verified case height requirement.
 - Review rules are 0.15mm clearance/minimum trace, 0.55-0.6mm via copper diameter with 0.3mm drill, and 0.25mm
   hole/copper-edge clearance. These are **draft routing constraints, not a
   selected manufacturer's process approval**. 0.4mm pitch QFN fan-out, solder
@@ -178,11 +180,9 @@ PMW3360 connections. The sensor connector is not finalized; J1's electrical rout
 ## Reproduction
 
 The initial seed uses KiCad's maintained `pcbnew` API and installed stock
-libraries. `sexpdata` only serializes the native schematic, embedding actual
-stock symbols and their electrical pin types. No custom autorouter was written.
+libraries. `sexpdata` serializes the native schematic with stock symbols and applies the deterministic USB overlay to native PCB data. No custom autorouter was written.
 Freerouting performs local detailed routing via KiCad's Specctra DSN/SES API.
-A small cleanup script removes only KiCad-reported dead-ended copper after zone refill; it never suppresses checks or unconnected nets. Native CAD and each variant's saved SES retain the editable route.
-The saved copper includes manual QFN escapes and local routing corrections. Replaying the saved SES reproduces those edits; rerunning the autorouter from a new seed does not replace layout review or guarantee completion.
+A small cleanup script removes only KiCad-reported dead-ended copper after zone refill; it never suppresses checks or unconnected nets. Native CAD retains the complete editable route. Each variant's saved SES retains the base route, including manual QFN escapes and local corrections. `scripts/usb_routing.py` applies the DRAFT E USB and ground changes after seed generation and SES import. Replaying the SES through `route_pcb.py` reproduces the combined route; rerunning the autorouter from a new seed does not replace layout review or guarantee completion.
 See [sources](sources.md) for versions, licenses and hashes.
 
 From the repository root, with the Python version matching KiCad's installed binding (the original Nix runtime uses Python 3.14; the official 10.0.7 Docker image uses Python 3.13). Scripts require Python 3.11 or newer, but `pcbnew` must match the chosen interpreter. Use the [Docker procedure](../../docs/reproduction.md#docker에서-kicad-검증) when KiCad is not installed on the host.

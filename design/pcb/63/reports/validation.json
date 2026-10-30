@@ -28,26 +28,26 @@
   "diode_count": 63,
   "footprint_count": 176,
   "net_count": 117,
-  "track_segment_count": 1517,
-  "via_count": 204,
+  "track_segment_count": 1515,
+  "via_count": 207,
   "signal_tracks_on_ground_layer": 3,
   "keepout_intersections": [],
   "structural_errors": [],
   "native_export_readback": {
     "exports/back.svg": {
-      "bytes": 321029,
+      "bytes": 342008,
       "viewBox": "0.0000 0.0000 284.9880 94.5896"
     },
     "exports/front.svg": {
-      "bytes": 278897,
+      "bytes": 289761,
       "viewBox": "0.0000 0.0000 284.9880 94.5896"
     },
     "exports/ground.svg": {
-      "bytes": 540877,
+      "bytes": 550598,
       "viewBox": "0.0000 0.0000 284.9880 94.5896"
     },
     "exports/schematic/keycult63.svg": {
-      "bytes": 2944588,
+      "bytes": 2934034,
       "viewBox": "0.0000 0.0000 840.9940 594.0044"
     },
     "exports/schematic.pdf": {
@@ -203,9 +203,20 @@
     ]
   ],
   "artifact_sha256": {
-    "keycult63.kicad_pro": "c64d43d8b73b37dfb5345a0bfcf29b1eca4dbb680a411a42d424b766912ba33a",
-    "keycult63.kicad_sch": "8c3ffc7e92c5a997454812d88843de036769bf29fda401cb3acb35af99e21d99",
-    "keycult63.kicad_pcb": "4a2b2a7b67a7935fb0fc781315580524c70083348c789eb62c672ac71eb0fc80"
+    "keycult63.kicad_pro": "bf9149689819c2d49dc3d9f3a20130159e1bb5b610c34cdf1ed919f8959e6d3e",
+    "keycult63.kicad_sch": "17aae5ae065b1e3f17454ef37d948e65ad798b51fecee84ce60c49436e42c56d",
+    "keycult63.kicad_pcb": "7f7421deea6f86f025b1b182df60d6c47f97143183d383a3b72ef384ff365eb2"
+  },
+  "usb_reference_review": {
+    "f_cu_width_mm": 0.29,
+    "minimum_f_cu_pair_edge_gap_mm": 0.2,
+    "uncovered_projection_mm2": {
+      "USB_DM": 0.0,
+      "USB_DP": 0.0
+    },
+    "transition_exclusion_radius_mm": 0.51,
+    "maximum_signal_via_to_ground_via_mm": 2.294073,
+    "note": "Saved refilled In1 polygons, make_valid for KiCad touching contours. Projection only; .51mm disks exclude signal-via antipads. 3mm stitching rule is a project study condition, not USB compliance. Finite plane edges, transitions and actual impedance still require qualification."
   },
   "ground_layer_tracks_by_net": {
     "COL12": 3,

@@ -15,6 +15,8 @@ from kicad_runtime import configure
 configure()
 import pcbnew as pcb
 from shapely.geometry import box, LineString, Point, Polygon
+from shapely import make_valid
+from shapely.ops import unary_union
 import pymupdf
 VARIANTS={66:('preferred',[155,75,205,125]),63:('rear_clearance',[151.425,52.7,208.575,128.575])}
 def indexed_keys(layout,variant):
@@ -28,6 +30,8 @@ def reservation_matches(shape,reservation):
  return shape.is_valid and shape.hausdorff_distance(reservation)<=1e-5 and shape.symmetric_difference(reservation).area<1e-3
 def usb_connector_matches(pad_nets):
  return pad_nets=={'1':'VBUS_USB','2':'USB_DM','3':'USB_DP','4':'GND','MP':'GND'}
+def usb_uncovered_area(trace_area,reference,transition_exclusions):
+ return trace_area.difference(reference).difference(transition_exclusions).area
 ROOT=Path(__file__).resolve().parents[1]
 parser=argparse.ArgumentParser();parser.add_argument('--draft',action='store_true');parser.add_argument('--keys',type=int,choices=VARIANTS,default=66);args=parser.parse_args()
 D=ROOT/'design/pcb' if args.keys==66 else ROOT/'design/pcb/63'; R=D/'reports'; E=D/'exports'; NAME=f'keycult{args.keys}'
@@ -157,7 +161,29 @@ for p in [E/'schematic.pdf',E/'board-layers.pdf']:
 erc=json.loads((R/'erc.json').read_text());drc=json.loads((R/'drc.json').read_text())
 eitems=[v for s in erc.get('sheets',[]) for v in s.get('violations',[])];viol=drc['violations'];unconn=drc['unconnected_items'];parity=drc['schematic_parity']
 check(not eitems,'ERC violations');check(not parity,'KiCad native schematic parity violations')
+usb_names=('USB_DM','USB_DP')
+usb_tracks=[t for t in b.GetTracks() if not isinstance(t,pcb.PCB_VIA) and t.GetNetname() in usb_names]
+usb_vias=[t for t in b.GetTracks() if isinstance(t,pcb.PCB_VIA) and t.GetNetname() in usb_names]
+gnd_vias=[xy(t.GetPosition()) for t in b.GetTracks() if isinstance(t,pcb.PCB_VIA) and t.GetNetname()=='GND']
+check(all(t.GetLayer() in (pcb.F_Cu,pcb.B_Cu) for t in usb_tracks),'Connector-side USB must use F.Cu with B.Cu escapes')
+check(all(abs(pcb.ToMM(t.GetWidth())-.29)<1e-5 for t in usb_tracks),'Connector-side USB width differs from .29mm study')
+check(all(sum(pcb.ToMM(t.GetLength()) for t in usb_tracks if t.GetNetname()==net and t.GetLayer()==pcb.F_Cu)>130 for net in usb_names),'Missing F.Cu USB margin route')
+reference=[]
+for z in b.Zones():
+ if z.GetNetname()=='GND' and z.GetLayer()==pcb.In1_Cu:
+  poly=z.GetFilledPolysList(pcb.In1_Cu)
+  reference.extend(make_valid(Polygon(chain(poly.COutline(i)),[chain(poly.CHole(i,j)) for j in range(poly.HoleCount(i))])) for i in range(poly.OutlineCount()))
+reference=unary_union(reference)
+transitions=unary_union([Point(xy(v.GetPosition())).buffer(.51) for v in usb_vias])
+usb_areas={net:unary_union([LineString([xy(t.GetStart()),xy(t.GetEnd())]).buffer(pcb.ToMM(t.GetWidth())/2,cap_style=2) for t in usb_tracks if t.GetNetname()==net and t.GetLayer()==pcb.F_Cu]) for net in usb_names}
+uncovered={net:usb_uncovered_area(area,reference,transitions) for net,area in usb_areas.items()}
+check(all(area<1e-6 for area in uncovered.values()),'F.Cu USB copper crosses an In1.Cu reference void outside transition antipads')
+pair_gap=usb_areas['USB_DM'].distance(usb_areas['USB_DP'])
+check(pair_gap>=.2-1e-5,'F.Cu USB pair edge gap below .2mm study')
+via_ground_distances=[min((Point(xy(v.GetPosition())).distance(Point(p)) for p in gnd_vias),default=float('inf')) for v in usb_vias]
+check(len(usb_vias)==8 and all(d<=3 for d in via_ground_distances),'USB transitions require nearby ground vias within 3mm study rule')
 summary={'status':('validation failed' if errs or viol or (not args.draft and unconn) else 'reviewable draft; NOT manufacturing approval'),'key_count':args.keys,'layout_variant':variant,'keepout_mm':circuit['keepout_mm'],'kicad_version':pcb.GetBuildVersion(),'erc_count':len(eitems),'erc_by_type':dict(Counter(v['type'] for v in eitems)),'drc_count':len(viol),'drc_by_type':dict(Counter(v['type'] for v in viol)),'drc_by_severity':dict(Counter(v['severity'] for v in viol)),'unconnected_item_count':len(unconn),'unconnected_nets':sorted({i['description'].split('[')[1].split(']')[0] for v in unconn for i in v['items'] if '[' in i['description']}),'schematic_parity_count':len(parity),'independent_netlist_mismatch_count':len(netdiff),'envelope_bounds_mm':bounds,'switch_count':len(set(fps)&switch_refs),'diode_count':len(set(fps)&diode_refs),'footprint_count':len(fps),'net_count':len(list(b.GetNetInfo().NetsByNetcode()))-1,'track_segment_count':sum(not isinstance(t,pcb.PCB_VIA) for t in b.GetTracks()),'via_count':sum(isinstance(t,pcb.PCB_VIA) for t in b.GetTracks()),'signal_tracks_on_ground_layer':sum(t.GetLayer()==pcb.In1_Cu and t.GetNetname() not in ('GND','+3V3','+1V1') for t in b.GetTracks() if not isinstance(t,pcb.PCB_VIA)),'keepout_intersections':sorted(set(bad)),'structural_errors':errs,'native_export_readback':readback,'commands':commands,'artifact_sha256':{p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in [D/(NAME+ext) for ext in ['.kicad_pro','.kicad_sch','.kicad_pcb']]}}
+summary['usb_reference_review']={'f_cu_width_mm':.29,'minimum_f_cu_pair_edge_gap_mm':round(pair_gap,6),'uncovered_projection_mm2':uncovered,'transition_exclusion_radius_mm':.51,'maximum_signal_via_to_ground_via_mm':round(max(via_ground_distances,default=0),6),'note':'Saved refilled In1 polygons, make_valid for KiCad touching contours. Projection only; .51mm disks exclude signal-via antipads. 3mm stitching rule is a project study condition, not USB compliance. Finite plane edges, transitions and actual impedance still require qualification.'}
 summary['ground_layer_tracks_by_net']=dict(Counter(t.GetNetname() for t in b.GetTracks() if not isinstance(t,pcb.PCB_VIA) and t.GetLayer()==pcb.In1_Cu))
 (R/'validation.json').write_text(json.dumps(summary,indent=2,ensure_ascii=False)+'\n');(R/'switch-coordinates.json').write_text(json.dumps(coord,indent=2)+'\n')
 print(json.dumps({k:v for k,v in summary.items() if k not in ['commands','native_export_readback','artifact_sha256']},indent=2))

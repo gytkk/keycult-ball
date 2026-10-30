@@ -5,11 +5,12 @@
   "jar_sha256": "d7fd0f63f52e6d74b0fad6715f87ca9f0ffd7109d66b2a584638000270592ecf",
   "java": "21",
   "stop_passes": 12,
-  "note": "v2.0.1 -mp alone does not bound BatchAutorouter; router.stop_pass_no is explicitly supplied. No cloud routing; usage analytics disabled.",
+  "note": "v2.0.1 -mp alone does not bound BatchAutorouter; router.stop_pass_no is explicitly supplied. No cloud routing; usage analytics disabled. SES preserves the base route; scripts/usb_routing.py replaces connector-side USB copper and adds the DRAFT E ground changes after import.",
   "input_sha256": {
     "design/pcb/circuit.json": "66d3d5a2d6b1b795b9ede74188de7f4265051547695a53e1245271466d55210d",
     "design/preliminary/layout.json": "6bd264684ddc415e40bfe91836bab6dd586f9bf93a91918599737024b11e6fcd",
-    "scripts/build_pcb.py": "94bd7da9deb8b6119e0ce57e5bf0ec699291d103e64273bdf34bba226bff0ebc"
+    "scripts/build_pcb.py": "1ced233819e63bc83645fde19277fd651269b6e11ede5b14a072a74ed96a61eb",
+    "scripts/usb_routing.py": "4ed48530ed397b2f7f281f4a968e584a554a073bc14f7f5ecd360f9b42e3c9c7"
   },
   "ses_sha256": "52dd478463e6c56757271b885f099b57198f6d3d106fd455b2a5bf4db31d764b"
 }

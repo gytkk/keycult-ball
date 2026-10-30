@@ -67,7 +67,7 @@ Downloaded schematic originals are ignored under `../preliminary/sources/upstrea
 
 ## Maintained tools and stock libraries
 
-- DRAFT D was regenerated and validated on 2026-10-30 with official `kicad/kicad:10.0.7`, Linux amd64, Python 3.13.5 and its stock symbol/footprint libraries. The image is pinned by manifest digest `sha256:3224d1bf143185ecc1bd3a1082a36f37f0f4e59d707983a16515a845e3737fc6`; the [Docker procedure](../../docs/reproduction.md#docker에서-kicad-검증) records the runtime dependencies. This image has no 3D model package. The following Nix versions record the earlier environment.
+- DRAFT E was regenerated and validated on 2026-10-30 with official `kicad/kicad:10.0.7`, Linux amd64, Python 3.13.5 and its stock symbol/footprint libraries. The image is pinned by manifest digest `sha256:3224d1bf143185ecc1bd3a1082a36f37f0f4e59d707983a16515a845e3737fc6`; the [Docker procedure](../../docs/reproduction.md#docker에서-kicad-검증) records the runtime dependencies. This image has no 3D model package. The following Nix versions record the earlier environment.
 - **KiCad 10.0.7** GUI/CLI and its installed Python `pcbnew` binding, Python 3.14.7.
   Native ERC, DRC, zone refill, schematic parity, XML netlist, PDF/SVG exports and
   Specctra transfer are performed by KiCad, not fabricated report text.
@@ -120,13 +120,13 @@ Downloaded originals and text extracts remain ignored under `../preliminary/sour
 
 ### USB stackup screening
 
-Checked 2026-10-30. The [JLCPCB controlled-impedance stackup table](https://jlcpcb.com/impedance) publishes these 1.6mm, four-layer candidates. Neither is an approved manufacturing order or a stackup already applied to the native PCB.
+Checked 2026-10-30. The [JLCPCB controlled-impedance stackup table](https://jlcpcb.com/impedance) publishes these 1.6mm, four-layer candidates. DRAFT E records the 7628 copper/dielectric model in both native PCBs; 3313 remains a comparison. Neither is an approved manufacturing order. The model omits solder mask construction and is not an impedance qualification.
 
 | Candidate | Outer copper | Inner copper | Outer-to-inner dielectric | Inner-to-inner dielectric | Prepreg dielectric constant |
 | --- | --- | --- | --- | --- | --- |
 | JLC04161H-7628 | 0.035mm | 0.0152mm | 0.2104mm | 1.065mm | 4.4 |
 | JLC04161H-3313 | 0.035mm | 0.0152mm | 0.0994mm | 1.265mm | 4.1 |
 
-[TI SLVA531A, September 2013, section 7.1, p. 15](https://www.ti.com/lit/an/slva531a/slva531a.pdf) supplies the screening equations `Z0 = 87/sqrt(Er+1.41) * ln(5.98H/(0.8W+T))` and `Zdiff = 2Z0 * (1-0.48exp(-0.96S/H))`. W is trace width, S edge gap, H dielectric height and T copper thickness, in consistent units. These are approximate microstrip equations from an Ethernet layout guide, not USB compliance criteria. Here they apply only to a proposed outer F.Cu pair above In1.Cu. They exclude mask, etched trapezoid, coplanar copper, tolerance and transitions. Do not apply them to the present In2.Cu pair to invent a qualified impedance.
+[TI SLVA531A, September 2013, section 7.1, p. 15](https://www.ti.com/lit/an/slva531a/slva531a.pdf) supplies the screening equations `Z0 = 87/sqrt(Er+1.41) * ln(5.98H/(0.8W+T))` and `Zdiff = 2Z0 * (1-0.48exp(-0.96S/H))`. W is trace width, S edge gap, H dielectric height and T copper thickness, in consistent units. These are approximate microstrip equations from an Ethernet layout guide, not USB compliance criteria. Here they screen a uniform outer F.Cu pair above In1.Cu. They exclude mask, etched trapezoid, finite plane edges, coplanar copper, tolerance and transitions, including the short B.Cu escapes. Their result does not qualify the actual routed path.
 
 [Raspberry Pi Hardware design with RP2040, release 2, build 2026-08-20, section 2.4.1, p. 11](https://datasheets.raspberrypi.com/rp2040/hardware-design-with-rp2040.pdf) specifies 27ohm resistors near the chip, approximately 90ohm differential traces and uninterrupted reference ground for full-speed USB. It does not make the entire path compliant solely because its data rate is 12Mbps. The candidate calculations, native layer-length measurements and remaining limitations are in the [electrical review](reports/electrical-review.json) and [PCB guide](README.md#power-and-usb-desk-review).

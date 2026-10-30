@@ -174,7 +174,7 @@ for p in parts:
 
 # Embed the stock symbols so the native schematic is self-contained.
 rootuuid=uid('schematic')
-sch=[S('kicad_sch'),node('version',20250114),node('generator','eeschema'),node('uuid',rootuuid),node('paper','A1'),node('title_block',node('title',f'Keycult{args.keys} / electrical review draft'),node('date','2026-10-30'),node('rev','DRAFT-D'),node('comment',1,'C5-JSH ASSUMED - NOT FOR FABRICATION - sensor and mechanical fit provisional')),node('lib_symbols',*SYMS.values())]
+sch=[S('kicad_sch'),node('version',20250114),node('generator','eeschema'),node('uuid',rootuuid),node('paper','A1'),node('title_block',node('title',f'Keycult{args.keys} / electrical review draft'),node('date','2026-10-30'),node('rev','DRAFT-E'),node('comment',1,'C5-JSH / 7628 STACKUP ASSUMED - NOT FOR FABRICATION')),node('lib_symbols',*SYMS.values())]
 def effect(size=1.27,just=None,hide=False):
     a=node('effects',node('font',node('size',size,size)))
     if just:a.append(node('justify',S(just)))
@@ -289,15 +289,7 @@ for ref,f in fps.items():
   if ref=='Y1':dx,dy=(.85 if p.GetNumber()=='2' else -1),0
   if ref.startswith('SW'):dx,dy=0,-1.1
   b=(a[0]+dx,a[1]+dy);track('GND',[a,b],pcb.B_Cu,.15 if ref=='U1' else .25);via('GND',b)
-# Keep USB paired on F.Cu above the uninterrupted In1.Cu reference; impedance needs a final stackup.
-for net,ref,pts in [
- ('USB_DM','R1',[(114.51,67.5),(115.4,67.5)]),
- ('USB_DP','R2',[(114.51,68.7),(116.4,68.7)]),
- ('USB_DM','TP3',[(113.9,54.5),(114.8,54.5)]),
- ('USB_DP','TP4',[(117.1,54.5),(116.4,55.5)])]:
- track(net,pts,pcb.B_Cu,.2);via(net,pts[-1])
-track('USB_DM',[(114.8,54.5),(114.8,56.1),(115.4,56.7),(115.4,67.5)],pcb.F_Cu,.2)
-track('USB_DP',[(116.4,55.5),(116.4,56.1),(115.8,56.7),(115.8,66.3),(116.4,66.9),(116.4,68.7)],pcb.F_Cu,.2)
+# Connector-side USB is applied by usb_routing.py after native serialization.
 track('USB_DM_MCU',[xy(pad('U1',46).GetPosition()),(107.8,68.4),(108.2,68),(111.8,68),(112.3,67.5),xy(pad('R1',1).GetPosition())],pcb.B_Cu,.15)
 track('USB_DP_MCU',[xy(pad('U1',47).GetPosition()),(107.8,68.8),(108.2,69.2),(112.99,69.2),xy(pad('R2',1).GetPosition())],pcb.B_Cu,.15)
 track('SWCLK',[xy(pad('U1',24).GetPosition()),(99.65,68.8),(99.4,68.55)],pcb.B_Cu,.15)
@@ -339,14 +331,18 @@ for x,y in [(38,53.2),(322,53.2),(322,146.8),(38,146.8)]:g.Outline().Append(mm(x
 board.Add(g)
 # Local ground and support routing are performed by the detailed router.
 # Board notes are on fabrication/documentation layers, not over copper/silkscreen.
-for text0,xy0,size in [(f'DRAFT D / {args.keys} KEYS - NOT FOR FABRICATION',(180,150),1.5),('RESERVED / NO CUTOUT',(180,100),1),('J1 TO EXTERNAL C5-JSH: 1 POWER / 2 D- / 3 D+ / 4 GND; F1 RETAINED',(85,50),.8),('SENSOR 3V3 LOGIC ONLY / NO MODULE CONNECTOR',(98,98),.9)]:
+for text0,xy0,size in [(f'DRAFT E / {args.keys} KEYS - NOT FOR FABRICATION',(180,150),1.5),('RESERVED / NO CUTOUT',(180,100),1),('USB F.Cu 0.29/0.20mm; 7628 STACKUP STUDY / IMPEDANCE NOT QUALIFIED',(85,50),.8),('SENSOR 3V3 LOGIC ONLY / NO MODULE CONNECTOR',(98,98),.9)]:
  t=pcb.PCB_TEXT(board);t.SetText(text0);t.SetPosition(pt(*xy0));t.SetTextSize(pt(size,size));t.SetTextThickness(mm(.15));t.SetLayer(pcb.Dwgs_User);board.Add(t)
 for i,k in indexed_keys:
  t=pcb.PCB_TEXT(board);t.SetText(k['id']);t.SetPosition(pt(180+k['x_mm'],100+k['y_mm']+8.2));t.SetTextSize(pt(.8,.8));t.SetTextThickness(mm(.12));t.SetLayer(pcb.F_SilkS);board.Add(t)
 board.SetFileName(str(OUT/(NAME+'.kicad_pcb')))
 pcb.SaveBoard(str(OUT/(NAME+'.kicad_pcb')),board)
+from usb_routing import apply_usb_route
+apply_usb_route(OUT/(NAME+'.kicad_pcb'))
 # Explicit review rules: not a claim about a selected fabricator's process or stackup.
 pro={'meta':{'filename':NAME+'.kicad_pro','version':1},'board':{'design_settings':{'rules':{'min_clearance':.15,'min_track_width':.15,'min_via_diameter':.55,'min_through_hole_diameter':.3,'min_hole_clearance':.25,'min_copper_edge_clearance':.25},'rule_severities':{}}},'net_settings':{'classes':[{'name':'Default','clearance':.15,'track_width':.25,'via_diameter':.6,'via_drill':.3,'diff_pair_width':.2,'diff_pair_gap':.15,'diff_pair_via_gap':.25}], 'meta':{'version':4}},'erc':{'erc_exclusions':[],'rule_severities':{}},'schematic':{'drawing':{}},'text_variables':{'STATUS':'DRAFT_NOT_FOR_FABRICATION'}}
+pro['net_settings']['classes'].append({'name':'USB','clearance':.15,'track_width':.29,'via_diameter':.6,'via_drill':.3,'diff_pair_width':.29,'diff_pair_gap':.2,'diff_pair_via_gap':.2})
+pro['net_settings']['netclass_patterns']=[{'netclass':'USB','pattern':net} for net in ('USB_DM','USB_DP')]
 (OUT/(NAME+'.kicad_pro')).write_text(json.dumps(pro,indent=2)+'\n')
 (OUT/'sym-lib-table').write_text('(sym_lib_table\n'+''.join(f'  (lib (name "{lib}")(type "KiCad")(uri "${{KICAD10_SYMBOL_DIR}}/{lib}.kicad_sym")(options "")(descr "KiCad stock"))\n' for lib in sorted({p['lib'].split(':')[0] for p in parts}))+')\n')
 (OUT/'fp-lib-table').write_text('(fp_lib_table\n'+''.join(f'  (lib (name "{lib}")(type "KiCad")(uri "${{KICAD10_FOOTPRINT_DIR}}/{lib}.pretty")(options "")(descr "KiCad stock"))\n' for lib in sorted({p['fp'].split(':')[0] for p in parts if p['fp']}))+')\n')

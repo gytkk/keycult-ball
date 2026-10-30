@@ -10,11 +10,11 @@ from pathlib import Path
 from types import SimpleNamespace
 import unittest
 import xml.etree.ElementTree as ET
-from shapely.geometry import box
+from shapely.geometry import box, Point
 
 SOURCE = Path(__file__).with_name("validate_pcb.py")
 GATE = compile(ast.Module(body=[ast.parse(SOURCE.read_text()).body[-1]], type_ignores=[]), str(SOURCE), "exec")
-VARIANT_CODE = compile(ast.Module(body=[node for node in ast.parse(SOURCE.read_text()).body if (isinstance(node, ast.FunctionDef) and node.name in {'indexed_keys', 'circuit_net_matches', 'reservation_matches', 'usb_connector_matches'}) or (isinstance(node, ast.Assign) and any(isinstance(target, ast.Name) and target.id == 'VARIANTS' for target in node.targets))], type_ignores=[]), str(SOURCE), "exec")
+VARIANT_CODE = compile(ast.Module(body=[node for node in ast.parse(SOURCE.read_text()).body if (isinstance(node, ast.FunctionDef) and node.name in {'indexed_keys', 'circuit_net_matches', 'reservation_matches', 'usb_connector_matches', 'usb_uncovered_area'}) or (isinstance(node, ast.Assign) and any(isinstance(target, ast.Name) and target.id == 'VARIANTS' for target in node.targets))], type_ignores=[]), str(SOURCE), "exec")
 
 class DraftGateTests(unittest.TestCase):
     def result(self, draft=True, errs=None, viol=None, unconn=None):
@@ -84,6 +84,17 @@ class VariantTests(unittest.TestCase):
         self.assertFalse(matches({'1':'GND','2':'USB_DP','3':'USB_DM','4':'VBUS_USB','MP':'GND'}))
         self.assertFalse(matches({'1':'VBUS_USB','2':'GND','3':'USB_DM','4':'USB_DP','MP':'GND'}))
         self.assertFalse(matches({'1':'VBUS_USB','2':'USB_DP','3':'USB_DM','4':'GND','MP':'GND'}))
+
+    def test_usb_reference_hole_outside_via_transition_is_not_excluded(self):
+        uncovered = self.namespace['usb_uncovered_area']
+        trace = box(0, -.145, 10, .145)
+        plane = box(-1, -1, 11, 1)
+        antipad = Point(0, 0).buffer(.5)
+        transitions = Point(0, 0).buffer(.51)
+        reference = plane.difference(antipad)
+        self.assertEqual(uncovered(trace, reference, transitions), 0)
+        self.assertGreater(uncovered(trace, reference, Point().buffer(0)), 0)
+        self.assertGreater(uncovered(trace, reference.difference(box(5, -.1, 5.2, .1)), transitions), .039)
 
     def test_external_c5_jsh_assembly_and_retained_main_board_protection(self):
         for count in (66, 63):

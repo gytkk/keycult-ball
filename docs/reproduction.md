@@ -87,13 +87,13 @@ uv run --python "$(command -v python3)" scripts/route_pcb.py --keys 63 --import-
 uv run --python "$(command -v python3)" scripts/validate_pcb.py --keys 63
 ```
 
-회로나 배열을 변경하면 저장된 배선의 입력 해시가 일치하지 않으므로 `--import-saved` 대신 `--route`로 다시 배선한다.
+각 SES는 기존 기본 배선을 보존한다. `scripts/usb_routing.py`는 seed 생성과 SES 가져오기 이후 J1 측 USB 배선을 교체하고 DRAFT E의 접지 비아·접지면 및 후보 stackup을 적용한다. `route-manifest.json`은 회로, 배열, 생성기와 이 스크립트의 해시를 검사하므로 입력을 변경하면 기존 배선을 그대로 가져올 수 없다. 회로나 배열을 변경하면 `--import-saved` 대신 `--route`로 다시 배선하고 전체 결과를 검토한다.
 
-검증은 기본적으로 미배선이나 DRC 위반이 있으면 실패한다. `--draft`는 미배선만 허용하고 실제 수를 보고하는 검토 모드이며, 기하 DRC 위반은 그대로 실패한다. 검사 상태는 [66키 보고서](../design/pcb/reports/validation.json)와 [63키 보고서](../design/pcb/63/reports/validation.json)를 기준으로 하며 제조 승인으로 해석하지 않는다. KiCad 없이 실행하는 검사 회귀 테스트는 `uv run scripts/test_pcb_validation_gate.py`다.
+검증은 기본적으로 미배선이나 DRC 위반이 있으면 실패한다. `--draft`는 미배선만 허용하고 실제 수를 보고하는 검토 모드이며, 기하 DRC 위반은 그대로 실패한다. 새로 채운 In1.Cu 접지면이 F.Cu USB 배선 아래를 덮는지 검사하며, 신호 비아 중심 반경 0.51mm는 접지면의 절연 간격(antipad) 때문에 별도로 제외한다. 선폭 0.29mm, 최소 간격 0.2mm와 신호 비아에서 접지 비아까지 3mm 이내라는 설계 조건도 검사한다. 이 수치는 프로젝트의 배선 검토 조건이며 USB 적합성 판정 기준이 아니다. 검사 상태는 [66키 보고서](../design/pcb/reports/validation.json)와 [63키 보고서](../design/pcb/63/reports/validation.json)를 기준으로 하며 제조 승인으로 해석하지 않는다. KiCad 없이 실행하는 검사 회귀 테스트는 `uv run scripts/test_pcb_validation_gate.py`다.
 
 ### 전원과 USB의 실물 없는 검토
 
-실물 없이 수행하는 전원·USB 계산은 아래 명령으로 재현한다. 기존 `sexpdata` 의존성만 사용하며 KiCad 실행 파일은 필요 없다. `design/pcb/reports/electrical-review.json`에 조건별 전압 강하·발열, 후보 stackup의 근사값과 두 native PCB에서 읽은 USB 층별 길이·비아 좌표를 기록한다. 입력 CAD 해시를 함께 저장하고, 계산 대상 부품 번호가 달라지거나 필요한 USB net의 배선이 없으면 실패한다. 이 보고서는 ERC/DRC나 실물 신호 품질 통과 보고서가 아니다.
+실물 없이 수행하는 전원·USB 계산은 아래 명령으로 재현한다. 기존 `sexpdata` 의존성만 사용하며 KiCad 실행 파일은 필요 없다. `design/pcb/reports/electrical-review.json`에 조건별 전압 강하·발열, 후보 stackup의 근사값과 두 native PCB에서 읽은 USB 층별 길이·비아 좌표를 기록한다. 입력 CAD 해시를 함께 저장하고, 계산 대상 부품 번호가 달라지거나 필요한 USB net의 배선이 없으면 실패한다. 테스트는 USB 배선 교체를 반복해도 결과가 같고 기존 MCU 측 배선을 보존하는지도 확인한다. 이 보고서는 ERC/DRC나 실물 신호 품질 통과 보고서가 아니다.
 
 ```bash
 uv run scripts/analyze_electrical.py
@@ -126,4 +126,4 @@ docker run --rm --platform linux/amd64 --entrypoint /bin/sh \
   '
 ```
 
-63키는 위 실행 명령의 `--keys 66` 세 곳을 `--keys 63`으로 바꾼다. `--no-project --active`는 미리 설치한 가상 환경과 시스템 KiCad 바인딩을 함께 사용하기 위한 옵션이다. 배선 정리 하위 스크립트는 자체 메타데이터에 따라 `uv` 캐시를 만들 수 있으므로 첫 실행에는 네트워크가 필요하다. DRAFT D의 두 버전은 이 환경에서 생성하고 ERC/DRC와 연결 일치를 검사했다.
+63키는 위 실행 명령의 `--keys 66` 세 곳을 `--keys 63`으로 바꾼다. `--no-project --active`는 미리 설치한 가상 환경과 시스템 KiCad 바인딩을 함께 사용하기 위한 옵션이다. USB 배선 및 배선 정리 하위 스크립트는 자체 메타데이터에 따라 `uv` 캐시를 만들 수 있으므로 첫 실행에는 네트워크가 필요하다. DRAFT E의 두 버전은 이 환경에서 생성하고 ERC/DRC와 연결 일치를 검사했다.

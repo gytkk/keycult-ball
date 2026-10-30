@@ -20,7 +20,7 @@ if args.keys==63:D=D/'63'
 CACHE=CACHE/str(args.keys);CACHE.mkdir(parents=True,exist_ok=True)
 def sha(path):return hashlib.sha256(path.read_bytes()).hexdigest()
 fp=D/f'keycult{args.keys}.kicad_pcb';saved=D/'initial-route.ses';manifest=D/'route-manifest.json'
-identity={str(p.relative_to(ROOT)):sha(p) for p in [D/'circuit.json',ROOT/'design/preliminary/layout.json',ROOT/'scripts/build_pcb.py']}
+identity={str(p.relative_to(ROOT)):sha(p) for p in [D/'circuit.json',ROOT/'design/preliminary/layout.json',ROOT/'scripts/build_pcb.py',ROOT/'scripts/usb_routing.py']}
 if args.import_saved:
  m=json.loads(manifest.read_text());assert m['input_sha256']==identity,'Circuit/layout changed: saved route cannot be reused';assert sha(saved)==m['ses_sha256'],'SES checksum mismatch'
 else:
@@ -48,7 +48,7 @@ else:
  content=source.read_text()
  if not content.lstrip().startswith('(session'):raise RuntimeError(f'Invalid SES from {source}; saved route was not replaced')
  content='\n'.join(line.rstrip() for line in content.replace(str(ROOT),'PROJECT_ROOT').splitlines())+'\n';saved.write_text(content)
- m={'tool':'Freerouting','version':'2.0.1','jar_url':URL,'jar_sha256':JAR_SHA,'java':'21','stop_passes':args.passes,'note':'v2.0.1 -mp alone does not bound BatchAutorouter; router.stop_pass_no is explicitly supplied. No cloud routing; usage analytics disabled.','input_sha256':identity,'ses_sha256':sha(saved)}
+ m={'tool':'Freerouting','version':'2.0.1','jar_url':URL,'jar_sha256':JAR_SHA,'java':'21','stop_passes':args.passes,'note':'v2.0.1 -mp alone does not bound BatchAutorouter; router.stop_pass_no is explicitly supplied. No cloud routing; usage analytics disabled. SES preserves the base route; scripts/usb_routing.py replaces connector-side USB copper and adds the DRAFT E ground changes after import.','input_sha256':identity,'ses_sha256':sha(saved)}
  manifest.write_text(json.dumps(m,indent=2)+'\n')
 b=pcb.LoadBoard(str(fp));assert pcb.ImportSpecctraSES(b,str(saved)),'KiCad SES import failed'
 # Drawing-only label placement fix: reserve board-edge silkscreen clearance.
@@ -56,5 +56,6 @@ for x in b.GetDrawings():
  if isinstance(x,pcb.PCB_TEXT) and x.GetText().startswith('r') and 'c' in x.GetText():
   p=x.GetPosition();p.y=pcb.FromMM(pcb.ToMM(p.y)-.8) if pcb.ToMM(p.y)>146.5 else p.y;x.SetPosition(p)
 pcb.SaveBoard(str(fp),b)
+subprocess.run(['uv','run',str(ROOT/'scripts/usb_routing.py'),str(fp)],check=True)
 subprocess.run(['uv','run',str(ROOT/'scripts/cleanup_pcb_routes.py'),'--keys',str(args.keys)],check=True)
 print('Imported and cleaned native route. Run validate_pcb.py; unconnected nets remain explicitly reportable.')
